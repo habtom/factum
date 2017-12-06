@@ -18,10 +18,10 @@ class PatternFormatter extends AbstractFormatter2 {
 	@Inject extension PatternGrammarAccess
 
 	def dispatch void format(Pattern pattern, extension IFormattableDocument document) {
-		//https://blogs.itemis.com/en/tabular-formatting-with-the-new-formatter-api
 		pattern.regionFor.keyword("{").append[newLine]
 		pattern.regionFor.keyword("}").prepend[newLine]
-		//pattern.regionFor.keyword(",").append[newLine]		
+		//pattern.regionFor.keyword(",").append[newLine]	
+			
 		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
 		for (Interface _interface : pattern.getPatternConnections()) {
 			_interface.format;
