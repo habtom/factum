@@ -1,0 +1,140 @@
+grammar org.tum.factum.pattern.Pattern with org.eclipse.xtext.common.Terminals
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore 
+
+generate pattern "http://www.tum.org/factum/pattern/Pattern"
+
+Pattern returns Pattern:
+	{Pattern} 
+	'Pattern' 
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+		('arcchConstraints' '(' arcchConstraints+=[ArchitectureConstraint|EString] ( "," arcchConstraints+=[ArchitectureConstraint|EString])* ')' )?
+		('patternConnections' '{' patternConnections+=Interface ( "," patternConnections+=Interface)* '}' )?
+	
+		('components' '{' components+=Component	( "," components+=Component)* '}' )?
+	    ('hasInterfaces' '{' hasInterfaces+=Interface ( "," hasInterfaces+=Interface)* '}' )?
+	    ('containsInPorts' '{' containsInPorts+=InputPort ( "," containsInPorts+=InputPort)* '}' )?
+	    ('containsOutPorts' '{' containsOutPorts+=OutputPort ( "," containsOutPorts+=OutputPort)* '}' )?
+	    
+		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
+	'}';
+
+/* 	
+	name=EString 
+	comment=EString
+	(components+=Component)*
+	(hasInterfaces+=Interface)*
+	(containsInPorts+=InputPort)*
+	(containsOutPorts+=OutputPort)*
+	('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
+;
+*/	
+Component returns Component:
+	{Component} 
+	'Component'	
+	
+	
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+		
+		('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
+		
+	    ('inputs' '{' inputs+=InputPort ( "," inputs+=InputPort)* '}' )?
+	    ('outputs' '{' outputs+=OutputPort ( "," outputs+=OutputPort)* '}' )?
+	    
+	    ('behvAssertions' '(' behvAssertions+=[BehaviorAssertion|EString] ( "," behvAssertions+=[BehaviorAssertion|EString])* ')' )?
+		('iParameters' '{' iParameters+=InterfaceParameter ( "," iParameters+=InterfaceParameter)* '}' )?
+	
+	'}';
+	
+/*
+	name=EString
+	(hasEdges+=Interface)*
+	(inputs+=InputPort)*
+	(outputs+=OutputPort)*	
+;
+*/
+Interface returns Interface:
+	{Interface}	
+	'Interface'	
+	
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+		//('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
+	    ('hasInput' '{' hasInput+=InputPort ( "," hasInput+=InputPort)* '}' )?
+	    ('hasOutput' '{' hasOutput+=OutputPort ( "," hasOutput+=OutputPort)* '}' )?
+	
+	'}';
+/*
+	name=EString
+	(hasInput=InputPort)
+	(hasOutput=OutputPort)	
+;
+*/
+InterfaceParameter returns InterfaceParameter:
+	{InterfaceParameter}
+	'InterfaceParameter'
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+		('portDataType' portDataType=[PortDataType|EString])?
+	'}';
+
+OutputPort returns OutputPort:
+	{OutputPort} 
+	'OutputPort'
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+		('portType' portType=[PortDataType|EString])?
+
+	'}';
+	
+InputPort returns InputPort:
+	{InputPort}	
+	'InputPort'
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+		('portType' portType=[PortDataType|EString])?
+	'}';
+	
+PortDataType returns PortDataType:
+	{PortDataType} 
+	'PortDataType'
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+		('type' type=EString)?
+		('outputPorts' outputPorts=[OutputPort|EString])?
+		('inputPorts' inputPorts=[OutputPort|EString])?
+		('dataTypeAssertions' '(' dataTypeAssertions+=[DataTypeAssertion|EString] ( "," dataTypeAssertions+=[DataTypeAssertion|EString])* ')' )?
+	'}';
+DataTypeAssertion returns DataTypeAssertion:
+	{DataTypeAssertion}
+	'DataTypeAssertion'
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+	'}';
+BehaviorAssertion returns BehaviorAssertion:
+	{BehaviorAssertion}
+	'BehaviorAssertion'
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+	'}';
+ArchitectureConstraint returns ArchitectureConstraint:
+	{ArchitectureConstraint}
+	'ArchitectureConstraint'
+	'{'
+		('name' name=EString)?
+		('comment' comment=EString)?
+	'}';	
+EString returns ecore::EString:
+	STRING | ID
+;
