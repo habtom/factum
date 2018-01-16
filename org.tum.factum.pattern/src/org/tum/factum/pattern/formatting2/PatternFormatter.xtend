@@ -18,26 +18,26 @@ class PatternFormatter extends AbstractFormatter2 {
 	@Inject extension PatternGrammarAccess
 
 	def dispatch void format(Pattern pattern, extension IFormattableDocument document) {
-		pattern.regionFor.keyword("{").append[newLine]
-		pattern.regionFor.keyword("}").prepend[newLine]
+		//pattern.regionFor.keyword("{").append[newLine]
+		//pattern.regionFor.keyword("}").prepend[newLine]
 		//pattern.regionFor.keyword(",").append[newLine]	
 			
 		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
-		for (Interface _interface : pattern.getPatternConnections()) {
-			_interface.format;
-		}
+//		for (Interface _interface : pattern.getPatternConnections()) {
+//			_interface.format;
+//		}
 		for (Component component : pattern.getComponents()) {
 			component.format;
 		}
-		for (Interface _interface : pattern.getHasInterfaces()) {
-			_interface.format;
-		}
-		for (InputPort inputPort : pattern.getContainsInPorts()) {
-			inputPort.format;
-		}
-		for (OutputPort outputPort : pattern.getContainsOutPorts()) {
-			outputPort.format;
-		}
+//		for (Interface _interface : pattern.getHasInterfaces()) {
+//			_interface.format;
+//		}
+		//for (InputPort inputPort : pattern.getContainsInPorts()) {
+			//inputPort.format;
+		//}
+		//for (OutputPort outputPort : pattern.getContainsOutPorts()) {
+			//outputPort.format;
+		//}
 		for (Pattern _pattern : pattern.getSubPattern()) {
 			_pattern.format;
 		}
@@ -53,12 +53,23 @@ class PatternFormatter extends AbstractFormatter2 {
 		for (Interface _interface : component.getHasEdges()) {
 			_interface.format;
 		}
-		for (InputPort inputPort : component.getInputs()) {
+		
+		for (InputPort inputPort : component.getInputPorts()) {
 			inputPort.format;
 		}
-		for (OutputPort outputPort : component.getOutputs()) {
+		for (OutputPort outputPort : component.getOutputPorts()) {
 			outputPort.format;
 		}
+	
+		/*
+		for (InputPort inputPort : component.getContainsInPorts()) {
+			inputPort.format;
+		}
+		for (OutputPort outputPort : component.getContainsOutPorts()) {
+			outputPort.format;
+		}
+		*/
+	
 	}
 	
 

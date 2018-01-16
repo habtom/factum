@@ -6,114 +6,102 @@ generate pattern "http://www.tum.org/factum/pattern/Pattern"
 
 Pattern returns Pattern:
 	{Pattern} 
-	'Pattern' 
+	'Pattern' name=EString 
 	'{'
-		('name' name=EString)?
+		//('name' name=EString)?
 		('comment' comment=EString)?
-		('arcchConstraints' '(' arcchConstraints+=[ArchitectureConstraint|EString] ( "," arcchConstraints+=[ArchitectureConstraint|EString])* ')' )?
-		('patternConnections' '{' patternConnections+=Interface ( "," patternConnections+=Interface)* '}' )?
+
+		//('patternConnections' '{' patternConnections+=Interface ( "," patternConnections+=Interface)* '}' )?
 	
 		('components' '{' components+=Component	( "," components+=Component)* '}' )?
 	    ('hasInterfaces' '{' hasInterfaces+=Interface ( "," hasInterfaces+=Interface)* '}' )?
-	    ('containsInPorts' '{' containsInPorts+=InputPort ( "," containsInPorts+=InputPort)* '}' )?
-	    ('containsOutPorts' '{' containsOutPorts+=OutputPort ( "," containsOutPorts+=OutputPort)* '}' )?
+	    
+	    //('containsInPorts' '{' containsInPorts+=InputPort ( "," containsInPorts+=InputPort)* '}' )?
+	    //('containsOutPorts' '{' containsOutPorts+=OutputPort ( "," containsOutPorts+=OutputPort)* '}' )?
+	    
+	    ('archConstraints' '{' (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('Component=[Component|EString]')')? '}' )?
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}';
 
-/* 	
-	name=EString 
-	comment=EString
-	(components+=Component)*
-	(hasInterfaces+=Interface)*
-	(containsInPorts+=InputPort)*
-	(containsOutPorts+=OutputPort)*
-	('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
-;
-*/	
+
+
 Component returns Component:
 	{Component} 
-	'Component'	
-	
-	
+	'Component' 
+	name=EString	
 	'{'
-		('name' name=EString)?
+		('name' compID=CompID)?
 		('comment' comment=EString)?
 		
 		('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
+			       
+		//('iParameters' '{' iParameters+=InterfaceParameter ( "," iParameters+=InterfaceParameter)* '}' )?
 		
-	    ('inputs' '{' inputs+=InputPort ( "," inputs+=InputPort)* '}' )?
-	    ('outputs' '{' outputs+=OutputPort ( "," outputs+=OutputPort)* '}' )?
+	    ('inputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
+	    ('outputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
 	    
-	    ('behvAssertions' '(' behvAssertions+=[BehaviorAssertion|EString] ( "," behvAssertions+=[BehaviorAssertion|EString])* ')' )?
-		('iParameters' '{' iParameters+=InterfaceParameter ( "," iParameters+=InterfaceParameter)* '}' )?
+	    ('bAssertions' '{' (bAssertions= BA | btaFunction=BehaviorTraceAssertion?) '}' )?
 	
-	'}';
-	
-/*
-	name=EString
-	(hasEdges+=Interface)*
-	(inputs+=InputPort)*
-	(outputs+=OutputPort)*	
+	'}'
 ;
-*/
+
+CompID:
+	name=EString
+;
+	
 Interface returns Interface:
-	{Interface}	
-	'Interface'	
+	{Interface}	'Interface'	
 	
 	'{'
 		('name' name=EString)?
 		('comment' comment=EString)?
 		//('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
-	    ('hasInput' '{' hasInput+=InputPort ( "," hasInput+=InputPort)* '}' )?
-	    ('hasOutput' '{' hasOutput+=OutputPort ( "," hasOutput+=OutputPort)* '}' )?
+	    ('hasInput' hasInput=[InputPort])
+	    //('portType' portType=[PortDataType|EString])?
+	    ('hasOutput' hasOutput=[OutputPort])
 	
 	'}';
-/*
-	name=EString
-	(hasInput=InputPort)
-	(hasOutput=OutputPort)	
-;
-*/
-InterfaceParameter returns InterfaceParameter:
-	{InterfaceParameter}
-	'InterfaceParameter'
-	'{'
-		('name' name=EString)?
-		('comment' comment=EString)?
-		('portDataType' portDataType=[PortDataType|EString])?
-	'}';
+
 
 OutputPort returns OutputPort:
 	{OutputPort} 
-	'OutputPort'
-	'{'
-		('name' name=EString)?
+	'OutputPort' name=EString
+	'('
+		//('name' name=EString)?
 		('comment' comment=EString)?
 		('portType' portType=[PortDataType|EString])?
-
-	'}';
+		//('connects' connects=[InputPort])
+	    ('connects' connects=[InputPort])?
+		
+		//('outPortIsContained' outPortIsContained=[Component])
+		
+	')';
 	
 InputPort returns InputPort:
 	{InputPort}	
-	'InputPort'
-	'{'
-		('name' name=EString)?
+	'InputPort' name=EString
+	'('
+		//('name' name=EString)?
 		('comment' comment=EString)?
 		('portType' portType=[PortDataType|EString])?
-	'}';
+	    //('connects' connects=[OutputPort])?
+		//('inPortIsContained' inPortIsContained=[Component])
+	')'
+	;
 	
 PortDataType returns PortDataType:
 	{PortDataType} 
-	'PortDataType'
-	'{'
+	//'PortDataType'
+	//'('
 		('name' name=EString)?
 		('comment' comment=EString)?
 		('type' type=EString)?
-		('outputPorts' outputPorts=[OutputPort|EString])?
-		('inputPorts' inputPorts=[OutputPort|EString])?
+		//('outputPorts' outputPorts=[OutputPort|EString])?
+		//('inputPorts' inputPorts=[OutputPort|EString])?
 		('dataTypeAssertions' '(' dataTypeAssertions+=[DataTypeAssertion|EString] ( "," dataTypeAssertions+=[DataTypeAssertion|EString])* ')' )?
-	'}';
+	//')'
+	;
 DataTypeAssertion returns DataTypeAssertion:
 	{DataTypeAssertion}
 	'DataTypeAssertion'
@@ -121,20 +109,53 @@ DataTypeAssertion returns DataTypeAssertion:
 		('name' name=EString)?
 		('comment' comment=EString)?
 	'}';
-BehaviorAssertion returns BehaviorAssertion:
-	{BehaviorAssertion}
-	'BehaviorAssertion'
-	'{'
-		('name' name=EString)?
-		('comment' comment=EString)?
-	'}';
-ArchitectureConstraint returns ArchitectureConstraint:
-	{ArchitectureConstraint}
-	'ArchitectureConstraint'
-	'{'
-		('name' name=EString)?
-		('comment' comment=EString)?
-	'}';	
+
+btaExpression:
+	BehaviorTraceAssertion
+; 
+
+BehaviorTraceAssertion returns btaExpression:
+	LtlOp '(' asertion=btaFunction ')'
+;
+
+btaFunction returns btaExpression:
+	btaExpression |
+	BA
+;
+
+BA:
+	inputPortA=[InputPort|QualifiedName] '=' outputPortA=[OutputPort|QualifiedName]
+;
+
+acExpression:
+	ArchitectureConstraint
+;
+
+ArchitectureConstraint	returns acExpression:
+	LtlOp '(' asertion=archConstFunction ')'
+	//( LtlOp '(' AC ')')? 
+	//('act''('Component=[Component|EString]')')?
+;
+
+archConstFunction:
+	acExpression |
+	AC
+;
+
+AC:
+	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
+	
+;
+
+LtlOp:
+	('G' | 'X' | 'F')
+;
+
+QualifiedName:
+    ID ('.' ID)*
+;
+	
 EString returns ecore::EString:
 	STRING | ID
 ;
+
