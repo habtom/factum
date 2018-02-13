@@ -6,7 +6,7 @@ package org.tum.factum.pattern.formatting2
 import com.google.inject.Inject
 import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
-import org.tum.factum.pattern.pattern.Component
+import org.tum.factum.pattern.pattern.ComponentType
 import org.tum.factum.pattern.pattern.InputPort
 import org.tum.factum.pattern.pattern.Interface
 import org.tum.factum.pattern.pattern.OutputPort
@@ -26,8 +26,8 @@ class PatternFormatter extends AbstractFormatter2 {
 //		for (Interface _interface : pattern.getPatternConnections()) {
 //			_interface.format;
 //		}
-		for (Component component : pattern.getComponents()) {
-			component.format;
+		for (ComponentType componentType : pattern.getComponentTypes()) {
+			componentType.format;
 		}
 //		for (Interface _interface : pattern.getHasInterfaces()) {
 //			_interface.format;
@@ -43,21 +43,21 @@ class PatternFormatter extends AbstractFormatter2 {
 		}
 	}
 
-	def dispatch void format(Component component, extension IFormattableDocument document) {
+	def dispatch void format(ComponentType componentType, extension IFormattableDocument document) {
 		//component.regionFor.keyword("{").append[newLine]
 		//component.regionFor.keyword("}").prepend[newLine]
 		//component.regionFor.keyword(",").append[newLine]
 		//component.regionFor.keyword(",").prepend[newLine]
 		
 		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
-		for (Interface _interface : component.getHasEdges()) {
+		for (Interface _interface : componentType.getHasEdges()) {
 			_interface.format;
 		}
 		
-		for (InputPort inputPort : component.getInputPorts()) {
+		for (InputPort inputPort : componentType.getInputPorts()) {
 			inputPort.format;
 		}
-		for (OutputPort outputPort : component.getOutputPorts()) {
+		for (OutputPort outputPort : componentType.getOutputPorts()) {
 			outputPort.format;
 		}
 	

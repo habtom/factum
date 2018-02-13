@@ -6,32 +6,48 @@ generate pattern "http://www.tum.org/factum/pattern/Pattern"
 
 Pattern returns Pattern:
 	{Pattern} 
-	'Pattern' name=EString 
+	'Pattern' name=EString
 	'{'
 		//('name' name=EString)?
 		('comment' comment=EString)?
-
 		//('patternConnections' '{' patternConnections+=Interface ( "," patternConnections+=Interface)* '}' )?
 	
-		('components' '{' components+=Component	( "," components+=Component)* '}' )?
+		('ComponentTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
 	    ('hasInterfaces' '{' hasInterfaces+=Interface ( "," hasInterfaces+=Interface)* '}' )?
+	    /*
 	    
-	    //('containsInPorts' '{' containsInPorts+=InputPort ( "," containsInPorts+=InputPort)* '}' )?
-	    //('containsOutPorts' '{' containsOutPorts+=OutputPort ( "," containsOutPorts+=OutputPort)* '}' )?
+	    //('archConstraints' '{' (cmpd+=CompDeclaration (","cmpd+=CompDeclaration) *))? ('set' '('(cmpA+=ComponentAssignment')')? (archConstraints= AC | acFunction= ArchitectureConstraint?) '}' )?
+	    	      
+	    //('archConstraints' '{' (cmpd+=CompDeclaration)* (cmpA+=ComponentAssignment)* (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
+	    */
+	    ('archConstraints' '{' 
+	    	(cmps+=Component ("," cmps+=Component)*)? 
+	    	
+	    	(portref+=PortREF)*
+	    	//(inputPortA=[InputPort|QualifiedName])?   
+	    	
+	    	(archConstraints= AC | acFunction= ArchitectureConstraint?) 
+	    	
+	    	('act''('ComponentType=[ComponentType|QualifiedName]')')?
+	    	
+	    	'}'
+	    )?
 	    
-	    ('archConstraints' '{' (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('Component=[Component|EString]')')? '}' )?
+	    //(cmp+=[Component|QualifiedName]+)
+	    
+// 	    ('archConstraints' '{' (cmps+=Component ("," cmps+=Component)*)? (cmp+=[Component|QualifiedName]+) (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
-	'}';
+	'}'
+;
 
 
-
-Component returns Component:
-	{Component} 
-	'Component' 
+ComponentType returns ComponentType:
+	{ComponentType} 
+	'ComponentType' 
 	name=EString	
 	'{'
-		('name' compID=CompID)?
+		//('name' compID=CompID)?
 		('comment' comment=EString)?
 		
 		('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
@@ -45,6 +61,24 @@ Component returns Component:
 	
 	'}'
 ;
+
+Component returns Component:
+	{Component} 
+	'Component'	name=QualifiedName ':' componentType=[ComponentType|QualifiedName]
+;
+
+PortREF:
+	cmp=[Component|ID] '.' prt=[InputPort|ID]
+   //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
+	
+;
+
+OutputPortREF:
+	cmp=[Component|ID] '.' outputprt=[OutputPort|ID]
+;
+
+
+
 
 CompID:
 	name=EString
@@ -126,7 +160,12 @@ btaFunction returns btaExpression:
 BA:
 	inputPortA=[InputPort|QualifiedName] '=' outputPortA=[OutputPort|QualifiedName]
 ;
+/*
+acAsignment:
+	'cmp' 'x' ':' cmp=[ComponentType|QualifiedName]
+;
 
+*/
 acExpression:
 	ArchitectureConstraint
 ;
@@ -144,8 +183,10 @@ archConstFunction:
 
 AC:
 	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
+    //cmp1=([Component|QualifiedName])':' InputPort=[InputPort|QualifiedName] '=' cmp2=([Component|QualifiedName])':' OutputPort=[OutputPort|QualifiedName]
 	
 ;
+
 
 LtlOp:
 	('G' | 'X' | 'F')

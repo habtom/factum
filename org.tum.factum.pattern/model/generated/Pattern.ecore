@@ -4,19 +4,23 @@
   <eClassifiers xsi:type="ecore:EClass" name="Pattern">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="comment" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="components" upperBound="-1"
-        eType="#//Component" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="componentTypes" upperBound="-1"
+        eType="#//ComponentType" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="hasInterfaces" upperBound="-1"
         eType="#//Interface" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cmps" upperBound="-1" eType="#//Component"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="portref" upperBound="-1"
+        eType="#//PortREF" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="archConstraints" eType="#//AC"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="acFunction" eType="#//acExpression"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="Component" eType="#//Component"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ComponentType" eType="#//ComponentType"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="SubPattern" upperBound="-1"
         eType="#//Pattern" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Component">
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentType">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="compID" eType="#//CompID"
         containment="true"/>
@@ -31,6 +35,18 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="btaFunction" eType="#//btaExpression"
         containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Component">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="componentType" eType="#//ComponentType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PortREF">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cmp" eType="#//Component"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prt" eType="#//InputPort"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OutputPortREF">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cmp" eType="#//Component"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="outputprt" eType="#//OutputPort"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CompID">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
