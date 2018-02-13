@@ -14,12 +14,10 @@ Pattern returns Pattern:
 	
 		('ComponentTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
 	    ('hasInterfaces' '{' hasInterfaces+=Interface ( "," hasInterfaces+=Interface)* '}' )?
-	    /*
-	    
-	    //('archConstraints' '{' (cmpd+=CompDeclaration (","cmpd+=CompDeclaration) *))? ('set' '('(cmpA+=ComponentAssignment')')? (archConstraints= AC | acFunction= ArchitectureConstraint?) '}' )?
-	    	      
+		      
 	    //('archConstraints' '{' (cmpd+=CompDeclaration)* (cmpA+=ComponentAssignment)* (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
-	    */
+	  	//('archConstraints' '{' (cmps+=Component ("," cmps+=Component)*)? (cmp+=[Component|QualifiedName]+) (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
+	  
 	    ('archConstraints' '{' 
 	    	(cmps+=Component ("," cmps+=Component)*)? 
 	    	
@@ -33,9 +31,6 @@ Pattern returns Pattern:
 	    	'}'
 	    )?
 	    
-	    
-		//('archConstraints' '{' (cmps+=Component ("," cmps+=Component)*)? (cmp+=[Component|QualifiedName]+) (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
-	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
@@ -46,16 +41,13 @@ ComponentType returns ComponentType:
 	'ComponentType' 
 	name=EString	
 	'{'
-		//('name' compID=CompID)?
 		('comment' comment=EString)?
-		
-		('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
-			       
+		('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?  
 		//('iParameters' '{' iParameters+=InterfaceParameter ( "," iParameters+=InterfaceParameter)* '}' )?
 		
 	    ('inputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
 	    ('outputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
-	    
+	
 	    ('bAssertions' '{' (bAssertions= BA | btaFunction=BehaviorTraceAssertion?) '}' )?
 	
 	'}'
@@ -95,25 +87,20 @@ OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=EString
 	'('
-		//('name' name=EString)?
 		('comment' comment=EString)?
 		('portType' portType=[PortDataType|EString])?
 		//('connects' connects=[InputPort])
 	    ('connects' connects=[InputPort])?
-		
-		//('outPortIsContained' outPortIsContained=[Component])
-		
+			
 	')';
 	
 InputPort returns InputPort:
 	{InputPort}	
 	'InputPort' name=EString
 	'('
-		//('name' name=EString)?
 		('comment' comment=EString)?
 		('portType' portType=[PortDataType|EString])?
 	    //('connects' connects=[OutputPort])?
-		//('inPortIsContained' inPortIsContained=[Component])
 	')'
 	;
 	
@@ -153,12 +140,7 @@ btaFunction returns btaExpression:
 BA:
 	inputPortA=[InputPort|QualifiedName] '=' outputPortA=[OutputPort|QualifiedName]
 ;
-/*
-acAsignment:
-	'cmp' 'x' ':' cmp=[ComponentType|QualifiedName]
-;
 
-*/
 acExpression:
 	ArchitectureConstraint
 ;
@@ -176,8 +158,6 @@ archConstFunction:
 
 AC:
 	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
-    //cmp1=([Component|QualifiedName])':' InputPort=[InputPort|QualifiedName] '=' cmp2=([Component|QualifiedName])':' OutputPort=[OutputPort|QualifiedName]
-	
 ;
 
 
