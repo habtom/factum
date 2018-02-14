@@ -8,8 +8,10 @@ Pattern returns Pattern:
 	{Pattern} 
 	'Pattern' name=EString
 	'{'
+		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
+		
 		//('name' name=EString)?
-		('comment' comment=EString)?
+		//('comment' comment=EString)?
 		//('patternConnections' '{' patternConnections+=Interface ( "," patternConnections+=Interface)* '}' )?
 	
 		('ComponentTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
@@ -34,7 +36,6 @@ Pattern returns Pattern:
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
-
 
 ComponentType returns ComponentType:
 	{ComponentType} 
@@ -68,7 +69,6 @@ OutputPortREF:
 	cmp=[Component|ID] '.' outputprt=[OutputPort|ID]
 ;
 
-
 Interface returns Interface:
 	{Interface}	'Interface'	
 	
@@ -81,7 +81,6 @@ Interface returns Interface:
 	    ('hasOutput' hasOutput=[OutputPort])
 	
 	'}';
-
 
 OutputPort returns OutputPort:
 	{OutputPort} 
@@ -123,6 +122,13 @@ DataTypeAssertion returns DataTypeAssertion:
 		('name' name=EString)?
 		('comment' comment=EString)?
 	'}';
+DataTypeSpec:
+	'Sort' (sorts+=Sort ("," sorts+=Sort)*)?
+;
+
+Sort:
+	name=ID
+;
 
 btaExpression:
 	BehaviorTraceAssertion
@@ -160,7 +166,6 @@ AC:
 	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
 ;
 
-
 LtlOp:
 	('G' | 'X' | 'F')
 ;
@@ -172,4 +177,3 @@ QualifiedName:
 EString returns ecore::EString:
 	STRING | ID
 ;
-
