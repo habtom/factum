@@ -76,6 +76,7 @@ Interface returns Interface:
 		('name' name=EString)?
 		('comment' comment=EString)?
 		//('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
+		('Type' ':' sort=[Sort| QualifiedName])
 	    ('hasInput' hasInput=[InputPort])
 	    //('portType' portType=[PortDataType|EString])?
 	    ('hasOutput' hasOutput=[OutputPort])
@@ -88,6 +89,7 @@ OutputPort returns OutputPort:
 	'('
 		('comment' comment=EString)?
 		('portType' portType=[PortDataType|EString])?
+		('Type' ':' sort=[Sort| QualifiedName])
 		//('connects' connects=[InputPort])
 	    ('connects' connects=[InputPort])?
 			
@@ -98,6 +100,7 @@ InputPort returns InputPort:
 	'InputPort' name=EString
 	'('
 		('comment' comment=EString)?
+		('Type' ':' sort=[Sort| QualifiedName])
 		('portType' portType=[PortDataType|EString])?
 	    //('connects' connects=[OutputPort])?
 	')'
@@ -122,9 +125,27 @@ DataTypeAssertion returns DataTypeAssertion:
 		('name' name=EString)?
 		('comment' comment=EString)?
 	'}';
-DataTypeSpec:
-	'Sort' (sorts+=Sort ("," sorts+=Sort)*)?
+DataTypeSpec returns DataTypeSpec:
+	{DataTypeSpec}
+	
+	'DataType' name =ID	'('
+		'Sort' (sorts+=Sort ("," sorts+=Sort)*)?
+		'Operation' (op+=Operation ("," op+=Operation)*)?
+	')'
 ;
+
+Operation:
+	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' (dtOutput=[Sort|QualifiedName])?
+	//(dtInput+=DTInput ("," dtInput+=DTInput)*)? '=>' (dtOutput=DTOutput)?
+;
+
+//DTOutput:
+//	name=ID
+//;
+//
+//DTInput:
+//	input
+//;
 
 Sort:
 	name=ID
