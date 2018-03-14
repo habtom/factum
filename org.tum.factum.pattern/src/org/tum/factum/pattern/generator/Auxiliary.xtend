@@ -16,6 +16,15 @@ class Auxiliary {
 				return inputportlist;
 
 	}
+	def static List<OutputPort> getOutputPorts(Pattern root) {
+		var List<OutputPort>  outputportlist = new ArrayList<OutputPort>()
+				for (ComponentType ct : root.componentTypes) {
+					outputportlist.add(ct.outputports)
+				}
+				return outputportlist;
+
+	}
+	
 
 	
 }
