@@ -7,28 +7,26 @@ generate pattern "http://www.tum.org/factum/pattern/Pattern"
 Pattern returns Pattern:
 	{Pattern} 
 	'Pattern' name=EString
+	'ShortName' psname=EString
 	'{'
 		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
-		
-		//('name' name=EString)?
-		//('comment' comment=EString)?
-		//('patternConnections' '{' patternConnections+=Interface ( "," patternConnections+=Interface)* '}' )?
-	
+			
 		('ComponentTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
-	    ('hasInterfaces' '{' hasInterfaces+=Interface ( "," hasInterfaces+=Interface)* '}' )?
-		      
+	    
+	    ('Interfaces' '{' hasInterfaces+=Interface ( "," hasInterfaces+=Interface)* '}' )?
+	    
 	    //('archConstraints' '{' (cmpd+=CompDeclaration)* (cmpA+=ComponentAssignment)* (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
 	  	//('archConstraints' '{' (cmps+=Component ("," cmps+=Component)*)? (cmp+=[Component|QualifiedName]+) (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
 	  
 	    ('archConstraints' '{' 
 	    	(cmps+=Component ("," cmps+=Component)*)? 
 	    	
-	    	(portref+=PortREF)*
+	    	//(prtref+=Portref)?
 	    	//(inputPortA=[InputPort|QualifiedName])?   
 	    	
 	    	(archConstraints= AC | acFunction= ArchitectureConstraint?) 
 	    	
-	    	('act''('ComponentType=[ComponentType|QualifiedName]')')?
+	    	//('act''('ComponentType=[ComponentType|QualifiedName]')')?
 	    	
 	    	'}'
 	    )?
@@ -36,53 +34,46 @@ Pattern returns Pattern:
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
-
 ComponentType returns ComponentType:
 	{ComponentType} 
 	'ComponentType' 
-	name=EString	
+	name=EString
 	'{'
+		('shortName' ctsname=EString)?
 		('comment' comment=EString)?
 		('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?  
 		//('iParameters' '{' iParameters+=InterfaceParameter ( "," iParameters+=InterfaceParameter)* '}' )?
 		
-	    ('inputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
-	    ('outputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
-	
+	    ('inputPorts' '{' inputports=InputPort '}' )?
+	    //('inputPorts' '{' inputports+=InputPort ( "," inputports+=InputPort)* '}' )?
+	    ('outputPorts' '{' outputports=OutputPort '}' )?
+	    	    
 	    ('bAssertions' '{' (bAssertions= BA | btaFunction=BehaviorTraceAssertion?) '}' )?
 	
 	'}'
 ;
-
 Component returns Component:
-	{Component} 
-	'Component'	name=QualifiedName ':' componentType=[ComponentType|QualifiedName]
+	{Component}
+	'Component'	name=QualifiedName ':' cmptypAssigned=[ComponentType|QualifiedName]?
 ;
 
-PortREF:
+Portref returns Portref:
+	{Portref}
 	cmp=[Component|ID] '.' prt=[InputPort|ID]
+	
    //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
-	
 ;
-
-OutputPortREF:
-	cmp=[Component|ID] '.' outputprt=[OutputPort|ID]
-;
-
 Interface returns Interface:
-	{Interface}	'Interface'	
-	
+	{Interface}	'Interface'
 	'{'
 		('name' name=EString)?
 		('comment' comment=EString)?
 		//('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
 		('Type' ':' sort=[Sort| QualifiedName])
 	    ('hasInput' hasInput=[InputPort])
-	    //('portType' portType=[PortDataType|EString])?
 	    ('hasOutput' hasOutput=[OutputPort])
-	
-	'}';
-
+	'}'
+;
 OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=EString
@@ -90,11 +81,10 @@ OutputPort returns OutputPort:
 		('comment' comment=EString)?
 		('portType' portType=[PortDataType|EString])?
 		('Type' ':' sort=[Sort| QualifiedName])
-		//('connects' connects=[InputPort])
 	    ('connects' connects=[InputPort])?
 			
-	')';
-	
+	')'
+;
 InputPort returns InputPort:
 	{InputPort}	
 	'InputPort' name=EString
@@ -102,10 +92,9 @@ InputPort returns InputPort:
 		('comment' comment=EString)?
 		('Type' ':' sort=[Sort| QualifiedName])
 		('portType' portType=[PortDataType|EString])?
-	    //('connects' connects=[OutputPort])?
+	    ('connects' connects=[OutputPort])?
 	')'
-	;
-	
+;
 PortDataType returns PortDataType:
 	{PortDataType} 
 	//'PortDataType'
@@ -117,84 +106,63 @@ PortDataType returns PortDataType:
 		//('inputPorts' inputPorts=[OutputPort|EString])?
 		('dataTypeAssertions' '(' dataTypeAssertions+=[DataTypeAssertion|EString] ( "," dataTypeAssertions+=[DataTypeAssertion|EString])* ')' )?
 	//')'
-	;
+;
 DataTypeAssertion returns DataTypeAssertion:
 	{DataTypeAssertion}
 	'DataTypeAssertion'
 	'{'
 		('name' name=EString)?
 		('comment' comment=EString)?
-	'}';
+	'}'
+;
 DataTypeSpec returns DataTypeSpec:
-	{DataTypeSpec}
-	
+	{DataTypeSpec}	
 	'DataType' name =ID	'('
 		'Sort' (sorts+=Sort ("," sorts+=Sort)*)?
 		'Operation' (op+=Operation ("," op+=Operation)*)?
 	')'
 ;
-
 Operation:
 	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' (dtOutput=[Sort|QualifiedName])?
 	//(dtInput+=DTInput ("," dtInput+=DTInput)*)? '=>' (dtOutput=DTOutput)?
 ;
-
-//DTOutput:
-//	name=ID
-//;
-//
-//DTInput:
-//	input
-//;
-
 Sort:
 	name=ID
 ;
-
 btaExpression:
 	BehaviorTraceAssertion
 ; 
-
 BehaviorTraceAssertion returns btaExpression:
 	LtlOp '(' asertion=btaFunction ')'
 ;
-
 btaFunction returns btaExpression:
 	btaExpression |
 	BA
 ;
-
 BA:
 	inputPortA=[InputPort|QualifiedName] '=' outputPortA=[OutputPort|QualifiedName]
 ;
-
 acExpression:
 	ArchitectureConstraint
 ;
-
 ArchitectureConstraint	returns acExpression:
 	LtlOp '(' asertion=archConstFunction ')'
 	//( LtlOp '(' AC ')')? 
 	//('act''('Component=[Component|EString]')')?
 ;
-
 archConstFunction:
 	acExpression |
 	AC
 ;
-
 AC:
 	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
 ;
-
 LtlOp:
 	('G' | 'X' | 'F')
 ;
-
 QualifiedName:
     ID ('.' ID)*
-;
-	
+;	
 EString returns ecore::EString:
 	STRING | ID
 ;
