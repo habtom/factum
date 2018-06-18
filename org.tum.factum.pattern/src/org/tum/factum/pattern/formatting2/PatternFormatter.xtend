@@ -50,9 +50,9 @@ class PatternFormatter extends AbstractFormatter2 {
 		//component.regionFor.keyword(",").prepend[newLine]
 		
 		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
-		for (Interface _interface : componentType.getHasEdges()) {
-			_interface.format;
-		}
+//		for (Interface _interface : componentType.getHasEdges()) {
+//			_interface.format;
+//		}
 		//uncomment this for sirius
 //		for (InputPort inputPort : componentType.inputports {
 //			inputPort.format;
