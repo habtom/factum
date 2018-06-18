@@ -8,7 +8,6 @@ import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
 import org.tum.factum.pattern.pattern.ComponentType
 import org.tum.factum.pattern.pattern.InputPort
-import org.tum.factum.pattern.pattern.Interface
 import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Pattern
 import org.tum.factum.pattern.services.PatternGrammarAccess

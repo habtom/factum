@@ -1,4 +1,5 @@
 grammar org.tum.factum.pattern.Pattern with org.eclipse.xtext.common.Terminals
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 generate pattern "http://www.tum.org/factum/pattern/Pattern"
 
@@ -10,7 +11,7 @@ Pattern returns Pattern:
 		('ComponentTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
  
 	    ('archConstraints' '{' 
-	    	(cmps+=Component ("," cmps+=Component)*)? 
+	    	//(cmps+=Component ("," cmps+=Component)*)? 
 	    	(ref+=Portref ("," ref+=Portref)*)
 	    	(archConstraints= AC | acFunction= ArchitectureConstraint)? //Importnat - this line is stoping the above line 
 	    	'}'
@@ -18,10 +19,9 @@ Pattern returns Pattern:
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
-
 ComponentType returns ComponentType:
 	{ComponentType} 
-	'CType'	name=ID ('ShortName' ctsname=ID)? 
+	'CType'	name=EString ('ShortName' ctsname=ID)? 
 	'{'
 	    ('InputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
 	    ('OutputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
@@ -31,32 +31,33 @@ ComponentType returns ComponentType:
 	
 	'}'
 ;
-
-Component:
-	'Component'	name=ID ':' cmptypAssigned=[ComponentType|ID]?
+VariableStatus: 
+	'rig' | 'flex'
+;
+ComponentVariable:
+	VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
 ;
 Portref:
-	cmp2=[Component|ID] '.' p2=[InputPort|ID]	
+	cmp2=[ComponentVariable|ID] '.' p2=[InputPort|ID]	
    //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
 ;
-
 OutputPort returns OutputPort:
 	{OutputPort} 
-	'OutputPort' name=ID '(' 
-		('Type' ':' outputPrtSrtTyp=[Sort| QualifiedName]) 
-		('connects' connects=[InputPort])?
+	'OutputPort' name=EString '(' 
+		('Type' ':' outputPrtSrtTyp=[Sort|QualifiedName]) 
+		('connects' connects+=[InputPort|QualifiedName]*)?
 	')'
 ;
 InputPort returns InputPort:
 	{InputPort}	
-	'InputPort' name=ID '('
-		('Type' ':' inputPrtSrtTyp=[Sort| QualifiedName])
-	    ('connects' connects=[OutputPort])?
+	'InputPort' name=EString '('
+		('Type' ':' inputPrtSrtTyp=[Sort|QualifiedName])
+	    ('connects' connects+=[OutputPort|QualifiedName]*)?
 	')'
 ;
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
-	'DataType' name =ID	'('
+	'DataType' name =EString	'('
 		'Sort' (sorts+=Sort ("," sorts+=Sort)*)?
 		'Operation' (op+=Operation ("," op+=Operation)*)?
 	')'
@@ -98,4 +99,8 @@ LtlOp:
 ;
 QualifiedName:
     ID ('.' ID)*
-;	
+;
+EString returns ecore::EString:
+	STRING | ID
+;
+	

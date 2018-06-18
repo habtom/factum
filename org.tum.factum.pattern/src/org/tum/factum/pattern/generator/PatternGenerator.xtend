@@ -17,11 +17,11 @@ import org.tum.factum.pattern.pattern.Pattern
 class PatternGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		val root = resource.allContents.head as Pattern;
-		 
-		if (root !== null) {
-			fsa.generateFile("factumPatternTheory.thy", IsabelleTextGenerator.toText(root))
-		}
+//		val root = resource.allContents.head as Pattern;
+//		 
+//		if (root !== null) {
+//			fsa.generateFile("factumPatternTheory.thy", IsabelleTextGenerator.toText(root))
+//		}
 		//toIsabelle
 		
 	}
