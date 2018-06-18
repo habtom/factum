@@ -11,12 +11,8 @@ Pattern returns Pattern:
  
 	    ('archConstraints' '{' 
 	    	(cmps+=Component ("," cmps+=Component)*)? 
-	   
-	    	(ref+=Portref ("," ref+=Portref)*)?
-	    	
+	    	(ref+=Portref ("," ref+=Portref)*)
 	    	(archConstraints= AC | acFunction= ArchitectureConstraint)? //Importnat - this line is stoping the above line 
-	    	
-	    	
 	    	'}'
 	    )?
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
@@ -57,14 +53,6 @@ InputPort returns InputPort:
 		('Type' ':' inputPrtSrtTyp=[Sort| QualifiedName])
 	    ('connects' connects=[OutputPort])?
 	')'
-;
-DataTypeAssertion returns DataTypeAssertion:
-	{DataTypeAssertion}
-	'DataTypeAssertion'
-	'{'
-		('name' name=ID)?
-		('comment' comment=ID)?
-	'}'
 ;
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
