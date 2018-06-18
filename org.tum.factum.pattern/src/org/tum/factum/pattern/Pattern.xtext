@@ -62,36 +62,17 @@ Interface returns Interface:
 ;
 OutputPort returns OutputPort:
 	{OutputPort} 
-	'OutputPort' name=EString
-	'('
-		('comment' comment=EString)?
-		('portType' portType=[PortDataType|EString])?
-		('Type' ':' sort=[Sort| QualifiedName])
-	    ('connects' connects=[InputPort])?
-			
+	'OutputPort' name=ID '(' 
+		('Type' ':' outputPrtSrtTyp=[Sort| QualifiedName]) 
+		('connects' connects=[InputPort])?
 	')'
 ;
 InputPort returns InputPort:
 	{InputPort}	
-	name=ID
-	'('
-		('comment' comment=EString)?
-		('Type' ':' sort=[Sort| QualifiedName])
-		('portType' portType=[PortDataType|ID])? //check if required 
+	'InputPort' name=ID '('
+		('Type' ':' inputPrtSrtTyp=[Sort| QualifiedName])
 	    ('connects' connects=[OutputPort])?
 	')'
-;
-PortDataType returns PortDataType:
-	{PortDataType} 
-	//'PortDataType'
-	//'('
-		('name' name=EString)?
-		('comment' comment=EString)?
-		('type' type=EString)?
-		//('outputPorts' outputPorts=[OutputPort|EString])?
-		//('inputPorts' inputPorts=[OutputPort|EString])?
-		('dataTypeAssertions' '(' dataTypeAssertions+=[DataTypeAssertion|EString] ( "," dataTypeAssertions+=[DataTypeAssertion|EString])* ')' )?
-	//')'
 ;
 DataTypeAssertion returns DataTypeAssertion:
 	{DataTypeAssertion}
