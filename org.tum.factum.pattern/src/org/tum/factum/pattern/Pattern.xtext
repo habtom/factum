@@ -26,6 +26,8 @@ ComponentType returns ComponentType:
 	    ('InputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
 	    ('OutputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
 	    ('bAssertions' '{' 
+	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
+	    	
 	    	(bAssertions= BA | btaFunction=BehaviorTraceAssertion?) '}'
 	    )?
 	
@@ -36,6 +38,9 @@ VariableStatus:
 ;
 ComponentVariable:
 	VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
+;
+DataTypeVariable: 
+	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
 ;
 Portref:
 	cmp2=[ComponentVariable|ID] '.' p2=[InputPort|ID]	
