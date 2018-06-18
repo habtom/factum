@@ -3,29 +3,25 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="pattern" nsURI="http://www.tum.org/factum/pattern/Pattern" nsPrefix="pattern">
   <eClassifiers xsi:type="ecore:EClass" name="Pattern">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="psname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dtSpec" upperBound="-1"
         eType="#//DataTypeSpec" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="componentTypes" upperBound="-1"
         eType="#//ComponentType" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="hasInterfaces" upperBound="-1"
-        eType="#//Interface" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="cmps" upperBound="-1" eType="#//Component"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="portref" upperBound="-1"
-        eType="#//PortREF" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" upperBound="-1" eType="#//Portref"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="archConstraints" eType="#//AC"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="acFunction" eType="#//acExpression"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ComponentType" eType="#//ComponentType"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="SubPattern" upperBound="-1"
         eType="#//Pattern" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ComponentType">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="comment" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="hasEdges" upperBound="-1"
-        eType="#//Interface" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ctsname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="inputPorts" upperBound="-1"
         eType="#//InputPort" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="outputPorts" upperBound="-1"
@@ -37,15 +33,11 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Component">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="componentType" eType="#//ComponentType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cmptypAssigned" eType="#//ComponentType"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PortREF">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="cmp" eType="#//Component"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="prt" eType="#//InputPort"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OutputPortREF">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="cmp" eType="#//Component"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="outputprt" eType="#//OutputPort"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Portref">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cmp2" eType="#//Component"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="p2" eType="#//InputPort"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Interface">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -66,6 +58,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="comment" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sort" eType="#//Sort"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="portType" eType="#//PortDataType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="connects" eType="#//OutputPort"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PortDataType">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
