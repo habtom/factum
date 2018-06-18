@@ -8,19 +8,14 @@ Pattern returns Pattern:
 	'{'
 		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
 		('ComponentTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
-   
-	    //('archConstraints' '{' (cmpd+=CompDeclaration)* (cmpA+=ComponentAssignment)* (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
-	  	//('archConstraints' '{' (cmps+=Component ("," cmps+=Component)*)? (cmp+=[Component|QualifiedName]+) (archConstraints= AC | acFunction= ArchitectureConstraint?) ('act''('ComponentType=[ComponentType|QualifiedName]')')? '}' )?
-	  
+ 
 	    ('archConstraints' '{' 
 	    	(cmps+=Component ("," cmps+=Component)*)? 
-	    	
-   	
+	   
 	    	(ref+=Portref ("," ref+=Portref)*)?
 	    	
 	    	(archConstraints= AC | acFunction= ArchitectureConstraint)? //Importnat - this line is stoping the above line 
 	    	
-	    	//('act''('ComponentType=[ComponentType|QualifiedName]')')?
 	    	
 	    	'}'
 	    )?
@@ -48,17 +43,7 @@ Portref:
 	cmp2=[Component|ID] '.' p2=[InputPort|ID]	
    //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
 ;
-Interface returns Interface:
-	{Interface}	'Interface'
-	'{'
-		('name' name=ID)?
-		('comment' comment=ID)?
-		//('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?
-		('Type' ':' sort=[Sort| QualifiedName])
-	    ('hasInput' hasInput=[InputPort])
-	    ('hasOutput' hasOutput=[OutputPort])
-	'}'
-;
+
 OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=ID '(' 
@@ -90,7 +75,6 @@ DataTypeSpec returns DataTypeSpec:
 ;
 Operation:
 	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' (dtOutput=[Sort|QualifiedName])?
-	//(dtInput+=DTInput ("," dtInput+=DTInput)*)? '=>' (dtOutput=DTOutput)?
 ;
 Sort:
 	name=ID
@@ -113,8 +97,6 @@ acExpression:
 ;
 ArchitectureConstraint	returns acExpression:
 	LtlOp '(' asertion=archConstFunction ')'
-	//( LtlOp '(' AC ')')? 
-	//('act''('Component=[Component|EString]')')?
 ;
 archConstFunction:
 	acExpression |
