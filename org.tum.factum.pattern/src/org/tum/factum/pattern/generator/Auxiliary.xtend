@@ -6,7 +6,7 @@ import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Pattern
 
 class Auxiliary {
-    def static List<InputPort> getInputPorts(Pattern root) {
+    def static getInputPorts(Pattern root) {
 		return root.componentTypes.map[ct|ct.inputports]
 	}
 	def static List<OutputPort> getOutputPorts(Pattern root) {
@@ -29,5 +29,6 @@ class Auxiliary {
 //				return outputportlist;
 //
 //	}
+
 
 }

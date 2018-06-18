@@ -1,7 +1,5 @@
 grammar org.tum.factum.pattern.Pattern with org.eclipse.xtext.common.Terminals
-
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore 
-
 generate pattern "http://www.tum.org/factum/pattern/Pattern"
 
 Pattern returns Pattern:
@@ -21,46 +19,44 @@ Pattern returns Pattern:
 	    ('archConstraints' '{' 
 	    	(cmps+=Component ("," cmps+=Component)*)? 
 	    	
-	    	//(prtref+=Portref)?
-	    	//(inputPortA=[InputPort|QualifiedName])?   
+	    	//ref=Portref
 	    	
-	    	(archConstraints= AC | acFunction= ArchitectureConstraint?) 
+	    	(ref+=Portref ("," ref+=Portref)*)?
+	    	
+	    	(archConstraints= AC | acFunction= ArchitectureConstraint)? //Importnat - this line is stoping the above line 
 	    	
 	    	//('act''('ComponentType=[ComponentType|QualifiedName]')')?
 	    	
 	    	'}'
 	    )?
-	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
+
 ComponentType returns ComponentType:
 	{ComponentType} 
 	'ComponentType' 
-	name=EString
+	name=ID
 	'{'
 		('shortName' ctsname=EString)?
 		('comment' comment=EString)?
 		('hasEdges' '{' hasEdges+=Interface ( "," hasEdges+=Interface)* '}' )?  
 		//('iParameters' '{' iParameters+=InterfaceParameter ( "," iParameters+=InterfaceParameter)* '}' )?
 		
-	    ('inputPorts' '{' inputports=InputPort '}' )?
-	    //('inputPorts' '{' inputports+=InputPort ( "," inputports+=InputPort)* '}' )?
+	    //('inputPorts' '{' inputports=InputPort '}' )?
+	    ('inputPorts' '{' inputports+=InputPort ( "," inputports+=InputPort)* '}' )?
 	    ('outputPorts' '{' outputports=OutputPort '}' )?
-	    	    
+
 	    ('bAssertions' '{' (bAssertions= BA | btaFunction=BehaviorTraceAssertion?) '}' )?
 	
 	'}'
 ;
-Component returns Component:
-	{Component}
-	'Component'	name=QualifiedName ':' cmptypAssigned=[ComponentType|QualifiedName]?
-;
 
-Portref returns Portref:
-	{Portref}
-	cmp=[Component|ID] '.' prt=[InputPort|ID]
-	
+Component:
+	'Component'	name=ID ':' cmptypAssigned=[ComponentType|ID]?
+;
+Portref:
+	cmp2=[Component|ID] '.' p2=[InputPort|ID]	
    //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
 ;
 Interface returns Interface:
@@ -87,11 +83,11 @@ OutputPort returns OutputPort:
 ;
 InputPort returns InputPort:
 	{InputPort}	
-	'InputPort' name=EString
+	name=ID
 	'('
 		('comment' comment=EString)?
 		('Type' ':' sort=[Sort| QualifiedName])
-		('portType' portType=[PortDataType|EString])?
+		('portType' portType=[PortDataType|ID])? //check if required 
 	    ('connects' connects=[OutputPort])?
 	')'
 ;

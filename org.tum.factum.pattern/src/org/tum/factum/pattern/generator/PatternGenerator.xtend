@@ -24,12 +24,5 @@ class PatternGenerator extends AbstractGenerator {
 		}
 		//toIsabelle
 		
-		
-		
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(Greeting)
-//				.map[name]
-//				.join(', '))
 	}
 }

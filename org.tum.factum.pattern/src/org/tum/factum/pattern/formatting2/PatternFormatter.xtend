@@ -53,13 +53,13 @@ class PatternFormatter extends AbstractFormatter2 {
 		for (Interface _interface : componentType.getHasEdges()) {
 			_interface.format;
 		}
-		
-		for (InputPort inputPort : componentType.getInputPorts()) {
-			inputPort.format;
-		}
-		for (OutputPort outputPort : componentType.getOutputPorts()) {
-			outputPort.format;
-		}
+		//uncomment this for sirius
+//		for (InputPort inputPort : componentType.inputports {
+//			inputPort.format;
+//		}
+//		for (OutputPort outputPort : componentType.getOutputports()) {
+//			outputPort.format;
+//		}
 	
 		/*
 		for (InputPort inputPort : component.getContainsInPorts()) {
