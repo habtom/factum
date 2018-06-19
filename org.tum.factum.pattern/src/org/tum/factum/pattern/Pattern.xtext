@@ -81,6 +81,26 @@ Sort:
 	name=ID
 ;
 
+
+//Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
+PortRef:
+	InputPort | OutputPort
+;
+CmpVariableRef:
+	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
+;
+Terms:
+	DataTypeVariable 
+;
+Term: 
+	terms=[Terms|ID] | CmpVariableRef | termOperatorFunction=TermOperatorFunction
+;
+TermOperatorFunction:
+	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*) ")" 
+;
+
+//End
+
 // Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
 CtaPortRef:
 	InputPort | OutputPort
