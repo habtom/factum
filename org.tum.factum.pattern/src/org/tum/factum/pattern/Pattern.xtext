@@ -81,7 +81,6 @@ Sort:
 	name=ID
 ;
 
-
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
 PortRef:
 	InputPort | OutputPort
@@ -114,7 +113,7 @@ CtaPredicateConn:
 	ctaConn='conn' ('(' ctaConnCmpVarOutputPort=CtaRefComponentVariableOutputPort ','	ctaConnCmpVarInptPort=CtaRefComponentVariableInputPort ')')
 ;
 CtaPredicateEq: 
-	ctaConn='eq' ('(' componentVariable+=[ComponentVariable|ID] ','	componentVariable+=[ComponentVariable|ID] ')')
+	ctaEq='eq' ('(' ctaComponentVariable+=[ComponentVariable|ID] ',' ctaComponentVariable+=[ComponentVariable|ID] ')')
 ;
 CtaPredicateVal:
 	ctaVal='val' ('(' valCtaCmpVaref=CmpVariableRef ',' ctaValTerms=Term ')') 
@@ -135,9 +134,36 @@ CtaQuantifiedFormulas:
 CtaFormula:
 	ctaPredicate=CtaPredicate | 
 	ctaPredicateTerms=CtaPredicateTerms | 
-	CtaPredicateConn | CtaPredicateVal | CtaPredicateEq | ctaUnaryFormulas=CtaUnaryFormulas | ctaBinaryFormulas=CtaBinaryFormulas |  ctaQuantifiedFormulas=CtaQuantifiedFormulas
+	CtaPredicateConn | CtaPredicateVal | CtaPredicateEq | 
+	ctaUnaryFormulas=CtaUnaryFormulas | ctaBinaryFormulas=CtaBinaryFormulas |  ctaQuantifiedFormulas=CtaQuantifiedFormulas
 ;
 // End CTA
+
+// Begin Architectural Guarantee
+AgRefComponentVariableInputPort:
+	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
+;
+AgRefComponentVariableOutputPort:
+	outptPrtCmpRef=[ComponentVariable|ID] '.' outputPrtrf=[OutputPort|ID]
+;
+AgPredicateTerms:
+	agPTerm1=Term equalityOperator=EqualityElementOperator agPTerm2=Term
+;
+AgPredicateEq: 
+	agEq='eq' ('(' agComponentVariable+=[ComponentVariable|ID] ',' agComponentVariable+=[ComponentVariable|ID] ')')
+;
+AgPredicateConn: 
+	agConn='conn' ('(' agConnCmpVarOutputPort=AgRefComponentVariableOutputPort ','	agConnCmpVarInptPort=AgRefComponentVariableInputPort ')')
+;
+AgPredicateVal:
+	agVal='val' ('(' valAgRefComponentVariable=CmpVariableRef ',' agValTerms=TermOperatorFunction ')') //| //the terms have to be the same type of the component port(CtaCmpVaref)
+;
+AgPredicate:
+	agcAct='cAct' ('('agcActCmpVar=[ComponentVariable|ID] ')') |
+	agpAct='pAct' ('(' agpActCtaCmpVaref=CmpVariableRef ')') 
+;
+// End AG
+
 
 //Begin Operator rules for CTA, BTA, and AG ....
 UnaryOperator: 
@@ -145,16 +171,10 @@ UnaryOperator:
 	neg='¬'
 ;
 BinaryOperator: 
-	'⇒' | '∧' | '∨' | '⇔' | 'W' | 'U' //operates F and F, F is a formula 
-;
-LogicOperator:
-	'¬' 
+	'⇒' | '∧' | '∨' | '⇔' | 'W' | 'U' //operates F and F, F is a formula
 ;
 EqualityElementOperator: //Maybe not needed (check?)
 	'='
-;
-UnaryOp:
-	'¬' 
 ;
 QuantifiedVariables:
 	DataTypeVariable | ComponentVariable
