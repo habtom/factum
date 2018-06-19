@@ -98,7 +98,6 @@ Term:
 TermOperatorFunction:
 	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*) ")" 
 ;
-
 //End
 
 // Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
@@ -124,37 +123,21 @@ CtaPredicate:
 	cAct='cAct' ('('cActCmpVar=[ComponentVariable|ID] ')') |
 	pAct='pAct' ('(' pActCtaCmpVaref=CmpVariableRef ')') 
 ;
-
-
+CtaUnaryFormulas:
+	unaryOperator=UnaryOperator  ctaFormulaLtl=CtaFormula
+;
+CtaBinaryFormulas:
+	'('(ctaFormulaLgk+=CtaFormula (BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')' //try with brackets for better non LL
+;
+CtaQuantifiedFormulas:
+	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
+;
+CtaFormula:
+	ctaPredicate=CtaPredicate | 
+	ctaPredicateTerms=CtaPredicateTerms | 
+	CtaPredicateConn | CtaPredicateVal | CtaPredicateEq | ctaUnaryFormulas=CtaUnaryFormulas | ctaBinaryFormulas=CtaBinaryFormulas |  ctaQuantifiedFormulas=CtaQuantifiedFormulas
+;
 // End CTA
-
-
-btaExpression:
-	BehaviorTraceAssertion
-; 
-BehaviorTraceAssertion returns btaExpression:
-	UnaryOperator '(' asertion=btaFunction ')'
-;
-btaFunction returns btaExpression:
-	btaExpression |
-	BA
-;
-BA:
-	inputPortA=[InputPort|QualifiedName] '=' outputPortA=[OutputPort|QualifiedName]
-;
-acExpression:
-	ArchitectureConstraint
-;
-ArchitectureConstraint	returns acExpression:
-	UnaryOperator '(' asertion=archConstFunction ')'
-;
-archConstFunction:
-	acExpression |
-	AC
-;
-AC:
-	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
-;
 
 //Begin Operator rules for CTA, BTA, and AG ....
 UnaryOperator: 
@@ -172,6 +155,12 @@ EqualityElementOperator: //Maybe not needed (check?)
 ;
 UnaryOp:
 	'¬' 
+;
+QuantifiedVariables:
+	DataTypeVariable | ComponentVariable
+;
+QuantifierOperator:
+	exists='∃'(quantifiedExistsDtVar=[DataTypeVariable|ID]'.') | all='∀'(quantifiedAllDtVar=[QuantifiedVariables|ID]'.')
 ;
 //End
 QualifiedName:
