@@ -81,8 +81,6 @@ Sort:
 	name=ID
 ;
 
-
-
 // Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
 CtaPortRef:
 	InputPort | OutputPort
@@ -90,7 +88,12 @@ CtaPortRef:
 CtaRefComponentVariable:
 	cmpRef=[ComponentVariable|ID] '.' ctaPortRef=[CtaPortRef|ID]
 ;
-
+CtaRefComponentVariableInputPort:
+	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
+;
+CtaRefComponentVariableOutputPort:
+	outptPrtCmpRef=[ComponentVariable|ID] '.' outputPrtrf=[OutputPort|ID]
+;
 
 // End CTA
 
