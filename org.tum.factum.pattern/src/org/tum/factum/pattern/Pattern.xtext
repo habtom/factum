@@ -14,16 +14,33 @@ Pattern returns Pattern:
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
 	    	ctaDtVars=DTVariables 														//Declaration of DT Variables
 	    	
-	    	
+			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
 	    )?
+	    
+	    ('ArchGuarantee' '{'
+			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
+			agDtVars=DTVariables
+			
+			(agFormulas+=AgFormulasID)*
+	    '}')?
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
+
+//Begin
+CtaFormulasID:
+	name=ID ':' ctaFormula=CtaFormula
+;
+AgFormulasID:
+	name=ID ':' agFormula=AgFormula
+;
 DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
+//End
+
 ComponentType returns ComponentType:
 	{ComponentType} 
 	'CType'	name=ID ('ShortName' ctsname=ID)? 
@@ -47,7 +64,6 @@ ComponentVariable:
 DataTypeVariable: 
 	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
 ;
-
 OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=EString '(' 
@@ -99,7 +115,7 @@ TermOperatorFunction:
 ;
 //End
 
-// Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
+//Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
 CtaRefComponentVariableInputPort:
 	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
 ;
@@ -132,11 +148,12 @@ CtaQuantifiedFormulas:
 	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
 ;
 CtaFormula:
-	ctaPredicate=CtaPredicate | 
 	ctaPredicateTerms=CtaPredicateTerms | 
 	ctaPredicateConn=CtaPredicateConn | 
 	ctaPredicateVal=CtaPredicateVal | 
 	ctaPredicateEq=CtaPredicateEq | 
+	ctaPredicate=CtaPredicate | 
+	
 	ctaUnaryFormulas=CtaUnaryFormulas | 
 	ctaBinaryFormulas=CtaBinaryFormulas |  
 	ctaQuantifiedFormulas=CtaQuantifiedFormulas
@@ -176,11 +193,11 @@ AgQuantifiedFormulas:
 	agQuantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula 
 ;
 AgFormula:
-	agPredicate=AgPredicate | 
 	gaPredicateTerms=AgPredicateTerms | 
 	agPredicateConn=AgPredicateConn | 
 	agPredicateVal=AgPredicateVal | 
 	agPredicateEq=AgPredicateEq | 
+	agPredicate=AgPredicate | 
 	
 	agUnaryFormulas=AgUnaryFormulas | 
 	agBinaryFormulas=AgBinaryFormulas | 
