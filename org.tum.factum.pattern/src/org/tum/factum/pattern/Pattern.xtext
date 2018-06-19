@@ -102,14 +102,28 @@ TermOperatorFunction:
 //End
 
 // Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
-
 CtaRefComponentVariableInputPort:
 	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
 ;
 CtaRefComponentVariableOutputPort:
 	outptPrtCmpRef=[ComponentVariable|ID] '.' outputPrtrf=[OutputPort|ID]
 ;
-
+CtaPredicateTerms:
+	ctaPTerm1=Term equalityOperator=EqualityElementOperator ctaPTerm2=Term
+;
+CtaPredicateConn: 
+	ctaConn='conn' ('(' ctaConnCmpVarOutputPort=CtaRefComponentVariableOutputPort ','	ctaConnCmpVarInptPort=CtaRefComponentVariableInputPort ')')
+;
+CtaPredicateEq: 
+	ctaConn='eq' ('(' componentVariable+=[ComponentVariable|ID] ','	componentVariable+=[ComponentVariable|ID] ')')
+;
+CtaPredicateVal:
+	ctaVal='val' ('(' valCtaCmpVaref=CmpVariableRef ',' ctaValTerms=Term ')') 
+;
+CtaPredicate:
+	cAct='cAct' ('('cActCmpVar=[ComponentVariable|ID] ')') |
+	pAct='pAct' ('(' pActCtaCmpVaref=CmpVariableRef ')') 
+;
 
 
 // End CTA
