@@ -94,6 +94,15 @@ CtaRefComponentVariableInputPort:
 CtaRefComponentVariableOutputPort:
 	outptPrtCmpRef=[ComponentVariable|ID] '.' outputPrtrf=[OutputPort|ID]
 ;
+CtaTerms:
+	DataTypeVariable 
+;
+CtaTermOperatorFunction:
+	ctaTrmOperator=[Operation|QualifiedName] "(" (ctaTrmOperands+=CtaTerm ("," ctaTrmOperands+=CtaTerm)*) ")" 
+;
+CtaTerm:
+	ctaTrms=[CtaTerms|ID] | CtaRefComponentVariable | ctaTrmOperatorFunction=CtaTermOperatorFunction
+;
 
 // End CTA
 
