@@ -25,6 +25,7 @@ ComponentType returns ComponentType:
 	'{'
 	    ('InputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
 	    ('OutputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
+	    
 	    ('bAssertions' '{' 
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
 	    	
@@ -62,10 +63,15 @@ InputPort returns InputPort:
 ;
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
-	'DataType' name =EString	'('
-		'Sort' (sorts+=Sort ("," sorts+=Sort)*)?
-		'Operation' (op+=Operation ("," op+=Operation)*)?
+	'DT' name =ID	'('
+		'Sort' (dtSorts+=Sort ("," dtSorts+=Sort)*)?
+		('Operation' (dtOps+=Operation ("," dtOps+=Operation)*))?
+		('Predicate' (dtPredicate+=DTPredicate ("," dtPredicate+=DTPredicate)*))?
+		(sortName=[Sort|ID] 'generatedBy' (returnOps+=[Operation|ID] ("," returnOps+=[Operation|ID])*))?		
 	')'
+;
+DTPredicate:
+	name=ID ':' (pInput+=[Sort|QualifiedName] ("," pInput+=[Sort|QualifiedName])*)?
 ;
 Operation:
 	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' (dtOutput=[Sort|QualifiedName])?
