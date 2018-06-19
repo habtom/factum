@@ -141,10 +141,25 @@ archConstFunction:
 AC:
 	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
 ;
+
+//Begin Operator rules for CTA, BTA, and AG ....
 UnaryOperator: 
 	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
 	neg='¬'
 ;
+BinaryOperator: 
+	'⇒' | '∧' | '∨' | '⇔' | 'W' | 'U' //operates F and F, F is a formula 
+;
+LogicOperator:
+	'¬' 
+;
+EqualityElementOperator: //Maybe not needed (check?)
+	'='
+;
+UnaryOp:
+	'¬' 
+;
+//End
 QualifiedName:
     ID ('.' ID)*
 ;
