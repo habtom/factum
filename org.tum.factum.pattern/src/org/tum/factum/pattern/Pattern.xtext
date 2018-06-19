@@ -8,16 +8,21 @@ Pattern returns Pattern:
 	'Pattern' name=ID 'ShortName' psname=ID
 	'{'
 		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
-		('ComponentTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
+		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
  
-	    ('archConstraints' '{' 
-	    	//(cmps+=Component ("," cmps+=Component)*)? 
-	    	(ref+=Portref ("," ref+=Portref)*)
-	    	(archConstraints= AC | acFunction= ArchitectureConstraint)? //Importnat - this line is stoping the above line 
+	    ('ArchSpec' '{' 
+	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
+	    	ctaDtVars=DTVariables 														//Declaration of DT Variables
+	    	
+	    	
 	    	'}'
 	    )?
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
+;
+
+DTVariables:
+	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
 ComponentType returns ComponentType:
 	{ComponentType} 
@@ -43,10 +48,7 @@ ComponentVariable:
 DataTypeVariable: 
 	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
 ;
-Portref:
-	cmp2=[ComponentVariable|ID] '.' p2=[InputPort|ID]	
-   //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
-;
+
 OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=EString '(' 
@@ -79,6 +81,15 @@ Operation:
 Sort:
 	name=ID
 ;
+
+
+
+
+Portref:
+	cmp2=[ComponentVariable|ID] '.' p2=[InputPort|ID]	
+   //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
+;
+
 btaExpression:
 	BehaviorTraceAssertion
 ; 
