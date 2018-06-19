@@ -131,7 +131,7 @@ CtaUnaryFormulas:
 	unaryOperator=UnaryOperator  ctaFormulaLtl=CtaFormula
 ;
 CtaBinaryFormulas:
-	'('(ctaFormulaLgk+=CtaFormula (BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')' //try with brackets for better non LL
+	'('(ctaFormulaLgk+=CtaFormula (BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')'
 ;
 CtaQuantifiedFormulas:
 	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
@@ -169,7 +169,7 @@ AgPredicateConn:
 	agConn='conn' ('(' agConnCmpVarOutputPort=AgRefComponentVariableOutputPort ','	agConnCmpVarInptPort=AgRefComponentVariableInputPort ')')
 ;
 AgPredicateVal:
-	agVal='val' ('(' valAgRefComponentVariable=CmpVariableRef ',' agValTerms=TermOperatorFunction ')') //| //the terms have to be the same type of the component port
+	agVal='val' ('(' valAgRefComponentVariable=CmpVariableRef ',' agValTerms=TermOperatorFunction ')') //the terms have to be the same type of the component port
 ;
 AgPredicate:
 	agcAct='cAct' ('('agcActCmpVar=[ComponentVariable|ID] ')') |
