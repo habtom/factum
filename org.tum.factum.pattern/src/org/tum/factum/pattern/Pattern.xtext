@@ -203,17 +203,42 @@ AgFormula:
 	agBinaryFormulas=AgBinaryFormulas | 
 	agQuantifiedFormulas=AgQuantifiedFormulas
 ;
-
 // End AG
 
+// Begin Behavior Trace Assertions(CTA) 
+BtaTerms:
+	prtRef=PortRef | DataTypeVariable	
+;
+BtaTermOperatorFunction:
+	btaTrmOperator=[Operation|QualifiedName] "(" (btaTrmOperands+=BtaTerm ("," btaTrmOperands+=BtaTerm)*) ")"
+;
+BtaTerm:
+	btaTerms=[BtaTerms|ID] | btaTrmOperatorFunction=BtaTermOperatorFunction
+;
+BtaPredicate:
+	(btaTerm1=BtaTerm EqualityElementOperator btaTerm2=BtaTerm) 
+;
+BtUrinaryFormulas:
+	UnaryOperator  btaFormulaLtl=BtaFormula
+;
+BtaBinaryFormulas:
+	'('(btaFormulaLgk+=BtaFormula (BinaryOperator btaFormulaLgk+=BtaFormula)*) ')' //try with brackets for better non LL
+;
+BtaQuantifiedFormulas:
+	QuantifierOperator btaQuantifiedFs=BtaFormula 
+;
+BtaFormula:
+	BtaPredicate | BtUrinaryFormulas | BtaBinaryFormulas |  BtaQuantifiedFormulas
+;
+//End BTA
 
 //Begin Operator rules for CTA, BTA, and AG ....
 UnaryOperator: 
 	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
-	neg='¬'
+	neg='¬' // Negation logic operator 
 ;
 BinaryOperator: 
-	'⇒' | '∧' | '∨' | '⇔' | 'W' | 'U' //operates F and F, F is a formula
+	'⇒' | '∧' | '∨' | '⇔' | 'W' | 'U' //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
 ;
 EqualityElementOperator: //Maybe not needed (check?)
 	'='
