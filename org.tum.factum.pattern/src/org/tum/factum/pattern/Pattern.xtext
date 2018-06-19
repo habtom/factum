@@ -17,10 +17,10 @@ Pattern returns Pattern:
 	    	
 	    	'}'
 	    )?
+	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
-
 DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
@@ -34,7 +34,6 @@ ComponentType returns ComponentType:
 	    ('bAssertions' '{' 
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
 	    	
-	    	(bAssertions= BA | btaFunction=BehaviorTraceAssertion?) '}'
 	    )?
 	
 	'}'
@@ -58,7 +57,7 @@ OutputPort returns OutputPort:
 ;
 InputPort returns InputPort:
 	{InputPort}	
-	'InputPort' name=EString '('
+	'InputPort' name=ID '('
 		('Type' ':' inputPrtSrtTyp=[Sort|QualifiedName])
 	    ('connects' connects+=[OutputPort|QualifiedName]*)?
 	')'
@@ -84,11 +83,17 @@ Sort:
 
 
 
-
-Portref:
-	cmp2=[ComponentVariable|ID] '.' p2=[InputPort|ID]	
-   //cmp=[Component|ID] '.' (prt1=[InputPort|ID] | prt2=[OutputPort])
+// Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
+CtaPortRef:
+	InputPort | OutputPort
 ;
+CtaRefComponentVariable:
+	cmpRef=[ComponentVariable|ID] '.' ctaPortRef=[CtaPortRef|ID]
+;
+
+
+// End CTA
+
 
 btaExpression:
 	BehaviorTraceAssertion
