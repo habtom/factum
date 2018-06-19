@@ -102,27 +102,15 @@ TermOperatorFunction:
 //End
 
 // Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
-CtaPortRef:
-	InputPort | OutputPort
-;
-CtaRefComponentVariable:
-	cmpRef=[ComponentVariable|ID] '.' ctaPortRef=[CtaPortRef|ID]
-;
+
 CtaRefComponentVariableInputPort:
 	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
 ;
 CtaRefComponentVariableOutputPort:
 	outptPrtCmpRef=[ComponentVariable|ID] '.' outputPrtrf=[OutputPort|ID]
 ;
-CtaTerms:
-	DataTypeVariable 
-;
-CtaTermOperatorFunction:
-	ctaTrmOperator=[Operation|QualifiedName] "(" (ctaTrmOperands+=CtaTerm ("," ctaTrmOperands+=CtaTerm)*) ")" 
-;
-CtaTerm:
-	ctaTrms=[CtaTerms|ID] | CtaRefComponentVariable | ctaTrmOperatorFunction=CtaTermOperatorFunction
-;
+
+
 
 // End CTA
 
@@ -131,7 +119,7 @@ btaExpression:
 	BehaviorTraceAssertion
 ; 
 BehaviorTraceAssertion returns btaExpression:
-	LtlOp '(' asertion=btaFunction ')'
+	UnaryOperator '(' asertion=btaFunction ')'
 ;
 btaFunction returns btaExpression:
 	btaExpression |
@@ -144,7 +132,7 @@ acExpression:
 	ArchitectureConstraint
 ;
 ArchitectureConstraint	returns acExpression:
-	LtlOp '(' asertion=archConstFunction ')'
+	UnaryOperator '(' asertion=archConstFunction ')'
 ;
 archConstFunction:
 	acExpression |
@@ -153,8 +141,9 @@ archConstFunction:
 AC:
 	InputPort=[InputPort|QualifiedName] '=' OutputPort=[OutputPort|QualifiedName]
 ;
-LtlOp:
-	('G' | 'X' | 'F')
+UnaryOperator: 
+	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
+	neg='¬'
 ;
 QualifiedName:
     ID ('.' ID)*
