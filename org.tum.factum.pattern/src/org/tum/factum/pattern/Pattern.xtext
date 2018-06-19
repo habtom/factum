@@ -28,19 +28,6 @@ Pattern returns Pattern:
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
 ;
-
-//Begin
-CtaFormulasID:
-	name=ID ':' ctaFormula=CtaFormula
-;
-AgFormulasID:
-	name=ID ':' agFormula=AgFormula
-;
-DTVariables:
-	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
-;
-//End
-
 ComponentType returns ComponentType:
 	{ComponentType} 
 	'CType'	name=ID ('ShortName' ctsname=ID)? 
@@ -51,18 +38,9 @@ ComponentType returns ComponentType:
 	    ('BTA' '{' //Behavior Trace Assertions (BTA)
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
 	    	
+			(btaFormulaIds+=BtaFormulasID)*
 	    )?
-	
 	'}'
-;
-VariableStatus: 
-	'rig' | 'flex'
-;
-ComponentVariable:
-	VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
-;
-DataTypeVariable: 
-	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
 ;
 OutputPort returns OutputPort:
 	{OutputPort} 
@@ -96,8 +74,19 @@ Operation:
 Sort:
 	name=ID
 ;
-
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
+VariableStatus: 
+	'rig' | 'flex'
+;
+ComponentVariable:
+	VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
+;
+DataTypeVariable: 
+	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
+;
+DTVariables:
+	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
+;
 PortRef:
 	InputPort | OutputPort
 ;
@@ -158,6 +147,9 @@ CtaFormula:
 	ctaBinaryFormulas=CtaBinaryFormulas |  
 	ctaQuantifiedFormulas=CtaQuantifiedFormulas
 ;
+CtaFormulasID:
+	name=ID ':' ctaFormula=CtaFormula
+;
 // End CTA
 
 // Begin Architectural Guarantee
@@ -203,9 +195,12 @@ AgFormula:
 	agBinaryFormulas=AgBinaryFormulas | 
 	agQuantifiedFormulas=AgQuantifiedFormulas
 ;
+AgFormulasID:
+	name=ID ':' agFormula=AgFormula
+;
 // End AG
 
-// Begin Behavior Trace Assertions(CTA) 
+// Begin Behavior Trace Assertions(BTA) 
 BtaTerms:
 	prtRef=PortRef | DataTypeVariable	
 ;
@@ -228,7 +223,13 @@ BtaQuantifiedFormulas:
 	QuantifierOperator btaQuantifiedFs=BtaFormula 
 ;
 BtaFormula:
-	BtaPredicate | BtUrinaryFormulas | BtaBinaryFormulas |  BtaQuantifiedFormulas
+	BtaPredicate | 
+	BtUrinaryFormulas | 
+	BtaBinaryFormulas |  
+	BtaQuantifiedFormulas
+;
+BtaFormulasID:
+	name=ID ':' btaFormula=BtaFormula
 ;
 //End BTA
 
