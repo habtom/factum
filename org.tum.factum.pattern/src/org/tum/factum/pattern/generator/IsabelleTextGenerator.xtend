@@ -1,11 +1,11 @@
 package org.tum.factum.pattern.generator
 
+import org.tum.factum.pattern.pattern.CtaPredicateCAct
+import org.tum.factum.pattern.pattern.CtaPredicateConn
+import org.tum.factum.pattern.pattern.CtaPredicatePAct
+import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
-import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
-import org.tum.factum.pattern.pattern.CtaPredicateCAct
-import org.tum.factum.pattern.pattern.CtaPredicatePAct
-import org.tum.factum.pattern.pattern.CtaPredicateConn
 
 class IsabelleTextGenerator {
 	
@@ -36,6 +36,7 @@ class IsabelleTextGenerator {
 	«FOR qf : root.ctaFormulaIds.map[ctaFormula.ctaQuantifiedFormulas]»«IF qf instanceof CtaQuantifiedFormulas»«generateFormula(qf)»«ENDIF»«ENDFOR»
 	«FOR cact : root.ctaFormulaIds.map[ctaFormula.ctaPredicateCAct]»«IF cact instanceof CtaPredicateCAct»«generateFormula(cact)»«ENDIF»«ENDFOR»
 	«FOR cact : root.ctaFormulaIds.map[ctaFormula.ctaPredicatePAct]»«IF cact instanceof CtaPredicatePAct»«generateFormula(cact)»«ENDIF»«ENDFOR»
+	«FOR conn : root.ctaFormulaIds.map[ctaFormula.ctaPredicateConn]»«IF conn instanceof CtaPredicateConn»«generateFormula(conn)»«ENDIF»«ENDFOR»
 	
 	«ENDFOR»
 	
@@ -55,7 +56,18 @@ class IsabelleTextGenerator {
 		'''(\«IF ctapc.CAct == 'cAct'»(ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicatePAct ctapp)
 		'''(\«IF ctapp.PAct== 'pAct'»(ca (\<lambda>c. «ctapp.PActCtaCmpVaref.cmpRef.cmptypAssigned.ctsname»active «ctapp.PActCtaCmpVaref.cmpRef.name» c)«ENDIF»'''
-	
+	def dispatch static generateFormula(CtaPredicateConn ctaconn){
+		val connCmpTypShortName1 = ctaconn.ctaConnCmpVarInptPort.inptPrtCmpRef.cmptypAssigned.ctsname
+		val connCmpTypShortName2 = ctaconn.ctaConnCmpVarOutputPort.outptPrtCmpRef.cmptypAssigned.ctsname
+		
+		val connCmpVarInputPort = ctaconn.ctaConnCmpVarInptPort.inputPrtrf.name
+		val connCmpVarOutputPort = ctaconn.ctaConnCmpVarOutputPort.outputPrtrf.name
+		
+		val connCmpVar1 = ctaconn.ctaConnCmpVarInptPort.inptPrtCmpRef.name
+		val connCmpVar2 = ctaconn.ctaConnCmpVarOutputPort.outptPrtCmpRef.name
+		
+	'''(\«IF ctaconn.ctaConn == 'conn'»(ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \in «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
+	}
 }
 
 

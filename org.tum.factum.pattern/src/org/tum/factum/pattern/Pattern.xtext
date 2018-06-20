@@ -13,10 +13,8 @@ Pattern returns Pattern:
 	    ('ArchSpec' '{' 
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
 	    	ctaDtVars=DTVariables 														//Declaration of DT Variables
-	    	
-	    	tm=TermOperatorFunction?													
-	    	
-	    	
+
+	    	//tm=TermOperatorFunction?													
 			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
 	    )?
@@ -27,8 +25,6 @@ Pattern returns Pattern:
 			
 			(agFormulas+=AgFormulasID)*
 	    '}')?
-	    
-	    
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
@@ -50,14 +46,14 @@ ComponentType returns ComponentType:
 OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=EString '(' 
-		('Type' ':' outputPrtSrtTyp=[Sort|QualifiedName]) 
+		('Type' ':' outputPrtSrtTyp=[Sort|QualifiedName])? 
 		('connects' connects+=[InputPort|QualifiedName]*)?
 	')'
 ;
 InputPort returns InputPort:
 	{InputPort}	
 	'InputPort' name=ID '('
-		('Type' ':' inputPrtSrtTyp=[Sort|QualifiedName])
+		('Type' ':' inputPrtSrtTyp=[Sort|QualifiedName])?
 	    ('connects' connects+=[OutputPort|QualifiedName]*)?
 	')'
 ;
@@ -128,10 +124,12 @@ CtaPredicateEq:
 	ctaEq='eq' ('(' ctaComponentVariable+=[ComponentVariable|ID] ',' ctaComponentVariable+=[ComponentVariable|ID] ')')
 ;
 CtaPredicateVal:
-	ctaVal='val' ('(' valCtaCmpVaref=CmpVariableRef ',' ctaValTerms=Term ')') 
+	ctaVal='val' ('(' valCmpVariableRef=CmpVariableRef ',' ctaValTerms=Term ')') 
 ;
-CtaPredicate:
-	cAct='cAct' ('('cActCmpVar=[ComponentVariable|ID] ')') |
+CtaPredicateCAct:
+	cAct='cAct' ('('cActCmpVar=[ComponentVariable|ID] ')')
+;
+CtaPredicatePAct:
 	pAct='pAct' ('(' pActCtaCmpVaref=CmpVariableRef ')') 
 ;
 CtaUnaryFormulas:
@@ -148,7 +146,8 @@ CtaFormula:
 	ctaPredicateConn=CtaPredicateConn | 
 	ctaPredicateVal=CtaPredicateVal | 
 	ctaPredicateEq=CtaPredicateEq | 
-	ctaPredicate=CtaPredicate | 
+	ctaPredicateCAct=CtaPredicateCAct | 
+	ctaPredicatePAct=CtaPredicatePAct |
 	
 	ctaUnaryFormulas=CtaUnaryFormulas | 
 	ctaBinaryFormulas=CtaBinaryFormulas |  

@@ -63,7 +63,7 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 	private def getScopeRefComponentVariableOutputPort(RefComponentVariableOutputPort cmpvrout) {
 		val cmpvarefoutput = cmpvrout.outptPrtCmpRef.cmptypAssigned.outputPorts
 		
-		return Scopes.scopeFor(cmpvarefoutput)     
+		return Scopes.scopeFor(cmpvarefoutput)
 	}
 	
 //	//Scope for Term Operands
