@@ -1,10 +1,13 @@
 package org.tum.factum.pattern.generator
 
+import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
+import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
+import org.tum.factum.pattern.pattern.CtaPredicate
 
 class IsabelleTextGenerator {
 	
-	def static toText(Pattern root) '''
+	def static toIsabelle(Pattern root) '''
 	theory  «root.name»«"\n"»
 	imports Auxiliary«"\n"»
 	begin«"\n"»
@@ -24,12 +27,27 @@ class IsabelleTextGenerator {
 	«ENDFOR»
 	«ENDFOR»
 	
+««« assumption begins (if not null)
+	«"\t"»assumes «FOR cta : root.ctaFormulaIds»
+	«cta.name»:  “\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> 
+	«FOR uf : root.ctaFormulaIds.map[ctaFormula.ctaUnaryFormulas]»«IF uf instanceof CtaUnaryFormulas»«generateFormula(uf)»«ENDIF»«ENDFOR»
+	«FOR qf : root.ctaFormulaIds.map[ctaFormula.ctaQuantifiedFormulas]»«IF qf instanceof CtaQuantifiedFormulas»«generateFormula(qf)»«ENDIF»«ENDFOR»
+	
+	«ENDFOR»
+	
+	
 	begin «"\n"»
 	
 	...«"\n"»
 	
 	end
 	'''
+	
+	def dispatch static generateFormula(CtaUnaryFormulas ctau)
+		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box> «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond> «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle> «ENDIF»\<^sub>c'''
+	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq)
+		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sup>c «ctaq.quantifierOperator.quantifiedExistsDtVar.name».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<all>\<^sup>c «ctaq.quantifierOperator.quantifiedAllDtVar.name».«ENDIF»'''
+	
 }
 
 
