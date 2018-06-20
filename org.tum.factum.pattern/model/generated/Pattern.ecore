@@ -12,6 +12,8 @@
         eType="#//ComponentVariable" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ctaDtVars" eType="#//DTVariables"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tm" eType="#//TermOperatorFunction"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ctaFormulaIds" upperBound="-1"
         eType="#//CtaFormulasID" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="agCmpVar" upperBound="-1"

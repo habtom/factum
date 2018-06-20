@@ -14,6 +14,9 @@ Pattern returns Pattern:
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
 	    	ctaDtVars=DTVariables 														//Declaration of DT Variables
 	    	
+	    	tm=TermOperatorFunction?													
+	    	
+	    	
 			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
 	    )?
@@ -24,6 +27,8 @@ Pattern returns Pattern:
 			
 			(agFormulas+=AgFormulasID)*
 	    '}')?
+	    
+	    
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'

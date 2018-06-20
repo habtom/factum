@@ -8,9 +8,11 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.scoping.Scopes
 import org.tum.factum.pattern.pattern.CmpVariableRef
+import org.tum.factum.pattern.pattern.Pattern
 import org.tum.factum.pattern.pattern.PatternPackage
 import org.tum.factum.pattern.pattern.RefComponentVariableInputPort
 import org.tum.factum.pattern.pattern.RefComponentVariableOutputPort
+import org.tum.factum.pattern.pattern.TermOperatorFunction
 
 //import org.tum.factum.pattern.pattern.OutputPort
 
@@ -35,7 +37,12 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		if (context instanceof RefComponentVariableOutputPort && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_OUTPUT_PORT__OUTPUT_PRTRF){
 			return getScopeRefComponentVariableOutputPort(context as RefComponentVariableOutputPort)
 		}
-			
+		
+		//Scope for Term Operands
+		if (context instanceof TermOperatorFunction && reference == PatternPackage.Literals.TERM_OPERATOR_FUNCTION__TRM_OPERANDS){
+			return getScopeTermOperands(context as TermOperatorFunction)		
+		}
+	
 		return super.getScope(context, reference);
 	}
 	
@@ -57,6 +64,23 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		val cmpvarefoutput = cmpvrout.outptPrtCmpRef.cmptypAssigned.outputPorts
 		
 		return Scopes.scopeFor(cmpvarefoutput)     
+	}
+	
+	//Scope for Term Operands
+	private def getScopeTermOperands(TermOperatorFunction termf) {
+		
+		println("-------------")
+		val dtListInput = termf.trmOperator.dtInput.map[it.name]
+		println(dtListInput)
+		
+		//val ptModel = EcoreUtil2.getRootContainer(termf)
+		//val dtVars = EcoreUtil2.eAllOfType(ptModel, DataTypeVariable).filter[e|dtListInput.filter[it == e.varSortType.name].size()>0]
+		
+		val scopeDtvar = (termf.eContainer as Pattern).ctaDtVars.dtVars.filter[e|dtListInput.filter[it == e.varSortType.name].size()>0]
+		
+		println(scopeDtvar)
+		
+	    return Scopes.scopeFor(scopeDtvar)
 	}
 	
 }
