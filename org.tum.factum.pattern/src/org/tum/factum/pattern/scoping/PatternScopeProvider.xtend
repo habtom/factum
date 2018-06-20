@@ -38,10 +38,10 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 			return getScopeRefComponentVariableOutputPort(context as RefComponentVariableOutputPort)
 		}
 		
-		//Scope for Term Operands
-		if (context instanceof TermOperatorFunction && reference == PatternPackage.Literals.TERM_OPERATOR_FUNCTION__TRM_OPERANDS){
-			return getScopeTermOperands(context as TermOperatorFunction)		
-		}
+//		//Scope for Term Operands
+//		if (context instanceof TermOperatorFunction && reference == PatternPackage.Literals.TERM_OPERATOR_FUNCTION__TRM_OPERANDS){
+//			return getScopeTermOperands(context as TermOperatorFunction)		
+//		}
 	
 		return super.getScope(context, reference);
 	}
@@ -66,22 +66,20 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		return Scopes.scopeFor(cmpvarefoutput)     
 	}
 	
-	//Scope for Term Operands
-	private def getScopeTermOperands(TermOperatorFunction termf) {
-		
-		println("-------------")
-		val dtListInput = termf.trmOperator.dtInput.map[it.name]
-		println(dtListInput)
-		
-		//val ptModel = EcoreUtil2.getRootContainer(termf)
-		//val dtVars = EcoreUtil2.eAllOfType(ptModel, DataTypeVariable).filter[e|dtListInput.filter[it == e.varSortType.name].size()>0]
-		
-		val scopeDtvar = (termf.eContainer as Pattern).ctaDtVars.dtVars.filter[e|dtListInput.filter[it == e.varSortType.name].size()>0]
-		
-		println(scopeDtvar)
-		
-	    return Scopes.scopeFor(scopeDtvar)
-	}
+//	//Scope for Term Operands
+//	private def getScopeTermOperands(TermOperatorFunction termf) {
+//		
+//		println("-------------")
+//		val dtListInput = termf.trmOperator.dtInput.map[it.name]
+//		
+//		//val ptModel = EcoreUtil2.getRootContainer(termf)
+//		//val dtVars = EcoreUtil2.eAllOfType(ptModel, DataTypeVariable).filter[e|dtListInput.filter[it == e.varSortType.name].size()>0]
+//		
+//		val scopeDtvar = (termf.eContainer as Pattern).ctaDtVars.dtVars.filter[e|dtListInput.filter[it == e.varSortType.name].size()>0]
+//		
+//		println(scopeDtvar)
+//	    return Scopes.scopeFor(scopeDtvar)
+//	}
 	
 }
 
