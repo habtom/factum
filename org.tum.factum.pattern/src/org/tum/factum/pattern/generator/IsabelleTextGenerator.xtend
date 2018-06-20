@@ -6,6 +6,7 @@ import org.tum.factum.pattern.pattern.CtaPredicatePAct
 import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
+import org.tum.factum.pattern.pattern.CtaPredicateVal
 
 class IsabelleTextGenerator {
 	
@@ -37,6 +38,7 @@ class IsabelleTextGenerator {
 	«FOR cact : root.ctaFormulaIds.map[ctaFormula.ctaPredicateCAct]»«IF cact instanceof CtaPredicateCAct»«generateFormula(cact)»«ENDIF»«ENDFOR»
 	«FOR cact : root.ctaFormulaIds.map[ctaFormula.ctaPredicatePAct]»«IF cact instanceof CtaPredicatePAct»«generateFormula(cact)»«ENDIF»«ENDFOR»
 	«FOR conn : root.ctaFormulaIds.map[ctaFormula.ctaPredicateConn]»«IF conn instanceof CtaPredicateConn»«generateFormula(conn)»«ENDIF»«ENDFOR»
+	«FOR pval : root.ctaFormulaIds.map[ctaFormula.ctaPredicateVal]»«IF pval instanceof CtaPredicateVal»«generateFormula(pval)»«ENDIF»«ENDFOR»
 	
 	«ENDFOR»
 	
@@ -68,6 +70,19 @@ class IsabelleTextGenerator {
 		
 	'''(\«IF ctaconn.ctaConn == 'conn'»(ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \in «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
 	}
+	
+	def dispatch static generateFormula(CtaPredicateVal ctapval) {
+		//val valCmpVarInputPort = ctape.valCtaCmpVaref.prtrf.inputPort.name //or change this to generic 'prtrf' and let it be spefied by the user
+		val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.name 
+		
+		val valCmpTypShortName = ctapval.valCmpVariableRef.cmpRef.cmptypAssigned.ctsname
+		val valCmpVar = ctapval.valCmpVariableRef.cmpRef.name
+		val valOps = ctapval.ctaValTerms.termOperatorFunction.trmOperator.name
+		val valOpsInput = ctapval.ctaValTerms.termOperatorFunction.trmOperands
+		
+		'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. «valOps» «valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
+		}
+	
 }
 
 
