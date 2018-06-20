@@ -3,14 +3,14 @@
  */
 package org.tum.factum.pattern.scoping
 
-import org.tum.factum.pattern.pattern.CmpVariableRef
 import com.google.common.collect.Iterables
-import org.eclipse.xtext.scoping.Scopes
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.scoping.Scopes
+import org.tum.factum.pattern.pattern.CmpVariableRef
 import org.tum.factum.pattern.pattern.PatternPackage
-import org.tum.factum.pattern.pattern.CtaRefComponentVariableInputPort
-import org.tum.factum.pattern.pattern.CtaRefComponentVariableOutputPort
+import org.tum.factum.pattern.pattern.RefComponentVariableInputPort
+import org.tum.factum.pattern.pattern.RefComponentVariableOutputPort
 
 //import org.tum.factum.pattern.pattern.OutputPort
 
@@ -29,12 +29,12 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		}
 		
 		//Scope for separate CMP Variable port reference or constraint (for input and output ports)
-		if (context instanceof CtaRefComponentVariableInputPort && reference == PatternPackage.Literals.CTA_REF_COMPONENT_VARIABLE_INPUT_PORT__INPUT_PRTRF){
-				return getScopeCtaRefComponentVariableInputPort(context as CtaRefComponentVariableInputPort)
-			}
-		if (context instanceof CtaRefComponentVariableOutputPort && reference == PatternPackage.Literals.CTA_REF_COMPONENT_VARIABLE_OUTPUT_PORT__OUTPUT_PRTRF){
-				return getScopeCtaRefComponentVariableOutputPort(context as CtaRefComponentVariableOutputPort)
-			}
+		if (context instanceof RefComponentVariableInputPort && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_INPUT_PORT__INPUT_PRTRF){
+			return getScopeRefComponentVariableInputPort(context as RefComponentVariableInputPort)
+		}
+		if (context instanceof RefComponentVariableOutputPort && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_OUTPUT_PORT__OUTPUT_PRTRF){
+			return getScopeRefComponentVariableOutputPort(context as RefComponentVariableOutputPort)
+		}
 			
 		return super.getScope(context, reference);
 	}
@@ -48,13 +48,15 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 	}
 	
 	//Scope for separate CMP Variable port reference or constraint (for input and output ports)
-	private def getScopeCtaRefComponentVariableInputPort(CtaRefComponentVariableInputPort cmpvrin) {
-				val cmpvarefinput = cmpvrin.inptPrtCmpRef.cmptypAssigned.inputPorts
-			    return Scopes.scopeFor(cmpvarefinput)     
+	private def getScopeRefComponentVariableInputPort(RefComponentVariableInputPort cmpvrin) {
+		val cmpvarefinput = cmpvrin.inptPrtCmpRef.cmptypAssigned.inputPorts
+		
+		return Scopes.scopeFor(cmpvarefinput)     
 	}
-	private def getScopeCtaRefComponentVariableOutputPort(CtaRefComponentVariableOutputPort cmpvrout) {
-				val cmpvarefoutput = cmpvrout.outptPrtCmpRef.cmptypAssigned.outputPorts
-			    return Scopes.scopeFor(cmpvarefoutput)     
+	private def getScopeRefComponentVariableOutputPort(RefComponentVariableOutputPort cmpvrout) {
+		val cmpvarefoutput = cmpvrout.outptPrtCmpRef.cmptypAssigned.outputPorts
+		
+		return Scopes.scopeFor(cmpvarefoutput)     
 	}
 	
 }
