@@ -1,5 +1,5 @@
 # Factum
 Architectural Design Constraints Specification and Verification
 
-## Factum
+# Factum Tool
 
