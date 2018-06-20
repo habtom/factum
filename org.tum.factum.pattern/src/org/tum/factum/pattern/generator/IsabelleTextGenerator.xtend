@@ -7,6 +7,7 @@ import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
 import org.tum.factum.pattern.pattern.CtaPredicateVal
+import org.tum.factum.pattern.pattern.CtaPredicateEq
 
 class IsabelleTextGenerator {
 	
@@ -82,6 +83,9 @@ class IsabelleTextGenerator {
 		
 		'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. «valOps» «valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
 		}
+	def dispatch static generateFormula(CtaPredicateEq ctapeq){
+		'''	(\«IF ctapeq.ctaEq == 'Eq'» (ca (\<lambda>c.  «ctapeq.ctaComponentVariable1» = «ctapeq.ctaComponentVariable2» ) «ENDIF»\<^sub>c'''
+	}
 	
 }
 
