@@ -210,7 +210,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="agVal" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="valAgRefComponentVariable"
         eType="#//CmpVariableRef" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agValTerms" eType="#//TermOperatorFunction"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agValTerms" eType="#//Term"
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AgPredicate">

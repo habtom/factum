@@ -97,7 +97,9 @@ Terms:
 	DataTypeVariable 
 ;
 Term: 
-	terms=[Terms|ID] | CmpVariableRef | termOperatorFunction=TermOperatorFunction
+	terms=[Terms|ID] | 
+	CmpVariableRef | 
+	termOperatorFunction=TermOperatorFunction
 ;
 TermOperatorFunction:
 	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*) ")" 
@@ -169,7 +171,7 @@ AgPredicateConn:
 	agConn='conn' ('(' agConnCmpVarOutputPort=AgRefComponentVariableOutputPort ','	agConnCmpVarInptPort=AgRefComponentVariableInputPort ')')
 ;
 AgPredicateVal:
-	agVal='val' ('(' valAgRefComponentVariable=CmpVariableRef ',' agValTerms=TermOperatorFunction ')') //the terms have to be the same type of the component port
+	agVal='val' ('(' valAgRefComponentVariable=CmpVariableRef ',' agValTerms=Term ')') //the terms have to be the same type of the component port
 ;
 AgPredicate:
 	agcAct='cAct' ('('agcActCmpVar=[ComponentVariable|ID] ')') |

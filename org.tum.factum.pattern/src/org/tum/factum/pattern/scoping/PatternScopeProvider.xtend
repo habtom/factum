@@ -9,6 +9,8 @@ import org.eclipse.xtext.scoping.Scopes
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.tum.factum.pattern.pattern.PatternPackage
+import org.tum.factum.pattern.pattern.CtaRefComponentVariableInputPort
+import org.tum.factum.pattern.pattern.CtaRefComponentVariableOutputPort
 
 //import org.tum.factum.pattern.pattern.OutputPort
 
@@ -20,10 +22,19 @@ import org.tum.factum.pattern.pattern.PatternPackage
  */
 class PatternScopeProvider extends AbstractPatternScopeProvider {
 	override getScope(EObject context, EReference  reference){
+		
 		//Scope for Component Variable reference or constraint (for input and output ports)
 		if (context instanceof CmpVariableRef && reference == PatternPackage.Literals.CMP_VARIABLE_REF__PORT_REF){
 			return getScopeCtaCmpVarPorts(context as CmpVariableRef)
 		}
+		
+		//Scope for separate CMP Variable port reference or constraint (for input and output ports)
+		if (context instanceof CtaRefComponentVariableInputPort && reference == PatternPackage.Literals.CTA_REF_COMPONENT_VARIABLE_INPUT_PORT__INPUT_PRTRF){
+				return getScopeCtaRefComponentVariableInputPort(context as CtaRefComponentVariableInputPort)
+			}
+		if (context instanceof CtaRefComponentVariableOutputPort && reference == PatternPackage.Literals.CTA_REF_COMPONENT_VARIABLE_OUTPUT_PORT__OUTPUT_PRTRF){
+				return getScopeCtaRefComponentVariableOutputPort(context as CtaRefComponentVariableOutputPort)
+			}
 			
 		return super.getScope(context, reference);
 	}
@@ -34,6 +45,16 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		val cmpvarefout = cmpvar.cmpRef.cmptypAssigned.outputPorts
 		
 		return Scopes.scopeFor(Iterables.concat(cmpvarefin, cmpvarefout))     
+	}
+	
+	//Scope for separate CMP Variable port reference or constraint (for input and output ports)
+	private def getScopeCtaRefComponentVariableInputPort(CtaRefComponentVariableInputPort cmpvrin) {
+				val cmpvarefinput = cmpvrin.inptPrtCmpRef.cmptypAssigned.inputPorts
+			    return Scopes.scopeFor(cmpvarefinput)     
+	}
+	private def getScopeCtaRefComponentVariableOutputPort(CtaRefComponentVariableOutputPort cmpvrout) {
+				val cmpvarefoutput = cmpvrout.outptPrtCmpRef.cmptypAssigned.outputPorts
+			    return Scopes.scopeFor(cmpvarefoutput)     
 	}
 	
 }
