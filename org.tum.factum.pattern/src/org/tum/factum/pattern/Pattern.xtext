@@ -35,6 +35,7 @@ ComponentType returns ComponentType:
 	'{'
 	    ('InputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
 	    ('OutputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
+	    ('Parameters' '{' parameters+=Parameter ( "," parameters+=Parameter)* '}' )?
 	    
 	    ('BTA' '{' //Behavior Trace Assertions (BTA)
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
@@ -42,6 +43,12 @@ ComponentType returns ComponentType:
 			(btaFormulaIds+=BtaFormulasID)*
 	    )?
 	'}'
+;
+Parameter returns Parameter:
+	{Parameter}
+	'Parameter' name=ID '(' 
+		('Type' ':' paramSrtTyp=[Sort|QualifiedName])? 
+	')'
 ;
 OutputPort returns OutputPort:
 	{OutputPort} 
@@ -60,7 +67,8 @@ InputPort returns InputPort:
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
 	'DT' name =ID	'('
-		'Sort' (dtSorts+=Sort ("," dtSorts+=Sort)*)?
+		('Param' (dtParam+=Sort ("," dtParam+=Sort)*))?
+		('Sort' (dtSorts+=Sort ("," dtSorts+=Sort)*))?
 		('Operation' (dtOps+=Operation ("," dtOps+=Operation)*))?
 		('Predicate' (dtPredicate+=DTPredicate ("," dtPredicate+=DTPredicate)*))?
 		(sortName=[Sort|ID] 'generatedBy' (returnOps+=[Operation|ID] ("," returnOps+=[Operation|ID])*))?		
@@ -69,6 +77,14 @@ DataTypeSpec returns DataTypeSpec:
 DTPredicate:
 	name=ID ':' (pInput+=[Sort|QualifiedName] ("," pInput+=[Sort|QualifiedName])*)?
 ;
+//DTInput:
+//	Sort | Param
+//;
+//
+//Param:
+//	name=ID
+//;
+
 Operation:
 	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' (dtOutput=[Sort|QualifiedName])?
 ;
@@ -94,16 +110,20 @@ PortRef:
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
 ;
-Terms:
-	DataTypeVariable 
-;
-Term: 
-	terms=[Terms|ID] | 
-	CmpVariableRef | 
+//Terms:
+//	termsDtVar=DataTypeVariable  | DataTypeVariable
+//;
+Term:
+	//RefComponentVariableParameter | 
+	terms=[DataTypeVariable|ID] | 
+	cmpVariableRef=CmpVariableRef | 
 	termOperatorFunction=TermOperatorFunction
 ;
 TermOperatorFunction:
 	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*) ")" 
+;
+RefComponentVariableParameter:
+	parameterCmpRef=[ComponentVariable|ID] '.' parameterPrtrf=[Parameter|ID]
 ;
 RefComponentVariableInputPort:
 	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
@@ -121,7 +141,7 @@ CtaPredicateConn:
 	ctaConn='conn' ('(' ctaConnCmpVarOutputPort=RefComponentVariableOutputPort ','	ctaConnCmpVarInptPort=RefComponentVariableInputPort ')')
 ;
 CtaPredicateEq: 
-	ctaEq='eq' ('(' ctaComponentVariable+=[ComponentVariable|ID] ',' ctaComponentVariable+=[ComponentVariable|ID] ')')
+	ctaEq='eq' ('(' ctaComponentVariable1=[ComponentVariable|ID] ',' ctaComponentVariable2=[ComponentVariable|ID] ')')
 ;
 CtaPredicateVal:
 	ctaVal='val' ('(' valCmpVariableRef=CmpVariableRef ',' ctaValTerms=Term ')') 
@@ -136,7 +156,7 @@ CtaUnaryFormulas:
 	unaryOperator=UnaryOperator  ctaFormulaLtl=CtaFormula
 ;
 CtaBinaryFormulas:
-	'('(ctaFormulaLgk+=CtaFormula (BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')'
+	'('(ctaFormulaLgk+=CtaFormula (binaryOperator+=BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')'
 ;
 CtaQuantifiedFormulas:
 	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
@@ -163,7 +183,7 @@ AgPredicateTerms:
 	agPTerm1=Term equalityOperator=EqualityElementOperator agPTerm2=Term
 ;
 AgPredicateEq: 
-	agEq='eq' ('(' agComponentVariable+=[ComponentVariable|ID] ',' agComponentVariable+=[ComponentVariable|ID] ')')
+	agEq='eq' ('(' agComponentVariable1=[ComponentVariable|ID] ',' agComponentVariable2=[ComponentVariable|ID] ')')
 ;
 AgPredicateConn: 
 	agConn='conn' ('(' agConnCmpVarOutputPort=RefComponentVariableOutputPort ','	agConnCmpVarInptPort=RefComponentVariableInputPort ')')
@@ -179,7 +199,7 @@ AgUnaryFormulas:
 	unaryOperator=UnaryOperator  agFormulaLtl=AgFormula
 ;
 AgBinaryFormulas:
-	'('(agFormulaLgk+=AgFormula (BinaryOperator agFormulaLgk+=AgFormula)*) ')'
+	'('(agFormulaLgk+=AgFormula (binaryOperator+=BinaryOperator agFormulaLgk+=AgFormula)*) ')'
 ;
 AgQuantifiedFormulas:
 	agQuantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula 
@@ -217,7 +237,7 @@ BtUrinaryFormulas:
 	UnaryOperator  btaFormulaLtl=BtaFormula
 ;
 BtaBinaryFormulas:
-	'('(btaFormulaLgk+=BtaFormula (BinaryOperator btaFormulaLgk+=BtaFormula)*) ')' //try with brackets for better non LL
+	'('(btaFormulaLgk+=BtaFormula (binaryOperator+=BinaryOperator btaFormulaLgk+=BtaFormula)*) ')' //try with brackets for better non LL
 ;
 BtaQuantifiedFormulas:
 	QuantifierOperator btaQuantifiedFs=BtaFormula 
@@ -238,17 +258,24 @@ UnaryOperator:
 	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
 	neg='¬' // Negation logic operator 
 ;
-BinaryOperator: 
-	'⇒' | '∧' | '∨' | '⇔' | 'W' | 'U' //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
+BinaryOperator: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
+	lImplies='⇒' | 
+	lAnd='∧' | 
+	lDisjunct='∨' | 
+	lDoubleImplies='⇔' | 
+	lWeakUntil='W' | 
+	lUntil='U' 
 ;
 EqualityElementOperator: //Maybe not needed (check?)
 	'='
 ;
 QuantifiedVariables:
 	DataTypeVariable | ComponentVariable
+	//dtvq=DataTypeVariable | cvq=ComponentVariable
+	
 ;
 QuantifierOperator:
-	exists='∃'(quantifiedExistsDtVar=[DataTypeVariable|ID]'.') | all='∀'(quantifiedAllDtVar=[QuantifiedVariables|ID]'.')
+	exists='∃'(quantifiedExistsVar=[DataTypeVariable|ID]'.') | all='∀'(quantifiedAllVar=[QuantifiedVariables|ID]'.')
 ;
 //End
 QualifiedName:
