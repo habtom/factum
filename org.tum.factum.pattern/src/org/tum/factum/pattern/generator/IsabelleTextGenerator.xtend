@@ -97,7 +97,6 @@ class IsabelleTextGenerator {
 		//val valCmpVarInputPort = ctape.valCtaCmpVaref.prtrf.inputPort.name //or change this to generic 'prtrf' and let it be spefied by the user
 		
 		val valCmpTypShortName = ctapval.valCmpVariableRef.cmpRef.cmptypAssigned.ctsname
-		
 		val valOps = ctapval.ctaValTerms.termOperatorFunction.trmOperator.name
 		
 		val valCmpVar0 = ctapval.valCmpVariableRef.cmpRef.name
@@ -107,14 +106,9 @@ class IsabelleTextGenerator {
 		val valCmpVar1 = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.name
 		
 		val valOpsDtVar = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name //[null, org.tum.factum.pattern.pattern.impl.DataTypeVariableImpl@16bde57e (name: e)]
-		//println(valOps)
-		//println(valCmpVarInputPort)
 		
 		'''«IF ctapval.ctaVal == 'val'»
-		 ca (\<lambda>c. ( «valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar1» c)) «valOpsDtVar» \<in>  «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))
-«««		 ca (\<lambda>c. ( «valOps» («valCmpTypShortName»id («valCmpTypShortName»cmp <s> c)) «valOpsDtVar» \<in>  «valCmpTypShortName»psb («valCmpTypShortName»cmp p c))))	 
-«ENDIF» \<^sub>c'''
-		 
+		 ca (\<lambda>c. ( «valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar1» c)) «valOpsDtVar» \<in>  «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF» \<^sub>c'''
 		//'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
 		}
 	def dispatch static generateFormula(CtaPredicateEq ctapeq){
