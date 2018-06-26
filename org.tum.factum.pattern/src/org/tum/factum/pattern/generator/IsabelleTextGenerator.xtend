@@ -7,7 +7,7 @@ import org.tum.factum.pattern.pattern.CtaPredicateConn
 import org.tum.factum.pattern.pattern.CtaPredicateEq
 import org.tum.factum.pattern.pattern.CtaPredicatePAct
 import org.tum.factum.pattern.pattern.CtaPredicateVal
-import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
+//import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
 
@@ -55,16 +55,16 @@ class IsabelleTextGenerator {
 	end
 	'''
 	
-	def static mapFormula(CtaFormula ctaFormula){
+	def static Object mapFormula(CtaFormula cf){
 		return '''
-			«IF ctaFormula.ctaUnaryFormulas !== null»«generateFormula(ctaFormula.ctaUnaryFormulas)»«ENDIF»
-			«IF ctaFormula.ctaQuantifiedFormulas !== null»«generateFormula(ctaFormula.ctaQuantifiedFormulas)»«ENDIF»
-			«IF ctaFormula.ctaPredicateCAct !== null»«generateFormula(ctaFormula.ctaPredicateCAct)»«ENDIF»
-			«IF ctaFormula.ctaPredicatePAct !== null»«generateFormula(ctaFormula.ctaPredicatePAct)»«ENDIF»
-			«IF ctaFormula.ctaPredicateConn !== null»«generateFormula(ctaFormula.ctaPredicateConn)»«ENDIF»
-			«IF ctaFormula.ctaPredicateVal !== null»«generateFormula(ctaFormula.ctaPredicateVal)»«ENDIF»
-			«IF ctaFormula.ctaPredicateEq !== null»«generateFormula(ctaFormula.ctaPredicateEq)»«ENDIF»
-			«IF ctaFormula.ctaBinaryFormulas !== null»«generateFormula(ctaFormula.ctaBinaryFormulas)»«ENDIF»
+			«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
+«««			«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
+			«IF cf.ctaPredicateCAct !== null»«generateFormula(cf.ctaPredicateCAct)»«ENDIF»
+			«IF cf.ctaPredicatePAct !== null»«generateFormula(cf.ctaPredicatePAct)»«ENDIF»
+			«IF cf.ctaPredicateConn !== null»«generateFormula(cf.ctaPredicateConn)»«ENDIF»
+			«IF cf.ctaPredicateVal !== null»«generateFormula(cf.ctaPredicateVal)»«ENDIF»
+			«IF cf.ctaPredicateEq !== null»«generateFormula(cf.ctaPredicateEq)»«ENDIF»
+			«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas)»«ENDIF»
 		'''
 	}
 	
@@ -74,8 +74,8 @@ class IsabelleTextGenerator {
 		\<^sub>c '''
 		
 		
-	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq)
-		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sup>c «ctaq.quantifierOperator.quantifiedExistsVar.name».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<all>\<^sup>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
+//	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq)
+//		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sup>c «ctaq.quantifierOperator.quantifiedExistsVar».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<all>\<^sup>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicateCAct ctapc)
 		'''(\«IF ctapc.CAct == 'cAct'»(ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicatePAct ctapp)
@@ -95,16 +95,27 @@ class IsabelleTextGenerator {
 	
 	def dispatch static generateFormula(CtaPredicateVal ctapval) {
 		//val valCmpVarInputPort = ctape.valCtaCmpVaref.prtrf.inputPort.name //or change this to generic 'prtrf' and let it be spefied by the user
-		val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.name 
 		
 		val valCmpTypShortName = ctapval.valCmpVariableRef.cmpRef.cmptypAssigned.ctsname
-		val valCmpVar = ctapval.valCmpVariableRef.cmpRef.name
+		
 		val valOps = ctapval.ctaValTerms.termOperatorFunction.trmOperator.name
-		val valOpsInput = ctapval.ctaValTerms.termOperatorFunction.trmOperands.map[terms.name].toString.replaceAll("[\\[\\],]]","")
-		//val valOpsInput = ctapval.ctaValTerms.termOperatorFunction.trmOperands.map[terms.termsDtVar.name]
 		
+		val valCmpVar0 = ctapval.valCmpVariableRef.cmpRef.name
+		val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.name
+		val valCmpParm = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name
 		
-		'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. «valOps» «valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
+		val valCmpVar1 = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.name
+		
+		val valOpsDtVar = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name //[null, org.tum.factum.pattern.pattern.impl.DataTypeVariableImpl@16bde57e (name: e)]
+		//println(valOps)
+		//println(valCmpVarInputPort)
+		
+		'''«IF ctapval.ctaVal == 'val'»
+		 ca (\<lambda>c. ( «valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar1» c)) «valOpsDtVar» \<in>  «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))
+«««		 ca (\<lambda>c. ( «valOps» («valCmpTypShortName»id («valCmpTypShortName»cmp <s> c)) «valOpsDtVar» \<in>  «valCmpTypShortName»psb («valCmpTypShortName»cmp p c))))	 
+«ENDIF» \<^sub>c'''
+		 
+		//'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
 		}
 	def dispatch static generateFormula(CtaPredicateEq ctapeq){
 		'''	(\ (ca (\<lambda>c.  «ctapeq.ctaComponentVariable1.name» = «ctapeq.ctaComponentVariable2.name» ) \<^sub>c'''
@@ -128,6 +139,10 @@ class IsabelleTextGenerator {
 		«ENDFOR»
 		'''
 	}
+//	def dispatch static generateFormula(Pattern e) {
+//    	if (e instanceof CtaFormula)
+//        	e.generateFormula
+//	}
 }
 
 
