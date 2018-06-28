@@ -17,20 +17,42 @@ class IsabelleTextGenerator {
 	theory «root.name»«"\n"»
 	imports Auxiliary«"\n"»
 	begin«"\n"»
-«««	DT list // what is the pattern for this?
-	«val sortCID=root.dtSpec.get(1).dtSorts.get(0).name»
-	«val sortSBS=root.dtSpec.get(1).dtSorts.get(1).name»
-	«val sortEVT=root.dtSpec.get(0).dtSorts.get(0).name»
-	«val dtOps0=root.dtSpec.get(1).dtOps.get(0).name»
-	«val dtOps1=root.dtSpec.get(1).dtOps.get(1).name»
-«««	typedecl <SBS> why this sort?
-	typedecl «sortSBS»
-«««	typedecl CID why this sort?
-	typedecl «sortCID»
-	consts «dtOps0»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortSBS»"
-	consts «dtOps1»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortEVT»"
 	
-	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.name»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»act «ENDFOR»+«"\n"»
+	«val sortEVT=root.dtSpec.get(0).dtSorts.get(0).name»
+	«val dtOps0=root.dtSpec.get(0).dtOps.get(0)»
+
+	typedecl «sortEVT»
+	«FOR dtdecl0 : root.dtSpec»
+	«FOR dts : dtdecl0.dtSorts.drop(2)»
+	typedecl «dts.name»
+	«ENDFOR»
+	«ENDFOR»
+	consts «dtOps0.name»::"«FOR dti : dtOps0.dtInput»«dti.name» \<Rightarrow> «ENDFOR»«dtOps0.dtOutput.name»"
+	
+	«FOR dtdecl1 : root.dtSpec.drop(1)»
+	«FOR dts : dtdecl1.dtSorts»
+	typedecl «dts.name»
+	«ENDFOR»
+	«FOR dto : dtdecl1.dtOps»
+	consts «dto.name»::"«FOR dti : dto.dtInput»«dti.name» \<Rightarrow> «ENDFOR»«dto.dtOutput.name»"
+	«ENDFOR»
+	«ENDFOR»
+««««««	DT list 
+«««	«val sortCID=root.dtSpec.get(1).dtSorts.get(0).name»
+«««	«val sortSBS=root.dtSpec.get(1).dtSorts.get(1).name»
+««««««	«val sortEVT=root.dtSpec.get(0).dtSorts.get(0).name»
+«««	«val dtOps0=root.dtSpec.get(1).dtOps.get(0).name»
+«««	«val dtOps1=root.dtSpec.get(1).dtOps.get(1).name»
+««««««	typedecl <SBS> why this sort?
+««««««	typedecl «sortSBS»
+««««««	typedecl CID why this sort?
+«««	typedecl «sortCID»
+«««	consts «dtOps0»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortSBS»"
+«««	consts «dtOps1»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortEVT»"
+	
+	locale «root.psname» = 
+	«FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.name»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»act 
+	«ENDFOR»+«"\n"»
 	
 	«"\t"»for «root.componentTypes.get(0).ctsname»active :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«FOR ctyp : root.componentTypes.drop(1)»
