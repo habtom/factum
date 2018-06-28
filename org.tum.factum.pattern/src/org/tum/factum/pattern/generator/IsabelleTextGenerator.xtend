@@ -10,8 +10,6 @@ import org.tum.factum.pattern.pattern.CtaPredicateVal
 import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
-import org.tum.factum.pattern.pattern.CtaFormulasID
-import org.tum.factum.pattern.pattern.impl.CtaFormulaImpl
 
 class IsabelleTextGenerator {
 
@@ -40,7 +38,8 @@ class IsabelleTextGenerator {
 	«ENDFOR»
 	«ENDFOR»
 	
-	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.ctsname»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»active +«ENDFOR»
+	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.ctsname»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»active«IF root.componentTypes.last() !== ctyp» + «ENDIF»«ENDFOR» «««	«IF root.componentTypes.indexOf(ctyp) !== root.componentTypes.size()-1» + «ENDIF»
+	
 	
 	«"\t"»for «root.componentTypes.get(0).ctsname»active :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«"\t"»and «root.componentTypes.get(0).ctsname»cmp :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> '«root.componentTypes.get(0).ctsname»"
@@ -72,7 +71,7 @@ class IsabelleTextGenerator {
 ««« assumption begins	
 	«FOR cta : root.ctaFormulaIds»
 	«"\t"»«cta.name»: "\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»
-	«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR» and
+	«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR» 
 	«ENDFOR»
 	
 	begin «"\n"»
