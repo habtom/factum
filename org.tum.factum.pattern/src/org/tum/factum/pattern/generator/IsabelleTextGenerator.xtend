@@ -7,48 +7,80 @@ import org.tum.factum.pattern.pattern.CtaPredicateConn
 import org.tum.factum.pattern.pattern.CtaPredicateEq
 import org.tum.factum.pattern.pattern.CtaPredicatePAct
 import org.tum.factum.pattern.pattern.CtaPredicateVal
-//import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
+import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
 
 class IsabelleTextGenerator {
 	
 	def static toIsabelle(Pattern root) '''
-	theory  «root.name»«"\n"»
+	theory «root.name»«"\n"»
 	imports Auxiliary«"\n"»
 	begin«"\n"»
+«««	DT list // what is the pattern for this?
+	«val sortCID=root.dtSpec.get(1).dtSorts.get(0).name»
+	«val sortSBS=root.dtSpec.get(1).dtSorts.get(1).name»
+	«val sortEVT=root.dtSpec.get(0).dtSorts.get(0).name»
+	«val dtOps0=root.dtSpec.get(1).dtOps.get(0).name»
+	«val dtOps1=root.dtSpec.get(1).dtOps.get(1).name»
+«««	typedecl <SBS> why this sort?
+	typedecl «sortSBS»
+«««	typedecl CID why this sort?
+	typedecl «sortCID»
+	consts «dtOps0»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortSBS»"
+	consts «dtOps1»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortEVT»"
 	
 	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.name»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»act «ENDFOR»+«"\n"»
 	
-	FIRST
-«««	«root.componentTypes.get(0)»
-	
-	«"\t"»for 
+	«"\t"»for «root.componentTypes.get(0).ctsname»active :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«FOR ctyp : root.componentTypes.drop(1)»
-	«"\t"»«"\t"»and  «ctyp.ctsname»act :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
-	«"\t"»«"\t"»and  «ctyp.ctsname»cmp :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> '«ctyp.ctsname»"«ENDFOR» + «"\n"»
-	
-	«"\t"»fixes «FOR a : Auxiliary.getInputPorts(root)»
-	«FOR ctyp : root.componentTypes»«"\t"»«"\t"»and «ctyp.ctsname»«a.map[name].toString.replaceAll("[\\[\\],]","")» :: '«ctyp.ctsname» \<Rightarrow>  «a.map[it.inputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")» set«"\n"»
-	«ENDFOR»
-	«ENDFOR»
-	«FOR b : Auxiliary.getOutputPorts(root)»
-	«FOR ctyp : root.componentTypes»«"\t"»«"\t"»and «ctyp.ctsname»«b.map[name].toString.replaceAll("[\\[\\],]","")» :: '«ctyp.ctsname» \<Rightarrow>  «b.map[it.outputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")»
+	«"\t"»and «ctyp.ctsname»cmp :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> '«ctyp.ctsname»"
+	«"\t"»and «ctyp.ctsname»active :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
+	«"\t"»and «ctyp.ctsname»cmp :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> '«ctyp.ctsname»"«ENDFOR» + «"\n"»
+«««	«val inptPrt0 = Auxiliary.getInputPorts(root).get(0)»
+«««	«val inptPrt0Name = Auxiliary.getInputPorts(root).get(0).map[name].toString.replaceAll("[\\[\\],]","")»
+«««	«val inptPrt0SortType = inptPrt0.map[it.inputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")»
+	«val inptPrt0 = root.componentTypes.get(0).inputPorts.get(0)»
+	«val inptPrt0SortType = inptPrt0.inputPrtSrtTyp.name»
+	«val inptPrt0Name = inptPrt0.name»
+	«val inptPrtDrop = root.componentTypes.map[inputPorts].drop(1)»
+	«val outputPrtDrop = root.componentTypes.map[outputPorts].drop(1)»
+	«««	«FOR a : Auxiliary.getInputPorts(root).drop(1)»
+
+	«"\t"»fixes «root.componentTypes.get(0).ctsname»«inptPrt0Name» :: '«root.componentTypes.get(0).ctsname» \<Rightarrow> «inptPrt0SortType» set«"\n"»
+	«FOR a : inptPrtDrop»«FOR ctyp : root.componentTypes.drop(1)»
+	«"\t"»and «ctyp.ctsname»«a.map[name].toString.replaceAll("[\\[\\],]","")» :: '«ctyp.ctsname» \<Rightarrow> «a.map[it.inputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")» set«"\n"»
+	«ENDFOR»«ENDFOR»
+	«FOR b : outputPrtDrop»
+	«FOR ctyp : root.componentTypes»«"\t"»and «ctyp.ctsname»«b.map[name].toString.replaceAll("[\\[\\],]","")» :: '«ctyp.ctsname» \<Rightarrow> «b.map[it.outputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")»
 	«ENDFOR»
 	«ENDFOR»
 	
 ««« assumption begins (if not null)
-	«"\t"»assumes 
+	«"\t"»assumes
+	«val shortNameFirstCmp = root.componentTypes.get(1).ctsname»«val shortNameSecondCmp = root.componentTypes.get(0).ctsname»
+	«val nameOutgoingPort = root.componentTypes.get(1).outputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
+	«"\t"»conn_«shortNameFirstCmp»«nameOutgoingPort»_«shortNameSecondCmp»: "\<And>sb1 sb2. \<lbrakk>sbid sb1 = sbid sb2\<rbrakk> \<Longrightarrow> sb1 = sb2"
+	«"\t"»and «FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
+«««	«FOR ctp: root.componentTypes»
+«««	«val ctParam = ctp.parameters»
+«««	«IF ctParam !== null»
+«««	«ctp.ctsname»id_ex: "\<And>sid. \<exists>«ctp.ctsname». «ctp.ctsname»«ctParam.map[name]» «ctp.ctsname» = sid"
+«««	«ENDIF»
+«««	«ENDFOR»
 	
-	«FOR cta : root.ctaFormulaIds»«cta.name»: “\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> 
-		«val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»
-		«FOR uf : ctaElement»
-			«mapFormula(uf.ctaFormula)»
-		«ENDFOR»
+	«FOR cta : root.ctaFormulaIds»
+	«"\t"»«cta.name»: "\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»
+	«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)»«ENDFOR»"
 	«ENDFOR»
 	
-	
 	begin «"\n"»
+	
+	theorem delivery:
+	  fixes t
+	  assumes "t \<in> arch"
+	  shows 
+	
 	
 	...«"\n"»
 	
@@ -56,26 +88,11 @@ class IsabelleTextGenerator {
 	'''
 	
 	def static Object mapFormula(CtaFormula cf){
-		return '''
-			«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
-«««			«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
-			«IF cf.ctaPredicateCAct !== null»«generateFormula(cf.ctaPredicateCAct)»«ENDIF»
-			«IF cf.ctaPredicatePAct !== null»«generateFormula(cf.ctaPredicatePAct)»«ENDIF»
-			«IF cf.ctaPredicateConn !== null»«generateFormula(cf.ctaPredicateConn)»«ENDIF»
-			«IF cf.ctaPredicateVal !== null»«generateFormula(cf.ctaPredicateVal)»«ENDIF»
-			«IF cf.ctaPredicateEq !== null»«generateFormula(cf.ctaPredicateEq)»«ENDIF»
-			«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas)»«ENDIF»
-		'''
-	}
-	
+		return '''«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»«IF cf.ctaPredicateCAct !== null»«generateFormula(cf.ctaPredicateCAct)»«ENDIF»«IF cf.ctaPredicatePAct !== null»«generateFormula(cf.ctaPredicatePAct)»«ENDIF»«IF cf.ctaPredicateConn !== null»«generateFormula(cf.ctaPredicateConn)»«ENDIF»«IF cf.ctaPredicateVal !== null»«generateFormula(cf.ctaPredicateVal)»«ENDIF»«IF cf.ctaPredicateEq !== null»«generateFormula(cf.ctaPredicateEq)»«ENDIF»«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas)»«ENDIF»'''}
 	def dispatch static generateFormula(CtaUnaryFormulas ctau)
-		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box> «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond> «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle> «ENDIF»
-		«mapFormula(ctau.ctaFormulaLtl)»
-		\<^sub>c '''
-		
-		
-//	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq)
-//		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sup>c «ctaq.quantifierOperator.quantifiedExistsVar».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<all>\<^sup>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
+		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box> «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond> «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle> «ENDIF»«mapFormula(ctau.ctaFormulaLtl)» \<^sub>c '''
+	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq) //check if cvq is not null 
+		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sup>c «ctaq.quantifierOperator.quantifiedExistsVar».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<all>\<^sup>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicateCAct ctapc)
 		'''(\«IF ctapc.CAct == 'cAct'»(ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicatePAct ctapp)
@@ -107,39 +124,22 @@ class IsabelleTextGenerator {
 		
 		val valOpsDtVar = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name //[null, org.tum.factum.pattern.pattern.impl.DataTypeVariableImpl@16bde57e (name: e)]
 		
-		'''«IF ctapval.ctaVal == 'val'»
-		 ca (\<lambda>c. ( «valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar1» c)) «valOpsDtVar» \<in>  «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF» \<^sub>c'''
+		'''«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»ca (\<lambda>c. ( «valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar1» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF» \<^sub>c'''
 		//'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
 		}
 	def dispatch static generateFormula(CtaPredicateEq ctapeq){
-		'''	(\ (ca (\<lambda>c.  «ctapeq.ctaComponentVariable1.name» = «ctapeq.ctaComponentVariable2.name» ) \<^sub>c'''
+		'''(\ (ca (\<lambda>c. «ctapeq.ctaComponentVariable1.name» = «ctapeq.ctaComponentVariable2.name» ) \<^sub>c'''
 	}
 	
 	def dispatch static generateFormula(CtaBinaryFormulas ctabf){
 //		'''	generateFormulaBinary(\«IF ctabf.binaryOperator.map[lImplies]» x «ENDIF»\<^sub>c'''
-		return '''
-«««		generateFormulaBinary
-«««		«ctabf.binaryOperator.map[LAnd]»
-«««		«ctabf.binaryOperator.map[LImplies]»
-«««		«ctabf.ctaFormulaLgk»
-		«FOR idx : 0..ctabf.binaryOperator.length-1»
-			«val value = ctabf.binaryOperator.get(idx)»
-			«IF value.LImplies !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF»\<longrightarrow>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»
-			«IF value.LAnd !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<and>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»
-			«IF value.LDisjunct !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF»  \<or>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»
-			«IF value.LDoubleImplies !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<longrightarrow>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»
-			«IF value.LWeakUntil !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<WW>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»
-			«IF value.LUntil !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))» «ENDIF»\<UU>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»
-		«ENDFOR»
-		'''
+		return '''«FOR idx : 0..ctabf.binaryOperator.length-1»«val value = ctabf.binaryOperator.get(idx)»«IF value.LImplies !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF»\<longrightarrow>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«IF value.LAnd !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<and>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«IF value.LDisjunct !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<or>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«IF value.LDoubleImplies !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<longrightarrow>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«IF value.LWeakUntil !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<WW>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«IF value.LUntil !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))» «ENDIF»\<UU>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«ENDFOR»'''
 	}
 //	def dispatch static generateFormula(Pattern e) {
 //    	if (e instanceof CtaFormula)
 //        	e.generateFormula
 //	}
 }
-
-
 
 
 /*
