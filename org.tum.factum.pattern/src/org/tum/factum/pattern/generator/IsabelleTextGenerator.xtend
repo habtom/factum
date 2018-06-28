@@ -38,7 +38,7 @@ class IsabelleTextGenerator {
 	«ENDFOR»
 	«ENDFOR»
 	
-	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.name»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»active «ENDFOR»+«"\n"»
+	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.ctsname»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»active +«ENDFOR»
 	
 	«"\t"»for «root.componentTypes.get(0).ctsname»active :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«FOR ctyp : root.componentTypes.drop(1)»
