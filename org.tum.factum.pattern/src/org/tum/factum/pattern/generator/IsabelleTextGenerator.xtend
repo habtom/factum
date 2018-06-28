@@ -45,15 +45,11 @@ class IsabelleTextGenerator {
 	«"\t"»and «ctyp.ctsname»cmp :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> '«ctyp.ctsname»"
 	«"\t"»and «ctyp.ctsname»active :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«"\t"»and «ctyp.ctsname»cmp :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> '«ctyp.ctsname»"«ENDFOR» + «"\n"»
-«««	«val inptPrt0 = Auxiliary.getInputPorts(root).get(0)»
-«««	«val inptPrt0Name = Auxiliary.getInputPorts(root).get(0).map[name].toString.replaceAll("[\\[\\],]","")»
-«««	«val inptPrt0SortType = inptPrt0.map[it.inputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")»
 	«val inptPrt0 = root.componentTypes.get(0).inputPorts.get(0)»
 	«val inptPrt0SortType = inptPrt0.inputPrtSrtTyp.name»
 	«val inptPrt0Name = inptPrt0.name»
 	«val inptPrtDrop = root.componentTypes.map[inputPorts].drop(1)»
 	«val outputPrtDrop = root.componentTypes.map[outputPorts].drop(1)»
-	«««	«FOR a : Auxiliary.getInputPorts(root).drop(1)»
 
 	«"\t"»fixes «root.componentTypes.get(0).ctsname»«inptPrt0Name» :: '«root.componentTypes.get(0).ctsname» \<Rightarrow> «inptPrt0SortType» set«"\n"»
 	«FOR a : inptPrtDrop»«FOR ctyp : root.componentTypes.drop(1)»
@@ -70,8 +66,6 @@ class IsabelleTextGenerator {
 	«val nameOutgoingPort = root.componentTypes.get(1).outputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
 	«"\t"»conn_«shortNameFirstCmp»«nameOutgoingPort»_«shortNameSecondCmp»: "\<And>sb1 sb2. \<lbrakk>sbid sb1 = sbid sb2\<rbrakk> \<Longrightarrow> sb1 = sb2"
 	«"\t"»and «FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
-«««	«FOR ctp: root.componentTypes»
-«««	«val ctParam = ctp.parameters»
 «««	«IF ctParam !== null»
 «««	«ctp.ctsname»id_ex: "\<And>sid. \<exists>«ctp.ctsname». «ctp.ctsname»«ctParam.map[name]» «ctp.ctsname» = sid"
 «««	«ENDIF»
@@ -97,9 +91,9 @@ class IsabelleTextGenerator {
 	def static Object mapFormula(CtaFormula cf){
 		return '''«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»«IF cf.ctaPredicateCAct !== null»«generateFormula(cf.ctaPredicateCAct)»«ENDIF»«IF cf.ctaPredicatePAct !== null»«generateFormula(cf.ctaPredicatePAct)»«ENDIF»«IF cf.ctaPredicateConn !== null»«generateFormula(cf.ctaPredicateConn)»«ENDIF»«IF cf.ctaPredicateVal !== null»«generateFormula(cf.ctaPredicateVal)»«ENDIF»«IF cf.ctaPredicateEq !== null»«generateFormula(cf.ctaPredicateEq)»«ENDIF»«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas)»«ENDIF»'''}
 	def dispatch static generateFormula(CtaUnaryFormulas ctau)
-		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box> «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond> «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle> «ENDIF»«mapFormula(ctau.ctaFormulaLtl)» \<^sub>c '''
+		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle>\<^sub>c «ENDIF»«mapFormula(ctau.ctaFormulaLtl)» \<^sub>c '''
 	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq) //check if cvq is not null 
-		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sup>c «ctaq.quantifierOperator.quantifiedExistsVar».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<all>\<^sup>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
+		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sup>c «ctaq.quantifierOperator.quantifiedExistsVar».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sup>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicateCAct ctapc)
 		'''(\«IF ctapc.CAct == 'cAct'»(ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicatePAct ctapp)
