@@ -45,31 +45,28 @@ class IsabelleTextGenerator {
 	«"\t"»and «ctyp.ctsname»cmp :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> '«ctyp.ctsname»"
 	«"\t"»and «ctyp.ctsname»active :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«"\t"»and «ctyp.ctsname»cmp :: "'«ctyp.ctsname»id \<Rightarrow> cnf \<Rightarrow> '«ctyp.ctsname»"«ENDFOR» + «"\n"»
+	
 	«val inptPrt0 = root.componentTypes.get(0).inputPorts.get(0)»
 	«val inptPrt0SortType = inptPrt0.inputPrtSrtTyp.name»
 	«val inptPrt0Name = inptPrt0.name»
 	«val inptPrtDrop = root.componentTypes.map[inputPorts].drop(1)»
 	«val outputPrtDrop = root.componentTypes.map[outputPorts].drop(1)»
 
-	«"\t"»fixes «root.componentTypes.get(0).ctsname»«inptPrt0Name» :: '«root.componentTypes.get(0).ctsname» \<Rightarrow> «inptPrt0SortType» set«"\n"»
+	«"\t"»fixes «root.componentTypes.get(0).ctsname»«inptPrt0Name» ::"'«root.componentTypes.get(0).ctsname» \<Rightarrow> «inptPrt0SortType» set«"\n"»
 	«FOR a : inptPrtDrop»«FOR ctyp : root.componentTypes.drop(1)»
-	«"\t"»and «ctyp.ctsname»«a.map[name].toString.replaceAll("[\\[\\],]","")» :: '«ctyp.ctsname» \<Rightarrow> «a.map[it.inputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")» set«"\n"»
+	«"\t"»and «ctyp.ctsname»«a.map[name].toString.replaceAll("[\\[\\],]","")» :: "'«ctyp.ctsname» \<Rightarrow> «a.map[it.inputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")» set«"\n"»
 	«ENDFOR»«ENDFOR»
 	«FOR b : outputPrtDrop»
-	«FOR ctyp : root.componentTypes»«"\t"»and «ctyp.ctsname»«b.map[name].toString.replaceAll("[\\[\\],]","")» :: '«ctyp.ctsname» \<Rightarrow> «b.map[it.outputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")»
+	«FOR ctyp : root.componentTypes»«"\t"»and «ctyp.ctsname»«b.map[name].toString.replaceAll("[\\[\\],]","")» :: "'«ctyp.ctsname» \<Rightarrow> «b.map[it.outputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")»
 	«ENDFOR»
 	«ENDFOR»
 	
-««« assumption begins (if not null)
+««« assumption begins
 	«"\t"»assumes
 	«val shortNameFirstCmp = root.componentTypes.get(1).ctsname»«val shortNameSecondCmp = root.componentTypes.get(0).ctsname»
 	«val nameOutgoingPort = root.componentTypes.get(1).outputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
 	«"\t"»conn_«shortNameFirstCmp»«nameOutgoingPort»_«shortNameSecondCmp»: "\<And>sb1 sb2. \<lbrakk>sbid sb1 = sbid sb2\<rbrakk> \<Longrightarrow> sb1 = sb2"
 	«"\t"»and «FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
-«««	«IF ctParam !== null»
-«««	«ctp.ctsname»id_ex: "\<And>sid. \<exists>«ctp.ctsname». «ctp.ctsname»«ctParam.map[name]» «ctp.ctsname» = sid"
-«««	«ENDIF»
-«««	«ENDFOR»
 	
 	«FOR cta : root.ctaFormulaIds»
 	«"\t"»«cta.name»: "\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)»"«ENDFOR» and
