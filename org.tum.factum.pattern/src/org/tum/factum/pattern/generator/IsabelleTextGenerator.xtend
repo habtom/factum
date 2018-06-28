@@ -38,9 +38,7 @@ class IsabelleTextGenerator {
 	«ENDFOR»
 	«ENDFOR»
 	
-	locale «root.psname» = 
-	«FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.name»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»act 
-	«ENDFOR»+«"\n"»
+	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.name»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»act «ENDFOR»+«"\n"»
 	
 	«"\t"»for «root.componentTypes.get(0).ctsname»active :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«FOR ctyp : root.componentTypes.drop(1)»
@@ -80,8 +78,7 @@ class IsabelleTextGenerator {
 «««	«ENDFOR»
 	
 	«FOR cta : root.ctaFormulaIds»
-	«"\t"»«cta.name»: "\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»
-	«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)»«ENDFOR»"
+	«"\t"»«cta.name»: "\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)»"«ENDFOR» and
 	«ENDFOR»
 	
 	begin «"\n"»
