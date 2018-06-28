@@ -71,7 +71,7 @@ class IsabelleTextGenerator {
 ««« assumption begins	
 	«FOR cta : root.ctaFormulaIds»
 	«"\t"»«cta.name»: "\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»
-	«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR» 
+	«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR» «IF root.ctaFormulaIds.last() !== cta» and «ENDIF»
 	«ENDFOR»
 	
 	begin «"\n"»
