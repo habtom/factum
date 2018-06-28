@@ -18,9 +18,9 @@ class IsabelleTextGenerator {
 	imports Auxiliary«"\n"»
 	begin«"\n"»
 	
+«««	dt type declarations
 	«val sortEVT=root.dtSpec.get(0).dtSorts.get(0).name»
 	«val dtOps0=root.dtSpec.get(0).dtOps.get(0)»
-
 	typedecl «sortEVT»
 	«FOR dtdecl0 : root.dtSpec»
 	«FOR dts : dtdecl0.dtSorts.drop(2)»
@@ -37,18 +37,6 @@ class IsabelleTextGenerator {
 	consts «dto.name»::"«FOR dti : dto.dtInput»«dti.name» \<Rightarrow> «ENDFOR»«dto.dtOutput.name»"
 	«ENDFOR»
 	«ENDFOR»
-««««««	DT list 
-«««	«val sortCID=root.dtSpec.get(1).dtSorts.get(0).name»
-«««	«val sortSBS=root.dtSpec.get(1).dtSorts.get(1).name»
-««««««	«val sortEVT=root.dtSpec.get(0).dtSorts.get(0).name»
-«««	«val dtOps0=root.dtSpec.get(1).dtOps.get(0).name»
-«««	«val dtOps1=root.dtSpec.get(1).dtOps.get(1).name»
-««««««	typedecl <SBS> why this sort?
-««««««	typedecl «sortSBS»
-««««««	typedecl CID why this sort?
-«««	typedecl «sortCID»
-«««	consts «dtOps0»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortSBS»"
-«««	consts «dtOps1»::"«sortCID» \<Rightarrow> «sortEVT» \<Rightarrow> «sortEVT»"
 	
 	locale «root.psname» = 
 	«FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.name»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»act 
