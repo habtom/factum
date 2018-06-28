@@ -152,9 +152,9 @@ CtaUnaryFormulas:
 CtaBinaryFormulas:
 	'('(ctaFormulaLgk+=CtaFormula (binaryOperator+=BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')'
 ;
-//CtaQuantifiedFormulas:
-//	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
-//;
+CtaQuantifiedFormulas:
+	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
+;
 CtaFormula:
 	ctaPredicateTerms=CtaPredicateTerms | 
 	ctaPredicateConn=CtaPredicateConn | 
@@ -164,8 +164,8 @@ CtaFormula:
 	ctaPredicatePAct=CtaPredicatePAct |
 	
 	ctaUnaryFormulas=CtaUnaryFormulas | 
-	ctaBinaryFormulas=CtaBinaryFormulas //|  
-	//ctaQuantifiedFormulas=CtaQuantifiedFormulas
+	ctaBinaryFormulas=CtaBinaryFormulas |  
+	ctaQuantifiedFormulas=CtaQuantifiedFormulas
 ;
 CtaFormulasID:
 	name=ID ':' ctaFormula=CtaFormula
@@ -195,9 +195,9 @@ AgUnaryFormulas:
 AgBinaryFormulas:
 	'('(agFormulaLgk+=AgFormula (binaryOperator+=BinaryOperator agFormulaLgk+=AgFormula)*) ')'
 ;
-//AgQuantifiedFormulas:
-//	agQuantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula 
-//;
+AgQuantifiedFormulas:
+	agQuantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula 
+;
 AgFormula:
 	gaPredicateTerms=AgPredicateTerms | 
 	agPredicateConn=AgPredicateConn | 
@@ -206,8 +206,8 @@ AgFormula:
 	agPredicate=AgPredicate | 
 	
 	agUnaryFormulas=AgUnaryFormulas | 
-	agBinaryFormulas=AgBinaryFormulas //| 
-	//agQuantifiedFormulas=AgQuantifiedFormulas
+	agBinaryFormulas=AgBinaryFormulas | 
+	agQuantifiedFormulas=AgQuantifiedFormulas
 ;
 AgFormulasID:
 	name=ID ':' agFormula=AgFormula
@@ -233,14 +233,14 @@ BtUrinaryFormulas:
 BtaBinaryFormulas:
 	'('(btaFormulaLgk+=BtaFormula (binaryOperator+=BinaryOperator btaFormulaLgk+=BtaFormula)*) ')' //try with brackets for better non LL
 ;
-//BtaQuantifiedFormulas:
-//	QuantifierOperator btaQuantifiedFs=BtaFormula 
-//;
+BtaQuantifiedFormulas:
+	QuantifierOperator btaQuantifiedFs=BtaFormula 
+;
 BtaFormula:
 	BtaPredicate | 
 	BtUrinaryFormulas | 
-	BtaBinaryFormulas //|  
-	//BtaQuantifiedFormulas
+	BtaBinaryFormulas |  
+	BtaQuantifiedFormulas
 ;
 BtaFormulasID:
 	name=ID ':' btaFormula=BtaFormula
@@ -264,12 +264,13 @@ EqualityElementOperator: //Maybe not needed (check?)
 	'='
 ;
 //QuantifiedVariables:
+//	//{QuantifiedVariables}
 //	//DataTypeVariable | ComponentVariable
 //	dtvq=[DataTypeVariable|ID] | cvq=[ComponentVariable|ID]
 //;
-//QuantifierOperator:
-//	exists='∃'(quantifiedExistsVar=[DataTypeVariable|ID] | cvq=[ComponentVariable|ID]'.') | all='∀'(quantifiedAllVar=QuantifiedVariables'.')
-//;
+QuantifierOperator:
+	exists='∃'quantifiedExistsVar=[ComponentVariable|ID]'.' | all='∀'quantifiedAllVar=[ComponentVariable|ID]'.'
+;
 //End
 QualifiedName:
     ID ('.' ID)*
