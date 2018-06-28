@@ -70,7 +70,7 @@ class IsabelleTextGenerator {
 
 ««« assumption begins	
 	«FOR cta : root.ctaFormulaIds»
-	«"\t"»«cta.name»: "\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»
+	«"\t"»«cta.name»: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»
 	«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR» «IF root.ctaFormulaIds.last() !== cta» and «ENDIF»
 	«ENDFOR»
 	
@@ -110,10 +110,10 @@ class IsabelleTextGenerator {
 //	def dispatch static generateFormula(CtaFormula ctb)
 //		'''«IF ctb == '('»(«ENDIF» «IF ctb == ')'»)«ENDIF»'''
 	def dispatch static generateFormula(CtaPredicateCAct ctapc)
-		'''(\«IF ctapc.CAct == 'cAct'»ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''
+		'''«IF ctapc.CAct == 'cAct'»ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''
 	
 	def dispatch static generateFormula(CtaPredicatePAct ctapp)
-		'''(\«IF ctapp.PAct== 'pAct'»ca (\<lambda>c. «ctapp.PActCtaCmpVaref.cmpRef.cmptypAssigned.ctsname»active «ctapp.PActCtaCmpVaref.cmpRef.name» c)«ENDIF»'''
+		'''«IF ctapp.PAct== 'pAct'»ca (\<lambda>c. «ctapp.PActCtaCmpVaref.cmpRef.cmptypAssigned.ctsname»active «ctapp.PActCtaCmpVaref.cmpRef.name» c)«ENDIF»'''
 	
 	def dispatch static generateFormula(CtaPredicateConn ctaconn){
 		val connCmpTypShortName1 = ctaconn.ctaConnCmpVarInptPort.inptPrtCmpRef.cmptypAssigned.ctsname
@@ -125,7 +125,7 @@ class IsabelleTextGenerator {
 		val connCmpVar1 = ctaconn.ctaConnCmpVarInptPort.inptPrtCmpRef.name
 		val connCmpVar2 = ctaconn.ctaConnCmpVarOutputPort.outptPrtCmpRef.name
 		
-	'''(\«IF ctaconn.ctaConn == 'conn'»ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \in «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
+	'''«IF ctaconn.ctaConn == 'conn'»ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \in «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
 	}
 	
 	def dispatch static generateFormula(CtaPredicateVal ctapval) {
