@@ -63,10 +63,10 @@ class IsabelleTextGenerator {
 	«ENDFOR»
 	
 	«"\t"»assumes
-	«val shortNameFirstCmp = root.componentTypes.get(1).ctsname»«val shortNameSecondCmp = root.componentTypes.get(0).ctsname»
-	«val nameOutgoingPort = root.componentTypes.get(1).outputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
-	«"\t"»conn_«shortNameFirstCmp»«nameOutgoingPort»_«shortNameSecondCmp»: "\<And>sb1 sb2. \<lbrakk>sbid sb1 = sbid sb2\<rbrakk> \<Longrightarrow> sb1 = sb2"
-	«"\t"»and «FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
+«««	«val shortNameFirstCmp = root.componentTypes.get(1).ctsname»«val shortNameSecondCmp = root.componentTypes.get(0).ctsname»
+«««	«val nameOutgoingPort = root.componentTypes.get(1).outputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
+«««	«"\t"»conn_«shortNameFirstCmp»«nameOutgoingPort»_«shortNameSecondCmp»: "\<And>sb1 sb2. \<lbrakk>sbid sb1 = sbid sb2\<rbrakk> \<Longrightarrow> sb1 = sb2"
+«««	«"\t"»and «FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
 
 ««« assumption begins	
 	«FOR cta : root.ctaFormulaIds»
@@ -125,7 +125,7 @@ class IsabelleTextGenerator {
 		val connCmpVar1 = ctaconn.ctaConnCmpVarInptPort.inptPrtCmpRef.name
 		val connCmpVar2 = ctaconn.ctaConnCmpVarOutputPort.outptPrtCmpRef.name
 		
-	'''«IF ctaconn.ctaConn == 'conn'»ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \in «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
+	'''«IF ctaconn.ctaConn == 'conn'»ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) <\in> «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
 	}
 	
 	def dispatch static generateFormula(CtaPredicateVal ctapval) {
