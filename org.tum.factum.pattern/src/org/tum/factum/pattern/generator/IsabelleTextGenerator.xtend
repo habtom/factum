@@ -162,33 +162,3 @@ class IsabelleTextGenerator {
 		 «IF value.LUntil !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))» «ENDIF»\<UU>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«ENDFOR»'''
 	}
 }
-
-
-/*
- * 
-theory Publisher_Subscriber
-imports Singleton
-begin
-
-locale publisher_subscriber =
-  publisher: singleton pbactive pbcmp +
-  subscriber: dynamic_component sbcmp sbactive
-    
-    for pbactive :: "'pid \<Rightarrow> cnf \<Rightarrow> bool"
-    and pbcmp :: "'pid \<Rightarrow> cnf \<Rightarrow> 'PB"
-    and sbactive :: "'sid \<Rightarrow> cnf \<Rightarrow> bool"
-    and sbcmp :: "'sid \<Rightarrow> cnf \<Rightarrow> 'SB" +
-  
-  fixes pbIn :: "'PB \<Rightarrow> bool set"
-    and pbOut :: "'PB \<Rightarrow> int set"
-    and sbIn :: "'SB \<Rightarrow> bool set"
-    and sbOut :: "'SB \<Rightarrow> int set"
-begin
-
-...
-
-end
-  
-end
- */
- 
