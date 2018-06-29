@@ -102,7 +102,7 @@ class IsabelleTextGenerator {
 		}
 	
 	def dispatch static generateFormula(CtaUnaryFormulas ctau)
-		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle>\<^sub>c «ENDIF»«mapFormula(ctau.ctaFormulaLtl)» \<^sub>c '''
+		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle>\<^sub>c «ENDIF»«mapFormula(ctau.ctaFormulaLtl)»'''
 	
 	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq)
 		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «ctaq.quantifierOperator.quantifiedExistsVar».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
@@ -161,10 +161,6 @@ class IsabelleTextGenerator {
 		 «IF value.LWeakUntil !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))»«ENDIF» \<WW>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»
 		 «IF value.LUntil !== null»«IF idx==0»«mapFormula(ctabf.ctaFormulaLgk.get(idx))» «ENDIF»\<UU>\<^sup>c «mapFormula(ctabf.ctaFormulaLgk.get(idx+1))»«ENDIF»«ENDFOR»'''
 	}
-//	def dispatch static generateFormula(Pattern e) {
-//    	if (e instanceof CtaFormula)
-//        	e.generateFormula
-//	}
 }
 
 
