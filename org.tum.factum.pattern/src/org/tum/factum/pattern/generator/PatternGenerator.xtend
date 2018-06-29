@@ -20,9 +20,9 @@ class PatternGenerator extends AbstractGenerator {
 		val root = resource.allContents.head as Pattern;
 		 
 		if (root !== null) {
-			fsa.generateFile("factumPatternTheory.thy", IsabelleTextGenerator.toIsabelle(root))
+			fsa.generateFile(root.name + ".thy", IsabelleTextGenerator.toIsabelle(root))
 		}
-		//toIsabelle
+//		//toIsabelle
 		
 	}
 }
