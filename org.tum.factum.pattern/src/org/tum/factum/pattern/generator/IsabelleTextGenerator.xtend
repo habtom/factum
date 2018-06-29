@@ -10,6 +10,7 @@ import org.tum.factum.pattern.pattern.CtaPredicateVal
 import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.Pattern
+import org.tum.factum.pattern.pattern.CtaPredicateTerms
 
 class IsabelleTextGenerator {
 
@@ -93,6 +94,7 @@ class IsabelleTextGenerator {
 		«"\t"»«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
 		«"\t"»«IF cf.ctaPredicateCAct !== null»«generateFormula(cf.ctaPredicateCAct)»«ENDIF»
 		«"\t"»«IF cf.ctaPredicatePAct !== null»«generateFormula(cf.ctaPredicatePAct)»«ENDIF»
+		«"\t"»«IF cf.ctaPredicateTerms !== null»«generateFormula(cf.ctaPredicateTerms)»«ENDIF»
 		«"\t"»«IF cf.ctaPredicateConn !== null»«generateFormula(cf.ctaPredicateConn)»«ENDIF»
 		«"\t"»«IF cf.ctaPredicateVal !== null»«generateFormula(cf.ctaPredicateVal)»«ENDIF»
 		«"\t"»«IF cf.ctaPredicateEq !== null»«generateFormula(cf.ctaPredicateEq)»«ENDIF»
@@ -106,6 +108,15 @@ class IsabelleTextGenerator {
 	
 	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq)
 		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «ctaq.quantifierOperator.quantifiedExistsVar.name».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»'''
+	def dispatch static generateFormula(CtaPredicateTerms ctat) {
+		val ctpTerm2Op = ctat.ctaPTerm2.termOperatorFunction.trmOperator.name
+		val ctpTerm2CmpTypSN = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.cmptypAssigned.ctsname].toString.replaceAll("[\\[\\],]","")
+		val ctpTerm2CmpTypPrt = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.portRef.name].toString.replaceAll("[\\[\\],]","")
+		val ctpTerm2CmpVar = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.name].toString.replaceAll("[\\[\\],]","")
+		val ctpTerm1CmpVarRef = ctat.ctaPTerm1.dtTypeVars.name
+		//"(ca (<lambda>c. evt (pbpnt (pbcmp p c)) = e))"
+		'''(ca (\<lambda>c. «ctpTerm2Op» («ctpTerm2CmpTypSN»«ctpTerm2CmpTypPrt»	(«ctpTerm2CmpTypSN»cmp «ctpTerm2CmpVar» c)) = «ctpTerm1CmpVarRef»))'''   //needs refactoring in the next release
+	}
 	
 //	def dispatch static generateFormula(CtaFormula ctb)
 //		'''«IF ctb == '('»(«ENDIF» «IF ctb == ')'»)«ENDIF»'''
