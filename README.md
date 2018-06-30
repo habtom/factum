@@ -13,4 +13,4 @@ The tool is developed using the Eclipse Modeling Framework (EMF) and supporting 
 
 You may download and try a working demo of the FACTum Studio. 
 
-[Link to Download](https://goo.gl/fgZN2Y) *(The copy works only in Linux OS.)*
+[Link to Download](https://goo.gl/fgZN2Y) *(The copy works on Linux systems.)*
