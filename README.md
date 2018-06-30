@@ -1,7 +1,5 @@
 # FACTum Studio
-
 [//]: # (Architectural Design Constraints Specification and Verification)
-Architectural Design Constraints Specification and Verification
 
 FACTum Studio is a tool that supports Architectural Design Patterns (ADPs) specification and verification with the support of interactive verification in Isabelle/HOL.
 
