@@ -10,6 +10,6 @@ You may download and try a working demo of the FACTum Studio.
 [Download](https://goo.gl/fgZN2Y)
 
 
-(like http://www.github.com/)
+
 
 
