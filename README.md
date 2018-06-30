@@ -6,8 +6,9 @@ FACTum Studio is a tool that supports Architectural Design Patterns (ADPs) speci
 At this stage of development, the tool has the following key features mainly for specification of ADPs:
 * Specification of abstract data types
 * Graphical modeling of component types
-* Specification of architectural constraints and 
-* Specification of architectural guarantees.
+* Specification of architectural constraints 
+* Specification of architectural guarantees and
+* Generattion of Isabelle/HOL theory from ADP specification.
 
 The tool is developed using the Eclipse Modeling Framework (EMF) and supporting languages xtext and xtend. 
 
