@@ -1,4 +1,3 @@
 theme: jekyll-theme-cayman
 title: Welcome to FACTum Studio! 
-description: FACTum Studio is a tool support for Architectural Design Patterns spesfication and verification with the support of
-interactive verification in Isabelle/HOL.
+description: FACTum Studio is a tool that supports Architectural Design Patterns (ADPs) specification and verification with the support of interactive verification in Isabelle/HOL.
