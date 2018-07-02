@@ -23,6 +23,6 @@ class PatternGenerator extends AbstractGenerator {
 			fsa.generateFile(root.name + ".thy", IsabelleTextGenerator.toIsabelle(root))
 		}
 //		//toIsabelle
-		
+
 	}
 }

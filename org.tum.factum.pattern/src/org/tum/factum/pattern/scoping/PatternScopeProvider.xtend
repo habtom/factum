@@ -8,11 +8,11 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.scoping.Scopes
 import org.tum.factum.pattern.pattern.CmpVariableRef
-import org.tum.factum.pattern.pattern.Pattern
 import org.tum.factum.pattern.pattern.PatternPackage
 import org.tum.factum.pattern.pattern.RefComponentVariableInputPort
 import org.tum.factum.pattern.pattern.RefComponentVariableOutputPort
-import org.tum.factum.pattern.pattern.TermOperatorFunction
+
+//import org.tum.factum.pattern.pattern.RefComponentVariableParameter
 
 //import org.tum.factum.pattern.pattern.OutputPort
 
@@ -29,7 +29,6 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		if (context instanceof CmpVariableRef && reference == PatternPackage.Literals.CMP_VARIABLE_REF__PORT_REF){
 			return getScopeCtaCmpVarPorts(context as CmpVariableRef)
 		}
-		
 		//Scope for separate CMP Variable port reference or constraint (for input and output ports)
 		if (context instanceof RefComponentVariableInputPort && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_INPUT_PORT__INPUT_PRTRF){
 			return getScopeRefComponentVariableInputPort(context as RefComponentVariableInputPort)
@@ -37,6 +36,9 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		if (context instanceof RefComponentVariableOutputPort && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_OUTPUT_PORT__OUTPUT_PRTRF){
 			return getScopeRefComponentVariableOutputPort(context as RefComponentVariableOutputPort)
 		}
+//		if (context instanceof RefComponentVariableParameter && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_PARAMETER__PARAMETER_REF){
+//			return getScopeRefComponentVariableParameter(context as RefComponentVariableParameter)
+//		}
 		
 //		//Scope for Term Operands
 //		if (context instanceof TermOperatorFunction && reference == PatternPackage.Literals.TERM_OPERATOR_FUNCTION__TRM_OPERANDS){
@@ -50,8 +52,8 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 	private def getScopeCtaCmpVarPorts(CmpVariableRef cmpvar) {
 		val cmpvarefin = cmpvar.cmpRef.cmptypAssigned.inputPorts
 		val cmpvarefout = cmpvar.cmpRef.cmptypAssigned.outputPorts
-		
-		return Scopes.scopeFor(Iterables.concat(cmpvarefin, cmpvarefout))     
+		val cmpvarefpar = cmpvar.cmpRef.cmptypAssigned.parameters
+		return Scopes.scopeFor(Iterables.concat(cmpvarefin, cmpvarefout, cmpvarefpar))     
 	}
 	
 	//Scope for separate CMP Variable port reference or constraint (for input and output ports)
@@ -65,6 +67,12 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		
 		return Scopes.scopeFor(cmpvarefoutput)
 	}
+//	private def getScopeRefComponentVariableParameter(RefComponentVariableParameter cmpvrp) {
+//		val cmpvarparams = cmpvrp.parameterCmpRef.cmptypAssigned.parameters
+//		
+//		return Scopes.scopeFor(cmpvarparams)
+//	}
+	
 	
 //	//Scope for Term Operands
 //	private def getScopeTermOperands(TermOperatorFunction termf) {
