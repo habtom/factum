@@ -85,14 +85,22 @@ class IsabelleTextGenerator {
 	«val shortNameSecondCmp = root.componentTypes.get(0).ctsname»
 	«val nameOutgoingPort = root.componentTypes.get(1).outputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
 	«val nameConnctingPort = root.componentTypes.get(0).inputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
-	«FOR ctp: root.componentTypes.drop(1)»
-	«val ctParam = ctp.parameters.map[name].toString.replaceAll("[\\[\\],]","")»
+«««	«FOR ctp: root.componentTypes.drop(1)»
+	«FOR ctp: root.componentTypes.get(1).parameters»
+	«val ctpName = root.componentTypes.get(1).ctsname»
+	«val ctParam = ctp.name»
+«««	«val ctParam = ctp.parameters.map[name].toString.replaceAll("[\\[\\],]","")»
 «««	«IF ctp.parameters !== null»
-	«"\t"»«ctp.ctsname»«»«ctParam»_unique: "\<And> «ctp.ctsname»1  «ctp.ctsname»2. \<lbrakk> «ctp.ctsname»«ctParam» «ctp.ctsname»1 = «ctp.ctsname»«ctParam» «ctp.ctsname»2\<rbrakk> \<Longrightarrow> «ctp.ctsname»1 = «ctp.ctsname»2" and«"\n"»
-	«"\t"»«ctp.ctsname»«»«ctParam»_ex: "\<And>«ctp.ctsname»«»«ctParam». \<exists>«ctp.ctsname». «ctp.ctsname»«»«ctParam» «ctp.ctsname» = «ctp.ctsname»«»«ctParam»" and«"\n"»
+	«"\t"»«ctpName»«»«ctParam»_unique: "\<And> «ctpName»1  «ctpName»2. \<lbrakk> «ctpName»«ctParam» «ctpName»1 = «ctpName»«ctParam» «ctpName»2\<rbrakk> \<Longrightarrow> «ctpName»1 = «ctpName»2" and«"\n"»
+	«"\t"»«ctpName»«»«ctParam»_ex: "\<And>«ctpName»«»«ctParam». \<exists>«ctpName». «ctpName»«»«ctParam» «ctpName» = «ctpName»«»«ctParam»" and«"\n"»
+«««	«ctpName»id_ex: "\<And>sid. \<exists>«ctpName». «ctpName»«ctParam» «ctpName» = sid"
+	«ENDFOR»
+
 «««	«ENDIF»
+«««	«ENDFOR»«"\t"»
+«««	«FOR p: root.componentTypes.map[parameters]»
+«««	«shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"
 «««	«ENDFOR»
-	«"\t"»«FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
 	«««	«FOR ctp: root.componentTypes»
 	«««	«val ctParam = ctp.parameters»
 	«««	«IF ctParam !== null»
@@ -108,8 +116,6 @@ class IsabelleTextGenerator {
 «««	«val cVarOftheInputPrt= root.componentTypes.map[outputPorts.filter[connects]].map[name])»
 	«"\t"»conn_«shortNameFirstCmp»«nameOutgoingPort»_«shortNameSecondCmp»«nameConnctingPort»: "\<And> k «cVarOftheoutputPrt» «cVarOftheInputPrt»\<lbrakk>«shortNameFirstCmp»active «cVarOftheoutputPrt» k; «shortNameSecondCmp»active «cVarOftheoutputPrt» k\<rbrakk> \<Longrightarrow> «shortNameSecondCmp»«nameConnctingPort» («shortNameSecondCmp»cmp «cVarOftheoutputPrt» k) \<in> «shortNameFirstCmp»«nameOutgoingPort» («shortNameFirstCmp»cmp «cVarOftheInputPrt» k)" and«"\n"»  
 	
-	
-	
 ««« assumption begins	
 	«FOR cta : root.ctaFormulaIds»«"\t"»«cta.name»: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== cta» and «"\n"»«ENDIF»«ENDFOR»
 	
@@ -122,7 +128,7 @@ class IsabelleTextGenerator {
 	  «"\t"»"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== ag» sorry «"\n"»«ENDIF»
 	«ENDFOR»
 	
-	«ENDFOR»
+«««	«ENDFOR»
 	
 	
 	...«"\n"»
