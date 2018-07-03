@@ -122,7 +122,7 @@ class IsabelleTextGenerator {
 	  shows 
 	
 	«FOR ag : root.agFormulaIds»
-	«"\t"»«ag.name»:"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»
+	«"\t"»"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»
 	«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"
 	«ENDFOR»
 	«IF root.ctaFormulaIds.last() !== ag» and «"\n"»«ENDIF»
