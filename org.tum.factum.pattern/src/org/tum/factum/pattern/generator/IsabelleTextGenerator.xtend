@@ -100,7 +100,6 @@ class IsabelleTextGenerator {
 	«««	«ENDIF»
 	«««	«ENDFOR»	
 ««« must be generated from connects 
-
 	«val cVarOftheInputPrt= root.ctaCmpVar.get(0).name»
 	«val cVarOftheoutputPrt= root.ctaCmpVar.get(1).name»
 «««	«val prtOfSecondVar= root.ctaCmpVar.get(1).cmptypAssigned.outputPorts.get(0).name» 
@@ -120,7 +119,7 @@ class IsabelleTextGenerator {
 	  fixes t
 	  assumes "t \<in> arch"
 	  shows
-	  «"\t"»"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== ag» and «"\n"»«ENDIF»
+	  «"\t"»"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== ag» sorry «"\n"»«ENDIF»
 	«ENDFOR»
 	
 	«ENDFOR»
@@ -137,7 +136,7 @@ class IsabelleTextGenerator {
 	def dispatch static generateFormula(CtaUnaryFormulas ctau)
 		'''(\«IF ctau.unaryOperator.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF ctau.unaryOperator.ltlF == 'X'»<circle>\<^sub>c «ENDIF»«mapFormula(ctau.ctaFormulaLtl)»'''
 	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq)
-		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «ctaq.quantifierOperator.quantifiedExistsVar.name».«ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «ctaq.quantifierOperator.quantifiedAllVar.name».«ENDIF»«mapFormula(ctaq.ctaQuantifiedFs)»'''
+		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «ctaq.quantifierOperator.quantifiedExistsVar.name». «ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «ctaq.quantifierOperator.quantifiedAllVar.name». «ENDIF»«mapFormula(ctaq.ctaQuantifiedFs)»'''
 	def dispatch static generateFormula(CtaPredicateTerms ctat) {
 		val ctpTerm2Op = ctat.ctaPTerm2.termOperatorFunction.trmOperator.name
 		val ctpTerm2CmpTypSN = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.cmptypAssigned.ctsname].toString.replaceAll("[\\[\\],]","")
@@ -183,7 +182,7 @@ class IsabelleTextGenerator {
 	def dispatch static generateFormula(AgUnaryFormulas agu)
 		'''(\«IF agu.unaryOperator.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF agu.unaryOperator.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF agu.unaryOperator.ltlF == 'X'»<circle>\<^sub>c «ENDIF»«mapFormula(agu.agFormulaLtl)»'''
 	def dispatch static generateFormula(AgQuantifiedFormulas agq)
-		'''«IF agq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «agq.quantifierOperator.quantifiedExistsVar.name».«ENDIF»«IF agq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «agq.quantifierOperator.quantifiedAllVar.name».«ENDIF»«mapFormula(agq.agQuantifiedFs)»'''
+		'''«IF agq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «agq.quantifierOperator.quantifiedExistsVar.name». «ENDIF»«IF agq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «agq.quantifierOperator.quantifiedAllVar.name». «ENDIF»«mapFormula(agq.agQuantifiedFs)»'''
 	def dispatch static generateFormula(AgPredicateTerms agt) {
 		val ctpTerm2Op = agt.agPTerm2.termOperatorFunction.trmOperator.name
 		val ctpTerm2CmpTypSN = agt.agPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.cmptypAssigned.ctsname].toString.replaceAll("[\\[\\],]","")
