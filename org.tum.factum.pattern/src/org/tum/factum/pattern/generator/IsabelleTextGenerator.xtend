@@ -52,6 +52,7 @@ class IsabelleTextGenerator {
 	
 	locale «root.psname» = «FOR ctyp : root.componentTypes»«"\n"»«"\t"»«ctyp.ctsname»: dynamic_component «ctyp.ctsname»cmp «ctyp.ctsname»active«IF root.componentTypes.last() !== ctyp» + «ENDIF»«ENDFOR» «««	«IF root.componentTypes.indexOf(ctyp) !== root.componentTypes.size()-1» + «ENDIF»
 	
+	
 	«"\t"»for «root.componentTypes.get(0).ctsname»active :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> bool"
 	«"\t"»and «root.componentTypes.get(0).ctsname»cmp :: "'«root.componentTypes.get(0).ctsname»id \<Rightarrow> cnf \<Rightarrow> '«root.componentTypes.get(0).ctsname»"
 	«FOR ctyp : root.componentTypes.drop(1)»
@@ -61,55 +62,54 @@ class IsabelleTextGenerator {
 	«val inptPrt0 = root.componentTypes.get(0).inputPorts.get(0)»
 	«val inptPrt0SortType = inptPrt0.inputPrtSrtTyp.name»
 	«val inptPrt0Name = inptPrt0.name»
-	«val inptPrtDrop = root.componentTypes.map[inputPorts].drop(1)»
-	«val outputPrtDrop = root.componentTypes.map[outputPorts].drop(1)»
 
+«««	Inputports have 'set' at the end and output ports and parameters not 
 	«"\t"»fixes «root.componentTypes.get(0).ctsname»«inptPrt0Name» ::"'«root.componentTypes.get(0).ctsname» \<Rightarrow> «inptPrt0SortType» set"«"\n"»
-	«FOR a : inptPrtDrop»«FOR ctyp : root.componentTypes.drop(1)»
-	«"\t"»and «ctyp.ctsname»«a.map[name].toString.replaceAll("[\\[\\],]","")» :: "'«ctyp.ctsname» \<Rightarrow> «a.map[it.inputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")» set"«"\n"»
-	«ENDFOR»«ENDFOR»
-	«FOR b : outputPrtDrop»
-	«FOR ctyp : root.componentTypes»«"\t"»and «ctyp.ctsname»«b.map[name].toString.replaceAll("[\\[\\],]","")» :: "'«ctyp.ctsname» \<Rightarrow> «b.map[it.outputPrtSrtTyp.name].toString.replaceAll("[\\[\\],]","")»"
+	«FOR ctyp : root.componentTypes.get(0).outputPorts»
+	«"\t"»and «root.componentTypes.get(0).ctsname»«ctyp.name» :: "'«root.componentTypes.get(0).ctsname» \<Rightarrow> «ctyp.outputPrtSrtTyp.name»"
+	«ENDFOR»
+	«FOR ctyp : root.componentTypes.drop(1)»
+	«FOR ip : ctyp.inputPorts»
+	«"\t"»and «ctyp.ctsname»«ip.name» :: "'«ctyp.ctsname» \<Rightarrow> «ip.inputPrtSrtTyp.name» set"«"\n"»
+	«ENDFOR»
+	«FOR op : ctyp.outputPorts»
+	«"\t"»and «ctyp.ctsname»«op.name» :: "'«ctyp.ctsname» \<Rightarrow> «op.outputPrtSrtTyp.name»"
+	«ENDFOR»
+	«FOR p : ctyp.parameters»
+	«"\t"»and «ctyp.ctsname»«p.name» :: "'«ctyp.ctsname» \<Rightarrow> «p.paramSrtTyp.name»"
 	«ENDFOR»
 	«ENDFOR»
 	
 	assumes
-	
-	«"\t"»sbid_unique: "\<And>sb1 sb2. \<lbrakk>sbid sb1 = sbid sb2\<rbrakk> \<Longrightarrow> sb1 = sb2" and 
-	
-	«"\t"»sbid_ex: "\<And>sid. \<exists>sb. sbid sb = sid" and
-««« must be generated from connects 
-	«val shortNameFirstCmp = root.componentTypes.get(1).ctsname»««« the compomnet type that begins connects  
+	«val shortNameFirstCmp = root.componentTypes.get(1).ctsname»««« the compomnet type that begins connects
 	«val shortNameSecondCmp = root.componentTypes.get(0).ctsname»
 	«val nameOutgoingPort = root.componentTypes.get(1).outputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
 	«val nameConnctingPort = root.componentTypes.get(0).inputPorts.map[name].toString.replaceAll("[\\[\\],]","")»
-	
+	«FOR ctp: root.componentTypes.drop(1)»
+	«val ctParam = ctp.parameters.map[name].toString.replaceAll("[\\[\\],]","")»
+«««	«IF ctp.parameters !== null»
+	«"\t"»«ctp.ctsname»«»«ctParam»_unique: "\<And> «ctp.ctsname»1  «ctp.ctsname»2. \<lbrakk> «ctp.ctsname»«ctParam» «ctp.ctsname»1 = «ctp.ctsname»«ctParam» «ctp.ctsname»2\<rbrakk> \<Longrightarrow> «ctp.ctsname»1 = «ctp.ctsname»2" and«"\n"»
+	«"\t"»«ctp.ctsname»«»«ctParam»_ex: "\<And>«ctp.ctsname»«»«ctParam». \<exists>«ctp.ctsname». «ctp.ctsname»«»«ctParam» «ctp.ctsname» = «ctp.ctsname»«»«ctParam»" and«"\n"»
+«««	«ENDIF»
+«««	«ENDFOR»
+	«"\t"»«FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
+	«««	«FOR ctp: root.componentTypes»
+	«««	«val ctParam = ctp.parameters»
+	«««	«IF ctParam !== null»
+	«««	«ctp.ctsname»id_ex: "\<And>sid. \<exists>«ctp.ctsname». «ctp.ctsname»«ctParam.map[name]» «ctp.ctsname» = sid"
+	«««	«ENDIF»
+	«««	«ENDFOR»	
+««« must be generated from connects 
+
 	«val cVarOftheInputPrt= root.ctaCmpVar.get(0).name»
 	«val cVarOftheoutputPrt= root.ctaCmpVar.get(1).name»
-	«val prtOfSecondVar= root.ctaCmpVar.get(1).cmptypAssigned.outputPorts.get(0).name» 
-	«val prtOfFirstVar= root.ctaCmpVar.get(0).cmptypAssigned.outputPorts.get(0).name» 
+«««	«val prtOfSecondVar= root.ctaCmpVar.get(1).cmptypAssigned.outputPorts.get(0).name» 
+«««	«val prtOfFirstVar= root.ctaCmpVar.get(0).cmptypAssigned.outputPorts.get(0).name» 
 «««	«val cVarOftheInputPrt= root.componentTypes.map[outputPorts.map[connects]]»
 «««	«val cVarOftheInputPrt= root.componentTypes.map[outputPorts.filter[connects]].map[name])»
 	«"\t"»conn_«shortNameFirstCmp»«nameOutgoingPort»_«shortNameSecondCmp»«nameConnctingPort»: "\<And> k «cVarOftheoutputPrt» «cVarOftheInputPrt»\<lbrakk>«shortNameFirstCmp»active «cVarOftheoutputPrt» k; «shortNameSecondCmp»active «cVarOftheoutputPrt» k\<rbrakk> \<Longrightarrow> «shortNameSecondCmp»«nameConnctingPort» («shortNameSecondCmp»cmp «cVarOftheoutputPrt» k) \<in> «shortNameFirstCmp»«nameOutgoingPort» («shortNameFirstCmp»cmp «cVarOftheInputPrt» k)" and«"\n"»  
 	
-	«FOR ctp: root.componentTypes.drop(1)»
-	«val ctParam = ctp.parameters.map[name].toString.replaceAll("[\\[\\],]","")»
-«««	//«val ctParam = ctp.parameters.map[name].toString.replaceAll("[\\[\\],]","")»
 	
-	«IF ctParam !== null»
-	«"\t"»«ctp.ctsname»«»«ctParam»_unique: "\<And> «ctp.ctsname»1  «ctp.ctsname»2. \<lbrakk> «ctp.ctsname»«ctParam» «ctp.ctsname»1 = «ctp.ctsname»«ctParam» «ctp.ctsname»2\<rbrakk> \<Longrightarrow> «ctp.ctsname»1 = «ctp.ctsname»2"
-	«ENDIF»
-	«ENDFOR»
-	
-	
-	 <snctyp><pName>_unique: "\<And> <snctyp>1  <snctyp>2. \<lbrakk> <snctyp><pName> <snctyp>1 = <snctyp><pName> <snctyp>2\<rbrakk> \<Longrightarrow> <snctyp>1 = <snctyp>2"
-	«"\t"»«FOR p: root.componentTypes.map[parameters]» «shortNameFirstCmp»id_ex: "\<And>sid. \<exists>«shortNameFirstCmp». «shortNameFirstCmp»«p.map[name].toString.replaceAll("[\\[\\],]","")» «shortNameFirstCmp» = sid"«ENDFOR»
-«««	«FOR ctp: root.componentTypes»
-«««	«val ctParam = ctp.parameters»
-«««	«IF ctParam !== null»
-«««	«ctp.ctsname»id_ex: "\<And>sid. \<exists>«ctp.ctsname». «ctp.ctsname»«ctParam.map[name]» «ctp.ctsname» = sid"
-«««	«ENDIF»
-«««	«ENDFOR»
 	
 ««« assumption begins	
 	«FOR cta : root.ctaFormulaIds»«"\t"»«cta.name»: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== cta» and «"\n"»«ENDIF»«ENDFOR»
@@ -121,7 +121,14 @@ class IsabelleTextGenerator {
 	  assumes "t \<in> arch"
 	  shows 
 	
-	«FOR ag : root.agFormulaIds»«"\t"»«ag.name»:"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== ag» and «"\n"»«ENDIF»«ENDFOR»
+	«FOR ag : root.agFormulaIds»
+	«"\t"»«ag.name»:"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»
+	«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"
+	«ENDFOR»
+	«IF root.ctaFormulaIds.last() !== ag» and «"\n"»«ENDIF»
+	«ENDFOR»
+	«ENDFOR»
+	
 	
 	...«"\n"»
 	
