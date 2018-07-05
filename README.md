@@ -17,7 +17,7 @@ A working copy of Obeo Designer Community edition should enable the importing of
 [Download Eclipse, Obeo Designer](https://www.obeodesigner.com/en/download) *(Needs installing Obeo Designer Community Extensions)*
 
 [Download FACTum Metamodel Project and Runtime Application](https://goo.gl/fgZN2Y) *(Contains files 'metamodelFACTumS.zip' and 'runtimeFACTumS.zip' )*
-* First, import the project file metamodelFACTumS.zip into your Obeo Designer Community workspace, 
-* The, generate Xtext Artifacts from the file Pattern.xtext. 
-* Next, configure an Eclipse runtime application (e.g., runtimeFACTumS) to launch the tool's application demo and then
-* Import the file runtimeFACTumS.zip into your created Eclipse application (runtimeFACTumS) to try and test the FACTum demo.
+* First, import the project file *('metamodelFACTumS.zip')* into your Obeo Designer Community workspace, 
+* Then, generate Xtext Artifacts from the file Pattern.xtext. 
+* Next, configure an Eclipse runtime application *(e.g., runtimeFACTumS)* to launch the tool's application demo and then
+* Import the file *('runtimeFACTumS.zip')* into your created Eclipse application (runtimeFACTumS) to try and test the FACTum demo.
