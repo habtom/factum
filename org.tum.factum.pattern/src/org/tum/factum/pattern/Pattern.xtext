@@ -149,18 +149,11 @@ CtaBinaryFormulas:
 CtaQuantifiedFormulas:
 	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
 ;
-CtaBeginParentheses:
-	begin='(' 
-;
-CtaEndParentheses: 
-	end=')' 
-;
-CtaFormulaParentheses:
-	ctaBeginParentheses=CtaBeginParentheses  ctaFormulaParentheses=CtaFormula	ctaEndParentheses=CtaEndParentheses
+CtaFP:
+	'(' ctaFormula=CtaFormula ')'
 ;
 CtaFormula:
-//	ctaBeginParentheses=CtaBeginParentheses
-//	(
+	//ctaFP=CtaFP |
 	ctaPredicateTerms=CtaPredicateTerms | 
 	ctaPredicateConn=CtaPredicateConn | 
 	ctaPredicateVal=CtaPredicateVal | 
@@ -169,9 +162,7 @@ CtaFormula:
 	ctaPredicatePAct=CtaPredicatePAct |
 	ctaUnaryFormulas=CtaUnaryFormulas | 
 	ctaBinaryFormulas=CtaBinaryFormulas |  
-	ctaQuantifiedFormulas=CtaQuantifiedFormulas //| CtaFormulaParentheses
-//	)
-//	ctaEndParentheses=CtaEndParentheses
+	ctaQuantifiedFormulas=CtaQuantifiedFormulas 
 ;
 CtaFormulasID:
 	name=ID ':' ctaFormula=CtaFormula
@@ -206,18 +197,7 @@ AgBinaryFormulas:
 AgQuantifiedFormulas:
 	quantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula 
 ;
-AgBeginParentheses:
-	begin='(' 
-;
-AgEndParentheses: 
-	end=')' 
-;
-AgFormulaParentheses:
-	agBeginParentheses=AgBeginParentheses  agFormulaParentheses=AgFormula	agEndParentheses=AgEndParentheses
-;
 AgFormula:
-//	agBeginParentheses=AgBeginParentheses
-//	(
 	agPredicateTerms=AgPredicateTerms | 
 	agPredicateConn=AgPredicateConn | 
 	agPredicateVal=AgPredicateVal | 
@@ -226,9 +206,7 @@ AgFormula:
 	agPredicatePAct=AgPredicatePAct |
 	agUnaryFormulas=AgUnaryFormulas | 
 	agBinaryFormulas=AgBinaryFormulas |  
-	agQuantifiedFormulas=AgQuantifiedFormulas //| AgFormulaParentheses
-//	)
-//	agEndParentheses=CtaEndParentheses
+	agQuantifiedFormulas=AgQuantifiedFormulas
 ;
 AgFormulasID:
 	name=ID ':' agFormula=AgFormula
