@@ -183,6 +183,7 @@ BaseTerms returns CtaFormula:
 	ctaPredicatePAct=CtaPredicatePAct
 ;
 //EndCtaFormulaExpression
+
 CtaFormulasID:
 	name=ID ':' ctaFormula=CtaFormula
 ;
@@ -226,6 +227,14 @@ AgFormula:
 	agUnaryFormulas=AgUnaryFormulas | 
 	agBinaryFormulas=AgBinaryFormulas |  
 	agQuantifiedFormulas=AgQuantifiedFormulas
+;
+AgBaseTerms returns AgFormula:
+	agPredicateTerms=AgPredicateTerms | 
+	agPredicateConn=AgPredicateConn | 
+	agPredicateVal=AgPredicateVal | 
+	agPredicateEq=AgPredicateEq |
+	agPredicateCAct=AgPredicateCAct | 
+	agPredicatePAct=AgPredicatePAct
 ;
 AgFormulasID:
 	name=ID ':' agFormula=AgFormula
