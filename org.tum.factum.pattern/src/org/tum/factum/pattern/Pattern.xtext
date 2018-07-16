@@ -122,6 +122,8 @@ RefComponentVariableOutputPort:
 //End
 
 //Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
+
+//BeginBaseTerms
 CtaPredicateTerms:
 	ctaPTerm1=Term equalityOperator=EqualityElementOperator ctaPTerm2=Term
 ;
@@ -140,30 +142,47 @@ CtaPredicateCAct:
 CtaPredicatePAct:
 	pAct='pAct' ('(' pActCtaCmpVaref=CmpVariableRef ')') 
 ;
-CtaUnaryFormulas:
+//EndBaseTerms
+
+//BeginCtaFormulaExpression
+CtaFormula:
+	ctaUnaryFormulas=CtaUnaryFormulas | 
+	ctaBinaryFormulas=CtaBinaryFormulas |  
+	ctaQuantifiedFormulas=CtaQuantifiedFormulas
+;
+CtaUnaryFormulas returns CtaFormula:
 	unaryOperator=UnaryOperator  ctaFormulaLtl=CtaFormula
 ;
-CtaBinaryFormulas:
-	'('(ctaFormulaLgk+=CtaFormula (binaryOperator+=BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')'
+//CtaBinaryFormulas returns CtaFormula:
+//	'('(ctaFormulaLgk+=CtaFormula (binaryOperator+=BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')'
+//;
+CtaQuantifiedFormulas returns CtaFormula:
+	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaPrimary 
+	//quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
 ;
-CtaQuantifiedFormulas:
-	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
+//CtaFP returns CtaFormula:
+//	'(' ctaFormula=CtaFormula ')'
+//;
+
+CtaBinaryFormulas returns CtaFormula:
+	CtaPrimary (
+		{CtaBinaryFormulas.left=current} binaryOperator=BinaryOperator right=CtaPrimary 
+		)*
 ;
-CtaFP:
-	'(' ctaFormula=CtaFormula ')'
+
+CtaPrimary returns CtaFormula:
+	'(' ctaFormula=CtaFormula ')' | BaseTerms
+	//'(' ctaFormula=CtaFormula ')' | BaseTerms
 ;
-CtaFormula:
-	//ctaFP=CtaFP |
+BaseTerms returns CtaFormula:
 	ctaPredicateTerms=CtaPredicateTerms | 
 	ctaPredicateConn=CtaPredicateConn | 
 	ctaPredicateVal=CtaPredicateVal | 
-	ctaPredicateEq=CtaPredicateEq | 
+	ctaPredicateEq=CtaPredicateEq | //This might be duplicate to CtaPredicateTerms?
 	ctaPredicateCAct=CtaPredicateCAct | 
-	ctaPredicatePAct=CtaPredicatePAct |
-	ctaUnaryFormulas=CtaUnaryFormulas | 
-	ctaBinaryFormulas=CtaBinaryFormulas |  
-	ctaQuantifiedFormulas=CtaQuantifiedFormulas 
+	ctaPredicatePAct=CtaPredicatePAct
 ;
+//EndCtaFormulaExpression
 CtaFormulasID:
 	name=ID ':' ctaFormula=CtaFormula
 ;
