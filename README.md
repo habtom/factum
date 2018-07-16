@@ -8,10 +8,16 @@ At this stage of development, the tool has the following key features mainly for
 * Graphical modeling of component types
 * Specification of architectural constraints 
 * Specification of architectural guarantees and
-* Generattion of Isabelle/HOL theory from ADP specification.
+* Generation of Isabelle/HOL theory from ADP specification.
 
-The tool is developed using the Eclipse Modeling Framework (EMF) and supporting languages xtext and xtend. 
+The tool is developed using the Eclipse Modeling Framework (EMF), which includes Sirius, Xtext, and Xtend.  
 
-You may download and try a working demo of the FACTum Studio. 
+A working copy of Obeo Designer Community edition should enable the importing of the FACTum tool metamodel project and runtime sample to start and try the tool. You may download files required from the following links:
 
-[Link to Download](https://goo.gl/fgZN2Y) *(The copy works on Linux systems.)*
+* [Download Eclipse, Obeo Designer](https://www.obeodesigner.com/en/download) *(Needs installing Obeo Designer Community Extensions)*
+
+* [Download FACTum Metamodel Project and Runtime Application](https://goo.gl/fgZN2Y) *(Contains files 'metamodelFACTumS.zip' and 'runtimeFACTumS.zip' )*
+  * First, import the project file *'metamodelFACTumS.zip'* into your Obeo Designer Community workspace, 
+  * Then, generate Xtext Artifacts from the file Pattern.xtext. 
+  * Next, configure an Eclipse runtime application *(e.g., runtimeFACTumS)* to launch the tool's application demo and then
+  * Import the file *'runtimeFACTumS.zip'* into your created Eclipse application (runtimeFACTumS) to try and test the FACTum demo.
