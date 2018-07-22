@@ -9,7 +9,7 @@ Pattern returns Pattern:
 		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
 		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
  
-	    ('ArchSpec' '{' 
+	    ('ArchSpec' '{'
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
 	    	ctaDtVars=DTVariables 														//Declaration of DT Variables
 
@@ -36,7 +36,6 @@ ComponentType returns ComponentType:
 	    
 	    ('BTA' '{' //Behavior Trace Assertions (BTA)
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
-	    	
 			(btaFormulaIds+=BtaFormulasID)*
 	    )?
 	'}'
@@ -122,7 +121,6 @@ RefComponentVariableOutputPort:
 //End
 
 //Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
-
 //BeginBaseTerms
 CtaPredicateTerms:
 	ctaPTerm1=Term equalityOperator=EqualityElementOperator ctaPTerm2=Term
@@ -145,61 +143,37 @@ CtaPredicatePAct:
 //EndBaseTerms
 
 //BeginCtaFormulaExpression
-CtaFormula:
+CtaFormula returns CtaFormula:
 	ctaUnaryFormulas=CtaUnaryFormulas | 
-	ctaBinaryFormulas=CtaBinaryFormulaUntil |  
+	ctaBinaryFormulas=CtaBinaryFormulas |
 	ctaQuantifiedFormulas=CtaQuantifiedFormulas
 ;
 CtaUnaryFormulas returns CtaFormula:
-	unaryOperator=UnaryOperator ctaFormulaLtl=CtaFormula
-;
-//CtaBinaryFormulas returns CtaFormula:
-//	'('(ctaFormulaLgk+=CtaFormula (binaryOperator+=BinaryOperator ctaFormulaLgk+=CtaFormula)*) ')'
-//;
-CtaQuantifiedFormulas returns CtaFormula:
-	//quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaPrimary 
-	quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula 
+	{CtaUnaryFormulas} (unaryOperator=UnaryOperator ctaFormulaLtl=CtaFormula)
 ;
 
-//
-CtaBinaryFormulaUntil returns CtaFormula:
-	CtaBinaryFormulaImplies (
-		{CtaBinaryFormulaUntil.left=current} binaryOperatorUntil=BinaryOperatorUntil right=CtaBinaryFormulaImplies 
+CtaQuantifiedFormulas:
+ 	{CtaQuantifiedFormulas} (quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula)
+;
+CtaBinaryFormulas returns CtaFormula:
+	{CtaBinaryFormulas}	
+	ctaPrimary=CtaPrimary (
+		{CtaBinaryFormulas.left=current} binaryOperator=BinaryOperator right=CtaPrimary 
 		)*
 ;
-CtaBinaryFormulaImplies returns CtaFormula:
-	CtaBinaryFormulaOr (
-		{CtaBinaryFormulaImplies.left=current} binaryOperatorImplies=BinaryOperatorImplies right=CtaBinaryFormulaOr 
-		)*
-;
-CtaBinaryFormulaOr returns CtaFormula:
-	CtaBinaryFormulaAnd (
-		{CtaBinaryFormulaOr.left=current} binaryOperatorOr=BinaryOperatorOr right=CtaBinaryFormulaAnd 
-		)*
-;
-CtaBinaryFormulaAnd returns CtaFormula:
-	CtaPrimary (
-		{CtaBinaryFormulaAnd.left=current} binaryOperatorAnd=BinaryOperatorAnd right=CtaPrimary 
-		)*
-;
-
-//CtaBinaryFormulas returns CtaFormula:
-//	CtaPrimary (
-//		{CtaBinaryFormulas.left=current} binaryOperator=BinaryOperator right=CtaPrimary 
-//		)*
-//;
-
 CtaPrimary returns CtaFormula:
-	'(' ctaFormula=CtaFormula ')' | BaseTerms
-	//'(' ctaFormula=CtaFormula ')' | BaseTerms
+	(ctaFormulaWithBracket=CtaFormulaWithBracket | ctaBaseTerms=CtaBaseTerms)
 ;
-BaseTerms returns CtaFormula:
-	ctaPredicateTerms=CtaPredicateTerms | 
-	ctaPredicateConn=CtaPredicateConn | 
-	ctaPredicateVal=CtaPredicateVal | 
-	ctaPredicateEq=CtaPredicateEq | //This might be duplicate to CtaPredicateTerms?
-	ctaPredicateCAct=CtaPredicateCAct | 
-	ctaPredicatePAct=CtaPredicatePAct
+CtaFormulaWithBracket:
+	leftBracket='(' ctaPrimaryFormula=CtaFormula rightBracket=')'
+;
+CtaBaseTerms:
+		ctaPredicateTerms=CtaPredicateTerms | 
+		ctaPredicateConn=CtaPredicateConn | 
+		ctaPredicateVal=CtaPredicateVal | 
+		ctaPredicateEq=CtaPredicateEq | //This might be duplicate to CtaPredicateTerms?
+		ctaPredicateCAct=CtaPredicateCAct | 
+		ctaPredicatePAct=CtaPredicatePAct 
 ;
 //EndCtaFormulaExpression
 
@@ -237,14 +211,7 @@ AgQuantifiedFormulas:
 	quantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula 
 ;
 AgFormula:
-	agPredicateTerms=AgPredicateTerms | 
-	agPredicateConn=AgPredicateConn | 
-	agPredicateVal=AgPredicateVal | 
-	agPredicateEq=AgPredicateEq | 
-	agPredicateCAct=AgPredicateCAct | 
-	agPredicatePAct=AgPredicatePAct |
 	agUnaryFormulas=AgUnaryFormulas | 
-	//agBinaryFormulas=AgBinaryFormulas |  
 	agQuantifiedFormulas=AgQuantifiedFormulas
 ;
 AgBaseTerms returns AgFormula:
@@ -298,12 +265,15 @@ UnaryOperator:
 	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
 	neg='¬' // Negation logic operator
 ;
-//BinaryOperator: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
-//	lAnd='∧' | 
-//	lDisjunct='∨' |
-//	lImplies='⇒' | lDoubleImplies='⇔' | 
-//	lWeakUntil='W' | lUntil='U' 
-//;
+BinaryOperator: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
+
+	lAnd='∧' | 
+	lDisjunct='∨' |
+	lImplies='⇒' | lDoubleImplies='⇔' |
+	lWeakUntil='W' | lUntil='U' 
+
+;
+/*
 BinaryOperatorOr: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
 	lDisjunct='∨'
 ;
@@ -314,11 +284,13 @@ BinaryOperatorImplies:
 	lImplies='⇒' | lDoubleImplies='⇔'
 ;
 BinaryOperatorUntil:
-	lWeakUntil='W' | lUntil='U' 
+	lWeakUntil='W' | lUntil='U'
 ;
+*/
 EqualityElementOperator: //Maybe not needed (check?)
 	'='
 ;
+
 QuantifierOperator:
 	exists='∃'quantifiedExistsVar=[ComponentVariable|ID]'.' | all='∀'quantifiedAllVar=[ComponentVariable|ID]'.'
 ;
