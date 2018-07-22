@@ -13,6 +13,8 @@ import org.tum.factum.pattern.pattern.Pattern
 import org.tum.factum.pattern.pattern.UnaryOperator
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
+import org.tum.factum.pattern.pattern.CtaBinaryFormulas
+import org.tum.factum.pattern.pattern.BinaryOperator
 
 class IsabelleTextGenerator {
 
@@ -131,9 +133,30 @@ class IsabelleTextGenerator {
 		«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»
 		«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
 		«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
+		«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»
 		
 		
-		
+		'''
+	}
+	def static generateBinary(BinaryOperator binaryOp){
+		return '''	
+		«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»
+		«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»
+		«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»
+		«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»
+		«IF binaryOp.LWeakUntil == 'W'»\<WW>\<^sub>c «ENDIF»
+		«IF binaryOp.LUntil == 'U'»\<UU>\<^sup>c «ENDIF»
+		'''
+	}
+	def dispatch static generateFormula(CtaBinaryFormulas ctabf){
+		return '''
+		«IF ctabf.binaryOperator !== null»
+			«mapFormula(ctabf.left)»  
+				«generateBinary(ctabf.binaryOperator)»
+			«mapFormula(ctabf.right)»
+		«ENDIF»
+		«IF ctabf.ctaFormulaWithBracket !== null && ctabf.ctaFormulaWithBracket.ctaPrimaryFormula !== null»«mapFormula(ctabf.ctaFormulaWithBracket.ctaPrimaryFormula)»«ENDIF»
+		«IF ctabf.ctaPrimary !== null»«mapFormula(ctabf.ctaPrimary)»«ENDIF»
 		'''
 	}
 	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq) {
