@@ -171,11 +171,7 @@ class IsabelleTextGenerator {
 		'''
 	}
 	def dispatch static generateFormula(CtaFormulaWithBracket fwb){
-		return '''	
-			«IF fwb.leftBracket == '('»(«ENDIF»
-			«mapFormula(fwb.ctaPrimaryFormula)»
-			«IF fwb.rightBracket == ')'»)«ENDIF»
-		'''
+		return '''«IF fwb.leftBracket == '('»(«ENDIF»	«mapFormula(fwb.ctaPrimaryFormula)»«IF fwb.rightBracket == ')'»)«ENDIF»'''
 	}
 	def static generateUnary(UnaryOperator opvalue){
 		return '''
