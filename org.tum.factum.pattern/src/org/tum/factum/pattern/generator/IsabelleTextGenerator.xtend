@@ -130,12 +130,14 @@ class IsabelleTextGenerator {
 	//CTA Dispatches
 	def static Object mapFormula(CtaFormula cf){
 		return '''
-		«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»
-		«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
-		«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
-		«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»
-		
-		
+		«IF cf instanceof CtaBinaryFormulas»
+			«generateFormula(cf as CtaBinaryFormulas)»
+		«ELSE»
+			«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»
+			«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
+			«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
+			«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»
+		«ENDIF»
 		'''
 	}
 	def static generateBinary(BinaryOperator binaryOp){
