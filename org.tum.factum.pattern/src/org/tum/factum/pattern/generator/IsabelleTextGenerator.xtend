@@ -130,16 +130,7 @@ class IsabelleTextGenerator {
 	'''
 	//CTA Dispatches
 	def static Object mapFormula(CtaFormula cf){
-		return '''
-		«IF cf instanceof CtaBinaryFormulas»
-			«generateFormula(cf as CtaBinaryFormulas)»
-		«ELSE»
-			«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»
-			«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
-			«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
-			«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»«IF cf.ctaFormulaWithBracket !== null»«generateFormula(cf.ctaFormulaWithBracket)»«ENDIF»
-		«ENDIF»
-		'''
+		return '''«IF cf instanceof CtaBinaryFormulas»«generateFormula(cf as CtaBinaryFormulas)»«ELSE»«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»«IF cf.ctaFormulaWithBracket !== null»«generateFormula(cf.ctaFormulaWithBracket)»«ENDIF»«ENDIF»'''
 	}
 	def static generateBinary(BinaryOperator binaryOp){
 		return '''«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LWeakUntil == 'W'»\<WW>\<^sub>c «ENDIF»«IF binaryOp.LUntil == 'U'»\<UU>\<^sup>c «ENDIF»'''
@@ -147,42 +138,20 @@ class IsabelleTextGenerator {
 	def dispatch static generateFormula(CtaBinaryFormulas ctabf){
 		return '''«IF ctabf.binaryOperator !== null»«mapFormula(ctabf.left)» «generateBinary(ctabf.binaryOperator)» «mapFormula(ctabf.right)»«ENDIF»«IF ctabf.ctaFormulaWithBracket !== null && ctabf.ctaFormulaWithBracket.ctaPrimaryFormula !== null»«mapFormula(ctabf.ctaFormulaWithBracket.ctaPrimaryFormula)»«ENDIF»«IF ctabf.ctaPrimary !== null»«mapFormula(ctabf.ctaPrimary)»«ENDIF»'''
 	}
-	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq) {
-		'''
-		«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «ctaq.quantifierOperator.quantifiedExistsVar.name». «ENDIF»
-		«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «ctaq.quantifierOperator.quantifiedAllVar.name». «ENDIF»
-		«mapFormula(ctaq.ctaQuantifiedFs)»
-		'''
+	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq){
+		'''«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «ctaq.quantifierOperator.quantifiedExistsVar.name». «ENDIF»«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «ctaq.quantifierOperator.quantifiedAllVar.name». «ENDIF»«mapFormula(ctaq.ctaQuantifiedFs)»'''
 	}
 	def dispatch static generateFormula(CtaFormulaWithBracket fwb){
 		return '''«IF fwb.leftBracket == '('»(«ENDIF»«mapFormula(fwb.ctaPrimaryFormula)»«IF fwb.rightBracket == ')'»)«ENDIF»'''
 	}
 	def static generateUnary(UnaryOperator opvalue){
-		return '''
-		(\«IF opvalue.ltlG == 'G'»<box>\<^sub>c «ENDIF»
-		«IF opvalue.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»
-		«IF opvalue.ltlF == 'X'»<circle>\<^sub>c «ENDIF»
-		'''
+		return '''(\«IF opvalue.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'X'»<circle>\<^sub>c «ENDIF»'''
 	}
 	def dispatch static generateFormula(CtaUnaryFormulas ctau){
-		'''
-		«IF ctau.unaryOperator !== null»
-			«generateUnary(ctau.unaryOperator)»
-		«ENDIF»
-		«IF ctau.ctaFormulaLtl !== null»
-			«mapFormula(ctau.ctaFormulaLtl)»
-		«ENDIF»
-		«IF ctau.ctaBaseTerms !== null»«generateBaseTerms(ctau.ctaBaseTerms)»«ENDIF»
-		'''
+		'''«IF ctau.unaryOperator !== null»«generateUnary(ctau.unaryOperator)»«ENDIF»«IF ctau.ctaFormulaLtl !== null»«mapFormula(ctau.ctaFormulaLtl)»«ENDIF»«IF ctau.ctaBaseTerms !== null»«generateBaseTerms(ctau.ctaBaseTerms)»«ENDIF»'''
 	}
 	def static generateBaseTerms(CtaBaseTerms baseTerms){
-		return '''«IF baseTerms.ctaPredicateCAct !== null»«generateFormula(baseTerms.ctaPredicateCAct)»«ENDIF»
-		«IF baseTerms.ctaPredicatePAct !== null»«generateFormula(baseTerms.ctaPredicatePAct)»«ENDIF»
-		«IF baseTerms.ctaPredicateTerms !== null»«generateFormula(baseTerms.ctaPredicateTerms)»«ENDIF»
-		«IF baseTerms.ctaPredicateConn !== null»«generateFormula(baseTerms.ctaPredicateConn)»«ENDIF»
-		«IF baseTerms.ctaPredicateVal !== null»«generateFormula(baseTerms.ctaPredicateVal)»«ENDIF»
-		«IF baseTerms.ctaPredicateEq !== null»«generateFormula(baseTerms.ctaPredicateEq)»«ENDIF»
-		'''
+		return '''«IF baseTerms.ctaPredicateCAct !== null»«generateFormula(baseTerms.ctaPredicateCAct)»«ENDIF»«IF baseTerms.ctaPredicatePAct !== null»«generateFormula(baseTerms.ctaPredicatePAct)»«ENDIF»«IF baseTerms.ctaPredicateTerms !== null»«generateFormula(baseTerms.ctaPredicateTerms)»«ENDIF»«IF baseTerms.ctaPredicateConn !== null»«generateFormula(baseTerms.ctaPredicateConn)»«ENDIF»«IF baseTerms.ctaPredicateVal !== null»«generateFormula(baseTerms.ctaPredicateVal)»«ENDIF»«IF baseTerms.ctaPredicateEq !== null»«generateFormula(baseTerms.ctaPredicateEq)»«ENDIF»'''
 	}
 	def dispatch static generateFormula(CtaPredicateTerms ctat){
 		val ctpTerm2Op = ctat.ctaPTerm2.termOperatorFunction.trmOperator.name
