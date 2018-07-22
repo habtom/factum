@@ -94,6 +94,7 @@ DTVariables:
 ;
 PortRef:
 	InputPort | OutputPort | Parameter
+	//inp=InputPort | outp=OutputPort | par=Parameter
 ;
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
@@ -183,6 +184,7 @@ CtaFormulasID:
 // End CTA
 
 // Begin Architectural Guarantee
+//BeginBaseTerms
 AgPredicateTerms:
 	agPTerm1=Term equalityOperator=EqualityElementOperator agPTerm2=Term
 ;
@@ -201,27 +203,42 @@ AgPredicateCAct:
 AgPredicatePAct:
 	pAct='pAct' ('(' pActAgCmpVaref=CmpVariableRef ')') 
 ;
-AgUnaryFormulas:
-	unaryOperator=UnaryOperator  agFormulaLtl=AgFormula
-;
-//AgBinaryFormulas:
-//	'('(agFormulaLgk+=AgFormula (binaryOperator+=BinaryOperator agFormulaLgk+=AgFormula)*) ')'
-//;
-AgQuantifiedFormulas:
-	quantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula 
-;
-AgFormula:
+//EndBaseTerms
+
+//BeginAgFormulaExpression
+AgFormula returns AgFormula:
 	agUnaryFormulas=AgUnaryFormulas | 
+	agBinaryFormulas=AgBinaryFormulas |
 	agQuantifiedFormulas=AgQuantifiedFormulas
 ;
-AgBaseTerms returns AgFormula:
-	agPredicateTerms=AgPredicateTerms | 
-	agPredicateConn=AgPredicateConn | 
-	agPredicateVal=AgPredicateVal | 
-	agPredicateEq=AgPredicateEq |
-	agPredicateCAct=AgPredicateCAct | 
-	agPredicatePAct=AgPredicatePAct
+AgUnaryFormulas returns AgFormula:
+	{AgUnaryFormulas} (unaryOperator=UnaryOperator agFormulaLtl=AgFormula)
 ;
+
+AgQuantifiedFormulas:
+ 	{AgQuantifiedFormulas} (quantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula)
+;
+AgBinaryFormulas returns AgFormula:
+	{AgBinaryFormulas}	
+	agPrimary=AgPrimary (
+		{AgBinaryFormulas.left=current} binaryOperator=BinaryOperator right=AgPrimary 
+		)*
+;
+AgPrimary returns AgFormula:
+	(agFormulaWithBracket=AgFormulaWithBracket | agBaseTerms=AgBaseTerms)
+;
+AgFormulaWithBracket:
+	leftBracket='(' agPrimaryFormula=AgFormula rightBracket=')'
+;
+AgBaseTerms:
+		agPredicateTerms=AgPredicateTerms | 
+		agPredicateConn=AgPredicateConn | 
+		agPredicateVal=AgPredicateVal | 
+		agPredicateEq=AgPredicateEq | //This might be duplicate to AgPredicateTerms?
+		agPredicateCAct=AgPredicateCAct | 
+		agPredicatePAct=AgPredicatePAct 
+;
+//EndAgFormulaExpression
 AgFormulasID:
 	name=ID ':' agFormula=AgFormula
 ;
