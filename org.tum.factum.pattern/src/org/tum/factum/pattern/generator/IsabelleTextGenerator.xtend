@@ -137,31 +137,15 @@ class IsabelleTextGenerator {
 			«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»
 			«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
 			«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
-			«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»
-			«IF cf.ctaFormulaWithBracket !== null»«generateFormula(cf.ctaFormulaWithBracket)»«ENDIF»
+			«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»«IF cf.ctaFormulaWithBracket !== null»«generateFormula(cf.ctaFormulaWithBracket)»«ENDIF»
 		«ENDIF»
 		'''
 	}
 	def static generateBinary(BinaryOperator binaryOp){
-		return '''	
-		«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»
-		«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»
-		«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»
-		«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»
-		«IF binaryOp.LWeakUntil == 'W'»\<WW>\<^sub>c «ENDIF»
-		«IF binaryOp.LUntil == 'U'»\<UU>\<^sup>c «ENDIF»
-		'''
+		return '''«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LWeakUntil == 'W'»\<WW>\<^sub>c «ENDIF»«IF binaryOp.LUntil == 'U'»\<UU>\<^sup>c «ENDIF»'''
 	}
 	def dispatch static generateFormula(CtaBinaryFormulas ctabf){
-		return '''
-		«IF ctabf.binaryOperator !== null»
-			«mapFormula(ctabf.left)»  
-				«generateBinary(ctabf.binaryOperator)»
-			«mapFormula(ctabf.right)»
-		«ENDIF»
-		«IF ctabf.ctaFormulaWithBracket !== null && ctabf.ctaFormulaWithBracket.ctaPrimaryFormula !== null»«mapFormula(ctabf.ctaFormulaWithBracket.ctaPrimaryFormula)»«ENDIF»
-		«IF ctabf.ctaPrimary !== null»«mapFormula(ctabf.ctaPrimary)»«ENDIF»
-		'''
+		return '''«IF ctabf.binaryOperator !== null»«mapFormula(ctabf.left)» «generateBinary(ctabf.binaryOperator)» «mapFormula(ctabf.right)»«ENDIF»«IF ctabf.ctaFormulaWithBracket !== null && ctabf.ctaFormulaWithBracket.ctaPrimaryFormula !== null»«mapFormula(ctabf.ctaFormulaWithBracket.ctaPrimaryFormula)»«ENDIF»«IF ctabf.ctaPrimary !== null»«mapFormula(ctabf.ctaPrimary)»«ENDIF»'''
 	}
 	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq) {
 		'''
@@ -171,7 +155,7 @@ class IsabelleTextGenerator {
 		'''
 	}
 	def dispatch static generateFormula(CtaFormulaWithBracket fwb){
-		return '''«IF fwb.leftBracket == '('»(«ENDIF»	«mapFormula(fwb.ctaPrimaryFormula)»«IF fwb.rightBracket == ')'»)«ENDIF»'''
+		return '''«IF fwb.leftBracket == '('»(«ENDIF»«mapFormula(fwb.ctaPrimaryFormula)»«IF fwb.rightBracket == ')'»)«ENDIF»'''
 	}
 	def static generateUnary(UnaryOperator opvalue){
 		return '''
@@ -192,8 +176,7 @@ class IsabelleTextGenerator {
 		'''
 	}
 	def static generateBaseTerms(CtaBaseTerms baseTerms){
-		return '''
-		«IF baseTerms.ctaPredicateCAct !== null»«generateFormula(baseTerms.ctaPredicateCAct)»«ENDIF»
+		return '''«IF baseTerms.ctaPredicateCAct !== null»«generateFormula(baseTerms.ctaPredicateCAct)»«ENDIF»
 		«IF baseTerms.ctaPredicatePAct !== null»«generateFormula(baseTerms.ctaPredicatePAct)»«ENDIF»
 		«IF baseTerms.ctaPredicateTerms !== null»«generateFormula(baseTerms.ctaPredicateTerms)»«ENDIF»
 		«IF baseTerms.ctaPredicateConn !== null»«generateFormula(baseTerms.ctaPredicateConn)»«ENDIF»
