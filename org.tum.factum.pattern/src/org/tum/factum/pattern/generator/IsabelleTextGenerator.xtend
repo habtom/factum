@@ -10,6 +10,8 @@ import org.tum.factum.pattern.pattern.CtaPredicatePAct
 import org.tum.factum.pattern.pattern.CtaPredicateTerms
 import org.tum.factum.pattern.pattern.CtaPredicateVal
 import org.tum.factum.pattern.pattern.Pattern
+import org.tum.factum.pattern.pattern.UnaryOperator
+import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 
 class IsabelleTextGenerator {
 
@@ -126,6 +128,27 @@ class IsabelleTextGenerator {
 	def static Object mapFormula(CtaFormula cf){
 		return '''
 		«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»
+		«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
+		
+		
+		'''
+	}
+	def static generateUnary(UnaryOperator opvalue) {
+		return '''
+		(\«IF opvalue.ltlG == 'G'»<box>\<^sub>c «ENDIF»
+		«IF opvalue.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»
+		«IF opvalue.ltlF == 'X'»<circle>\<^sub>c «ENDIF»
+		'''
+	}
+	def dispatch static generateFormula(CtaUnaryFormulas ctau) {
+		'''
+		«IF ctau.unaryOperator !== null»
+			«generateUnary(ctau.unaryOperator)»
+		«ENDIF»
+		«IF ctau.ctaFormulaLtl !== null»
+			«mapFormula(ctau.ctaFormulaLtl)»
+		«ENDIF»
+		«IF ctau.ctaBaseTerms !== null»«generateBaseTerms(ctau.ctaBaseTerms)»«ENDIF»
 		'''
 	}
 	def static generateBaseTerms(CtaBaseTerms baseTerms){
