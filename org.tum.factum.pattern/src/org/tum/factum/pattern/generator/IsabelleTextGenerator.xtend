@@ -12,6 +12,7 @@ import org.tum.factum.pattern.pattern.CtaPredicateVal
 import org.tum.factum.pattern.pattern.Pattern
 import org.tum.factum.pattern.pattern.UnaryOperator
 import org.tum.factum.pattern.pattern.CtaUnaryFormulas
+import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 
 class IsabelleTextGenerator {
 
@@ -129,18 +130,27 @@ class IsabelleTextGenerator {
 		return '''
 		«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»
 		«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»
+		«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»
+		
 		
 		
 		'''
 	}
-	def static generateUnary(UnaryOperator opvalue) {
+	def dispatch static generateFormula(CtaQuantifiedFormulas ctaq) {
+		'''
+		«IF ctaq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «ctaq.quantifierOperator.quantifiedExistsVar.name». «ENDIF»
+		«IF ctaq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «ctaq.quantifierOperator.quantifiedAllVar.name». «ENDIF»
+		«mapFormula(ctaq.ctaQuantifiedFs)»
+		'''
+	}
+	def static generateUnary(UnaryOperator opvalue){
 		return '''
 		(\«IF opvalue.ltlG == 'G'»<box>\<^sub>c «ENDIF»
 		«IF opvalue.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»
 		«IF opvalue.ltlF == 'X'»<circle>\<^sub>c «ENDIF»
 		'''
 	}
-	def dispatch static generateFormula(CtaUnaryFormulas ctau) {
+	def dispatch static generateFormula(CtaUnaryFormulas ctau){
 		'''
 		«IF ctau.unaryOperator !== null»
 			«generateUnary(ctau.unaryOperator)»
