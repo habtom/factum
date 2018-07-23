@@ -28,6 +28,9 @@ import org.tum.factum.pattern.pattern.AgFormulaWithBracket
 import org.tum.factum.pattern.pattern.AgQuantifiedFormulas
 import org.tum.factum.pattern.pattern.AgBinaryFormulas
 import org.tum.factum.pattern.pattern.AgFormula
+import org.tum.factum.pattern.pattern.OutputPort
+import org.tum.factum.pattern.pattern.InputPort
+import org.tum.factum.pattern.pattern.PortRef
 
 class IsabelleTextGenerator {
 
@@ -198,16 +201,21 @@ class IsabelleTextGenerator {
 		
 		//val valCmpVarOutputPort = ctapval.valCmpVariableRef.portRef.outp.name
 		
+		val valTermCmpVariableRef = ctapval.ctaValTerms.cmpVariableRef
+		
+		
 		val valCmpParm = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name
 		val valOpsDtVar = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name //[null, org.tum.factum.pattern.pattern.impl.DataTypeVariableImpl@16bde57e (name: e)]
 		'''«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
+
 //		'''
 //		«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»
 //		ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))
 //		«ELSE»
 //		x
 //		«ENDIF»
-//		
+//		'''«IF ctapval.ctaVal == 'val' && valTermCmpVariableRef !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
+
 //		'''
 		//'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
 		}
@@ -259,15 +267,57 @@ class IsabelleTextGenerator {
 		'''«IF agconn.agConn == 'conn'»ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \<in> «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
 	}
 	def dispatch static generateFormula(AgPredicateVal agpval){
+		
+		
+		//begin first input of val (valCmpVariableRef)
 		val valCmpTypShortName = agpval.valCmpVariableRef.cmpRef.cmptypAssigned.ctsname
-		val valOps = agpval.agValTerms.termOperatorFunction.trmOperator.name
-		val valCmpVar0 = agpval.valCmpVariableRef.cmpRef.name
-		val valCmpVarInputPort = agpval.valCmpVariableRef.portRef.name
-		val valCmpParm = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name
-		val valOpsDtVar = agpval.agValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name
-		'''«IF agpval.agVal == 'val' && valCmpVarInputPort !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
-		//'''(\«IF agpval.agVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
+		val valCmpVarFirstInpt = agpval.valCmpVariableRef.cmpRef.name
+		//val valCmpVarPort = agpval.valCmpVariableRef.portRef.
+//		if (valCmpVarPort instanceof InputPort) valCmpVarInputPort = valCmpVarPort as InputPort
+		
+		val valCmpPortRef = agpval.valCmpVariableRef.portRef
+		
+		
+		//end first input of val (valCmpVariableRef
+		
+		//second input of val (agValTerms)
+
+		
+
+		
+		//val valTermCmpVariableRef = agpval.agValTerms.cmpVariableRef  //to check value
+		
+
+		
+		
+		if (agpval.valCmpVariableRef !== null && agpval.agValTerms !== null) {
+			switch  valCmpPortRef {
+	    		
+	        InputPort : {
+	        	val valCmpVarInputPort = agpval.valCmpVariableRef.portRef as InputPort
+	        	
+				'''«IF agpval.agVal == 'val' && agpval.agValTerms.termOperatorFunction !== null && valCmpVarInputPort !== null && agpval.agValTerms.termOperatorFunction.trmOperator !== null»«val valOps = agpval.agValTerms.termOperatorFunction.trmOperator.name»«val valOpsDtVar = agpval.agValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name»«val valCmpParm = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name»«val valTermCmpTypShortNameSecondInpt = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.ctsname»«val valTermCmpVarSecondInpt = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.name»ca (\<lambda>c. («valOps» («valTermCmpTypShortNameSecondInpt»«valCmpParm» («valTermCmpTypShortNameSecondInpt»cmp «valTermCmpVarSecondInpt» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c))))
+				««« Inputport Case with cmpvar portref as second input
+				«ELSEIF agpval.agVal == 'val' && valCmpVarInputPort !== null && agpval.agValTerms.cmpVariableRef !== null && agpval.agValTerms.cmpVariableRef.cmpRef !== null »«val valCmpPortSecondInpt = agpval.agValTerms.cmpVariableRef.portRef.name»«val valCmpTypShortNameSecondInpt = agpval.agValTerms.cmpVariableRef.cmpRef.cmptypAssigned.ctsname»«val valCmpVarSecondInpt = agpval.agValTerms.cmpVariableRef.cmpRef.name»ca (\<lambda>c. «valCmpTypShortNameSecondInpt»«valCmpPortSecondInpt» («valCmpTypShortNameSecondInpt»cmp «valCmpVarSecondInpt» c) \<in> «valCmpTypShortName»«valCmpVarInputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)))«ENDIF»'''
+	        }
+	        OutputPort : {
+	        	val valCmpVarOutputPort = agpval.valCmpVariableRef.portRef as OutputPort
+				'''«IF agpval.agVal == 'val' && agpval.agValTerms !== null»«val valOps = agpval.agValTerms.termOperatorFunction.trmOperator.name»«val valOpsDtVar = agpval.agValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name»«val valCmpParm = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)) «valOpsDtVar» = «valCmpTypShortName»«valCmpVarOutputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c))))«ENDIF»'''
+	        }
+	        }
 		}
+	    	
+	    }
+/*
+««« Outport Case
+«««		'''«IF agpval.agVal == 'val' && agpval.agValTerms !== null && valCmpVarOutputPort !== null »ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)) «valOpsDtVar» = «valCmpTypShortName»«valCmpVarOutputPort» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c))))
+««« Inputport Case
+«««		«ELSEIF agpval.agVal == 'val' && agpval.agValTerms.termOperatorFunction !== null && valCmpVarInputPort !== null»ca (\<lambda>c. («valOps» («valTermCmpTypShortNameSecondInpt»«valCmpParm» («valTermCmpTypShortNameSecondInpt»cmp «valTermCmpVarSecondInpt» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c))))
+«««««« Inputport Case with cmpvar portref as second input
+«««		«ELSEIF agpval.agVal == 'val' && agpval.agValTerms !== null && valCmpVarInputPort !== null»ca (\<lambda>c. «valCmpTypShortNameSecondInpt»«valCmpPortSecondInpt» («valCmpTypShortNameSecondInpt»cmp «valCmpVarSecondInpt» c) \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)))
+«««		«ENDIF»'''
+ */		
+		
 	def dispatch static generateFormula(AgPredicateEq agpeq){
 		'''ca (\<lambda>c. «agpeq.agComponentVariable1.name» = «agpeq.agComponentVariable2.name» )'''
 	}
