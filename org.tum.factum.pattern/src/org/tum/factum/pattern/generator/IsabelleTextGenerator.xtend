@@ -16,6 +16,18 @@ import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
 import org.tum.factum.pattern.pattern.CtaBinaryFormulas
 import org.tum.factum.pattern.pattern.BinaryOperator
 import org.tum.factum.pattern.pattern.CtaFormulaWithBracket
+import org.tum.factum.pattern.pattern.AgPredicateEq
+import org.tum.factum.pattern.pattern.AgPredicateVal
+import org.tum.factum.pattern.pattern.AgPredicateConn
+import org.tum.factum.pattern.pattern.AgPredicatePAct
+import org.tum.factum.pattern.pattern.AgPredicateCAct
+import org.tum.factum.pattern.pattern.AgPredicateTerms
+import org.tum.factum.pattern.pattern.AgBaseTerms
+import org.tum.factum.pattern.pattern.AgUnaryFormulas
+import org.tum.factum.pattern.pattern.AgFormulaWithBracket
+import org.tum.factum.pattern.pattern.AgQuantifiedFormulas
+import org.tum.factum.pattern.pattern.AgBinaryFormulas
+import org.tum.factum.pattern.pattern.AgFormula
 
 class IsabelleTextGenerator {
 
@@ -114,13 +126,13 @@ class IsabelleTextGenerator {
 	«FOR cta : root.ctaFormulaIds»«"\t"»«cta.name»: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== cta» and «"\n"»«ENDIF»«ENDFOR»
 	
 	begin «"\n"»
-«««	«FOR ag : root.agFormulaIds»
-«««	theorem «ag.name»:
-«««	  fixes t
-«««	  assumes "t \<in> arch"
-«««	  shows
-«««	  «"\t"»"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== ag» sorry «"\n"»«ENDIF»
-«««	«ENDFOR»
+	«FOR ag : root.agFormulaIds»
+	theorem «ag.name»:
+	  fixes t
+	  assumes "t \<in> arch"
+	  shows
+	  «"\t"»"«val agElement = root.agFormulaIds.filter[v|v.name == ag.name]»«FOR uf : agElement»«mapFormula(uf.agFormula)»t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== ag» sorry «"\n"»«ENDIF»
+	«ENDFOR»
 	
 «««	«ENDFOR»
 	
@@ -128,12 +140,18 @@ class IsabelleTextGenerator {
 	
 	end
 	'''
-	//CTA Dispatches
-	def static Object mapFormula(CtaFormula cf){
-		return '''«IF cf instanceof CtaBinaryFormulas»«generateFormula(cf as CtaBinaryFormulas)»«ELSE»«IF cf.ctaBaseTerms !== null»«generateBaseTerms(cf.ctaBaseTerms)»«ENDIF»«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»«IF cf.ctaFormulaWithBracket !== null»«generateFormula(cf.ctaFormulaWithBracket)»«ENDIF»«ENDIF»'''
-	}
 	def static generateBinary(BinaryOperator binaryOp){
 		return '''«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LWeakUntil == 'W'»\<WW>\<^sub>c «ENDIF»«IF binaryOp.LUntil == 'U'»\<UU>\<^sup>c «ENDIF»'''
+	}
+	def static generateUnary(UnaryOperator opvalue){
+		return '''(\«IF opvalue.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'X'»<circle>\<^sub>c «ENDIF»'''
+	}
+//CTA Dispatches
+	def static Object mapFormula(CtaFormula cf){
+		return '''«IF cf instanceof CtaBinaryFormulas»«generateFormula(cf as CtaBinaryFormulas)»«ELSE»«IF cf.ctaBaseTerms !== null»«generateCtaBaseTerms(cf.ctaBaseTerms)»«ENDIF»«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»«IF cf.ctaFormulaWithBracket !== null»«generateFormula(cf.ctaFormulaWithBracket)»«ENDIF»«ENDIF»'''
+	}
+	def static generateCtaBaseTerms(CtaBaseTerms baseTerms){
+		return '''«IF baseTerms.ctaPredicateCAct !== null»«generateFormula(baseTerms.ctaPredicateCAct)»«ENDIF»«IF baseTerms.ctaPredicatePAct !== null»«generateFormula(baseTerms.ctaPredicatePAct)»«ENDIF»«IF baseTerms.ctaPredicateTerms !== null»«generateFormula(baseTerms.ctaPredicateTerms)»«ENDIF»«IF baseTerms.ctaPredicateConn !== null»«generateFormula(baseTerms.ctaPredicateConn)»«ENDIF»«IF baseTerms.ctaPredicateVal !== null»«generateFormula(baseTerms.ctaPredicateVal)»«ENDIF»«IF baseTerms.ctaPredicateEq !== null»«generateFormula(baseTerms.ctaPredicateEq)»«ENDIF»'''
 	}
 	def dispatch static generateFormula(CtaBinaryFormulas ctabf){
 		return '''«IF ctabf.binaryOperator !== null»«mapFormula(ctabf.left)» «generateBinary(ctabf.binaryOperator)» «mapFormula(ctabf.right)»«ENDIF»«IF ctabf.ctaFormulaWithBracket !== null && ctabf.ctaFormulaWithBracket.ctaPrimaryFormula !== null»«mapFormula(ctabf.ctaFormulaWithBracket.ctaPrimaryFormula)»«ENDIF»«IF ctabf.ctaPrimary !== null»«mapFormula(ctabf.ctaPrimary)»«ENDIF»'''
@@ -144,18 +162,13 @@ class IsabelleTextGenerator {
 	def dispatch static generateFormula(CtaFormulaWithBracket fwb){
 		return '''«IF fwb.leftBracket == '('»(«ENDIF»«mapFormula(fwb.ctaPrimaryFormula)»«IF fwb.rightBracket == ')'»)«ENDIF»'''
 	}
-	def static generateUnary(UnaryOperator opvalue){
-		return '''(\«IF opvalue.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'X'»<circle>\<^sub>c «ENDIF»'''
-	}
 	def dispatch static generateFormula(CtaUnaryFormulas ctau){
-		'''«IF ctau.unaryOperator !== null»«generateUnary(ctau.unaryOperator)»«ENDIF»«IF ctau.ctaFormulaLtl !== null»«mapFormula(ctau.ctaFormulaLtl)»«ENDIF»«IF ctau.ctaBaseTerms !== null»«generateBaseTerms(ctau.ctaBaseTerms)»«ENDIF»'''
-	}
-	def static generateBaseTerms(CtaBaseTerms baseTerms){
-		return '''«IF baseTerms.ctaPredicateCAct !== null»«generateFormula(baseTerms.ctaPredicateCAct)»«ENDIF»«IF baseTerms.ctaPredicatePAct !== null»«generateFormula(baseTerms.ctaPredicatePAct)»«ENDIF»«IF baseTerms.ctaPredicateTerms !== null»«generateFormula(baseTerms.ctaPredicateTerms)»«ENDIF»«IF baseTerms.ctaPredicateConn !== null»«generateFormula(baseTerms.ctaPredicateConn)»«ENDIF»«IF baseTerms.ctaPredicateVal !== null»«generateFormula(baseTerms.ctaPredicateVal)»«ENDIF»«IF baseTerms.ctaPredicateEq !== null»«generateFormula(baseTerms.ctaPredicateEq)»«ENDIF»'''
+		'''«IF ctau.unaryOperator !== null»«generateUnary(ctau.unaryOperator)»«ENDIF»«IF ctau.ctaFormulaLtl !== null»«mapFormula(ctau.ctaFormulaLtl)»«ENDIF»«IF ctau.ctaBaseTerms !== null»«generateCtaBaseTerms(ctau.ctaBaseTerms)»«ENDIF»'''
 	}
 	def dispatch static generateFormula(CtaPredicateTerms ctat){
 		val ctpTerm2Op = ctat.ctaPTerm2.termOperatorFunction.trmOperator.name
 		val ctpTerm2CmpTypSN = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.cmptypAssigned.ctsname].toString.replaceAll("[\\[\\],]","")
+		//val ctpTerm2CmpTypPrt = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.portRef.name].toString.replaceAll("[\\[\\],]","")
 		val ctpTerm2CmpTypPrt = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.portRef.name].toString.replaceAll("[\\[\\],]","")
 		val ctpTerm2CmpVar = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.name].toString.replaceAll("[\\[\\],]","")
 		val ctpTerm1CmpVarRef = ctat.ctaPTerm1.dtTypeVars.name
@@ -181,14 +194,87 @@ class IsabelleTextGenerator {
 		val valOps = ctapval.ctaValTerms.termOperatorFunction.trmOperator.name
 		val valCmpVar0 = ctapval.valCmpVariableRef.cmpRef.name
 		val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.name
+		//val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.inp.name
+		
+		//val valCmpVarOutputPort = ctapval.valCmpVariableRef.portRef.outp.name
+		
 		val valCmpParm = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name
 		val valOpsDtVar = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name //[null, org.tum.factum.pattern.pattern.impl.DataTypeVariableImpl@16bde57e (name: e)]
 		'''«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
+//		'''
+//		«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»
+//		ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))
+//		«ELSE»
+//		x
+//		«ENDIF»
+//		
+//		'''
 		//'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
 		}
 	def dispatch static generateFormula(CtaPredicateEq ctapeq){
 		'''ca (\<lambda>c. «ctapeq.ctaComponentVariable1.name» = «ctapeq.ctaComponentVariable2.name» )'''
 	}
+//End of CTA Dispatches
+
+//AG dispatches
+	def static Object mapFormula(AgFormula af){
+		return '''«IF af instanceof AgBinaryFormulas»«generateFormula(af as AgBinaryFormulas)»«ELSE»«IF af.agBaseTerms !== null»«generateAgBaseTerms(af.agBaseTerms)»«ENDIF»«IF af.agUnaryFormulas !== null»«generateFormula(af.agUnaryFormulas)»«ENDIF»«IF af.agQuantifiedFormulas !== null»«generateFormula(af.agQuantifiedFormulas)»«ENDIF»«IF af.agBinaryFormulas !== null»«generateFormula(af.agBinaryFormulas as AgBinaryFormulas)»«ENDIF»«IF af.agFormulaWithBracket !== null»«generateFormula(af.agFormulaWithBracket)»«ENDIF»«ENDIF»'''
+	}
+	def static generateAgBaseTerms(AgBaseTerms baseTerms){
+		return '''«IF baseTerms.agPredicateCAct !== null»«generateFormula(baseTerms.agPredicateCAct)»«ENDIF»«IF baseTerms.agPredicatePAct !== null»«generateFormula(baseTerms.agPredicatePAct)»«ENDIF»«IF baseTerms.agPredicateTerms !== null»«generateFormula(baseTerms.agPredicateTerms)»«ENDIF»«IF baseTerms.agPredicateConn !== null»«generateFormula(baseTerms.agPredicateConn)»«ENDIF»«IF baseTerms.agPredicateVal !== null»«generateFormula(baseTerms.agPredicateVal)»«ENDIF»«IF baseTerms.agPredicateEq !== null»«generateFormula(baseTerms.agPredicateEq)»«ENDIF»'''
+	}
+	def dispatch static generateFormula(AgBinaryFormulas agbf){
+		return '''«IF agbf.binaryOperator !== null»«mapFormula(agbf.left)» «generateBinary(agbf.binaryOperator)» «mapFormula(agbf.right)»«ENDIF»«IF agbf.agFormulaWithBracket !== null && agbf.agFormulaWithBracket.agPrimaryFormula !== null»«mapFormula(agbf.agFormulaWithBracket.agPrimaryFormula)»«ENDIF»«IF agbf.agPrimary !== null»«mapFormula(agbf.agPrimary)»«ENDIF»'''
+	}
+	def dispatch static generateFormula(AgQuantifiedFormulas agq){
+		'''«IF agq.quantifierOperator.exists == '∃'»\<exists>\<^sub>c «agq.quantifierOperator.quantifiedExistsVar.name». «ENDIF»«IF agq.quantifierOperator.all == '∀'»\<forall>\<^sub>c «agq.quantifierOperator.quantifiedAllVar.name». «ENDIF»«mapFormula(agq.agQuantifiedFs)»'''
+	}
+	def dispatch static generateFormula(AgFormulaWithBracket fwb){
+		return '''«IF fwb.leftBracket == '('»(«ENDIF»«mapFormula(fwb.agPrimaryFormula)»«IF fwb.rightBracket == ')'»)«ENDIF»'''
+	}
+	def dispatch static generateFormula(AgUnaryFormulas agu){
+		'''«IF agu.unaryOperator !== null»«generateUnary(agu.unaryOperator)»«ENDIF»«IF agu.agFormulaLtl !== null»«mapFormula(agu.agFormulaLtl)»«ENDIF»«IF agu.agBaseTerms !== null»«generateAgBaseTerms(agu.agBaseTerms)»«ENDIF»'''
+	}
+	def dispatch static generateFormula(AgPredicateTerms agt){
+		val ctpTerm2Op = agt.agPTerm2.termOperatorFunction.trmOperator.name
+		val ctpTerm2CmpTypSN = agt.agPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.cmptypAssigned.ctsname].toString.replaceAll("[\\[\\],]","")
+		val ctpTerm2CmpTypPrt = agt.agPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.portRef.name].toString.replaceAll("[\\[\\],]","")
+		val ctpTerm2CmpVar = agt.agPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.name].toString.replaceAll("[\\[\\],]","")
+		val ctpTerm1CmpVarRef = agt.agPTerm1.dtTypeVars.name
+		'''(ca (\<lambda>c. «ctpTerm2Op» («ctpTerm2CmpTypSN»«ctpTerm2CmpTypPrt»	(«ctpTerm2CmpTypSN»cmp «ctpTerm2CmpVar» c)) = «ctpTerm1CmpVarRef»))'''   //needs refactoring in the next release
+	}
+	def dispatch static generateFormula(AgPredicateCAct agpc){
+		'''«IF agpc.CAct == 'cAct'»ca (\<lambda>c. «agpc.CActCmpVar.cmptypAssigned.ctsname»active «agpc.CActCmpVar.name» c)«ENDIF»'''		
+	}
+	def dispatch static generateFormula(AgPredicatePAct agpp){
+		'''«IF agpp.PAct== 'pAct'»ca (\<lambda>c. «agpp.PActAgCmpVaref.cmpRef.cmptypAssigned.ctsname»active «agpp.PActAgCmpVaref.cmpRef.name» c)«ENDIF»'''
+	}
+	def dispatch static generateFormula(AgPredicateConn agconn){
+		val connCmpTypShortName1 = agconn.agConnCmpVarInptPort.inptPrtCmpRef.cmptypAssigned.ctsname
+		val connCmpTypShortName2 = agconn.agConnCmpVarOutputPort.outptPrtCmpRef.cmptypAssigned.ctsname
+		val connCmpVarInputPort = agconn.agConnCmpVarInptPort.inputPrtrf.name
+		val connCmpVarOutputPort = agconn.agConnCmpVarOutputPort.outputPrtrf.name
+		val connCmpVar1 = agconn.agConnCmpVarInptPort.inptPrtCmpRef.name
+		val connCmpVar2 = agconn.agConnCmpVarOutputPort.outptPrtCmpRef.name
+		'''«IF agconn.agConn == 'conn'»ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \<in> «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
+	}
+	def dispatch static generateFormula(AgPredicateVal agpval){
+		val valCmpTypShortName = agpval.valCmpVariableRef.cmpRef.cmptypAssigned.ctsname
+		val valOps = agpval.agValTerms.termOperatorFunction.trmOperator.name
+		val valCmpVar0 = agpval.valCmpVariableRef.cmpRef.name
+		val valCmpVarInputPort = agpval.valCmpVariableRef.portRef.name
+		val valCmpParm = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name
+		val valOpsDtVar = agpval.agValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name
+		'''«IF agpval.agVal == 'val' && valCmpVarInputPort !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
+		//'''(\«IF agpval.agVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
+		}
+	def dispatch static generateFormula(AgPredicateEq agpeq){
+		'''ca (\<lambda>c. «agpeq.agComponentVariable1.name» = «agpeq.agComponentVariable2.name» )'''
+	}
+//End of AG dispatches
+	
+
+
 
 }
 
