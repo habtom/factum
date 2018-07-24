@@ -30,7 +30,6 @@ import org.tum.factum.pattern.pattern.AgBinaryFormulas
 import org.tum.factum.pattern.pattern.AgFormula
 import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.InputPort
-import org.tum.factum.pattern.pattern.PortRef
 
 class IsabelleTextGenerator {
 
