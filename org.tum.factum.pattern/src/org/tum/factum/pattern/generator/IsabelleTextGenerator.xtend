@@ -139,7 +139,7 @@ class IsabelleTextGenerator {
 	
 «««	«ENDFOR»
 	
-	...«"\n"»
+«««	...«"\n"»
 	
 	end
 	'''
