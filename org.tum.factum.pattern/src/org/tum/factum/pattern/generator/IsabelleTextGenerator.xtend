@@ -101,7 +101,7 @@ class IsabelleTextGenerator {
 «««	«val ctParam = ctp.parameters.map[name].toString.replaceAll("[\\[\\],]","")»
 «««	«IF ctp.parameters !== null»
 	«"\t"»«ctpName»«»«ctParam»_unique: "\<And> «ctpName»1  «ctpName»2. \<lbrakk> «ctpName»«ctParam» «ctpName»1 = «ctpName»«ctParam» «ctpName»2\<rbrakk> \<Longrightarrow> «ctpName»1 = «ctpName»2" and«"\n"»
-	«"\t"»«ctpName»«»«ctParam»_ex: "\<And>«ctpName»«»«ctParam». \<exists>«ctpName». «ctpName»«»«ctParam» «ctpName» = «ctpName»«»«ctParam»" and«"\n"»
+	«"\t"»«ctpName»«»«ctParam»_ex: "\<And>«ctpName»«»«ctParam»'. \<exists>«ctpName». «ctpName»«»«ctParam» «ctpName» = «ctpName»«ctParam»'" and«"\n"»
 «««	«ctpName»id_ex: "\<And>sid. \<exists>«ctpName». «ctpName»«ctParam» «ctpName» = sid"
 	«ENDFOR»
 
@@ -175,7 +175,7 @@ class IsabelleTextGenerator {
 		val ctpTerm2CmpTypPrt = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.portRef.name].toString.replaceAll("[\\[\\],]","")
 		val ctpTerm2CmpVar = ctat.ctaPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.name].toString.replaceAll("[\\[\\],]","")
 		val ctpTerm1CmpVarRef = ctat.ctaPTerm1.dtTypeVars.name
-		'''(ca (\<lambda>c. «ctpTerm2Op» («ctpTerm2CmpTypSN»«ctpTerm2CmpTypPrt»	(«ctpTerm2CmpTypSN»cmp «ctpTerm2CmpVar» c)) = «ctpTerm1CmpVarRef»))'''   //needs refactoring in the next release
+		'''ca (\<lambda>c. «ctpTerm2Op» («ctpTerm2CmpTypSN»«ctpTerm2CmpTypPrt»	(«ctpTerm2CmpTypSN»cmp «ctpTerm2CmpVar» c)) = «ctpTerm1CmpVarRef»))'''   //needs refactoring in the next release
 	}
 	def dispatch static generateFormula(CtaPredicateCAct ctapc){
 		'''«IF ctapc.CAct == 'cAct'»ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''		
@@ -196,28 +196,13 @@ class IsabelleTextGenerator {
 		val valCmpTypShortName = ctapval.valCmpVariableRef.cmpRef.cmptypAssigned.ctsname
 		val valOps = ctapval.ctaValTerms.termOperatorFunction.trmOperator.name
 		val valCmpVar0 = ctapval.valCmpVariableRef.cmpRef.name
-		val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.name
-		//val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.inp.name
-		
-		//val valCmpVarOutputPort = ctapval.valCmpVariableRef.portRef.outp.name
-		
-		val valTermCmpVariableRef = ctapval.ctaValTerms.cmpVariableRef
-		
-		
+		val valCmpVarInputPort = ctapval.valCmpVariableRef.portRef.name		
+	
 		val valCmpParm = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name
 		val valOpsDtVar = ctapval.ctaValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name //[null, org.tum.factum.pattern.pattern.impl.DataTypeVariableImpl@16bde57e (name: e)]
-		'''«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
-
-//		'''
-//		«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»
-//		ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))
-//		«ELSE»
-//		x
-//		«ENDIF»
-//		'''«IF ctapval.ctaVal == 'val' && valTermCmpVariableRef !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
-
-//		'''
-		//'''(\«IF ctapval.ctaVal == 'val'» (ca (\<lambda>c. («valOps» («valOpsInput» = «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName» «valCmpVar» c) «ENDIF»\<^sub>c'''
+		//'''«IF ctapval.ctaVal == 'val' && valCmpVarInputPort !== null»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVar0» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort» («valCmpTypShortName»cmp «valCmpVar0» c))))«ENDIF»'''
+		
+		//TODO replicate AgPredicateVal code generator 
 		}
 	def dispatch static generateFormula(CtaPredicateEq ctapeq){
 		'''ca (\<lambda>c. «ctapeq.ctaComponentVariable1.name» = «ctapeq.ctaComponentVariable2.name» )'''
@@ -249,7 +234,7 @@ class IsabelleTextGenerator {
 		val ctpTerm2CmpTypPrt = agt.agPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.portRef.name].toString.replaceAll("[\\[\\],]","")
 		val ctpTerm2CmpVar = agt.agPTerm2.termOperatorFunction.trmOperands.map[cmpVariableRef.cmpRef.name].toString.replaceAll("[\\[\\],]","")
 		val ctpTerm1CmpVarRef = agt.agPTerm1.dtTypeVars.name
-		'''(ca (\<lambda>c. «ctpTerm2Op» («ctpTerm2CmpTypSN»«ctpTerm2CmpTypPrt»	(«ctpTerm2CmpTypSN»cmp «ctpTerm2CmpVar» c)) = «ctpTerm1CmpVarRef»))'''   //needs refactoring in the next release
+		'''ca (\<lambda>c. «ctpTerm2Op» («ctpTerm2CmpTypSN»«ctpTerm2CmpTypPrt»	(«ctpTerm2CmpTypSN»cmp «ctpTerm2CmpVar» c)) = «ctpTerm1CmpVarRef»))'''   //needs refactoring in the next release
 	}
 	def dispatch static generateFormula(AgPredicateCAct agpc){
 		'''«IF agpc.CAct == 'cAct'»ca (\<lambda>c. «agpc.CActCmpVar.cmptypAssigned.ctsname»active «agpc.CActCmpVar.name» c)«ENDIF»'''		
@@ -267,28 +252,16 @@ class IsabelleTextGenerator {
 		'''«IF agconn.agConn == 'conn'»ca (\<lambda>c. «connCmpTypShortName2»«connCmpVarOutputPort» («connCmpTypShortName2»cmp «connCmpVar2» c) \<in> «connCmpTypShortName1»«connCmpVarInputPort» («connCmpTypShortName1»cmp «connCmpVar1» c)))«ENDIF»'''
 	}
 	def dispatch static generateFormula(AgPredicateVal agpval){
-		
-		
 		//begin first input of val (valCmpVariableRef)
 		val valCmpTypShortName = agpval.valCmpVariableRef.cmpRef.cmptypAssigned.ctsname
 		val valCmpVarFirstInpt = agpval.valCmpVariableRef.cmpRef.name
-		//val valCmpVarPort = agpval.valCmpVariableRef.portRef.
 //		if (valCmpVarPort instanceof InputPort) valCmpVarInputPort = valCmpVarPort as InputPort
 		
 		val valCmpPortRef = agpval.valCmpVariableRef.portRef
 		
 		
 		//end first input of val (valCmpVariableRef
-		
-		//second input of val (agValTerms)
-
-		
-
-		
-		//val valTermCmpVariableRef = agpval.agValTerms.cmpVariableRef  //to check value
-		
-
-		
+	
 		
 		if (agpval.valCmpVariableRef !== null && agpval.agValTerms !== null) {
 			switch  valCmpPortRef {
@@ -297,7 +270,6 @@ class IsabelleTextGenerator {
 	        	val valCmpVarInputPort = agpval.valCmpVariableRef.portRef as InputPort
 	        	
 				'''«IF agpval.agVal == 'val' && agpval.agValTerms.termOperatorFunction !== null && valCmpVarInputPort !== null && agpval.agValTerms.termOperatorFunction.trmOperator !== null»«val valOps = agpval.agValTerms.termOperatorFunction.trmOperator.name»«val valOpsDtVar = agpval.agValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name»«val valCmpParm = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name»«val valTermCmpTypShortNameSecondInpt = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.ctsname»«val valTermCmpVarSecondInpt = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.name»ca (\<lambda>c. («valOps» («valTermCmpTypShortNameSecondInpt»«valCmpParm» («valTermCmpTypShortNameSecondInpt»cmp «valTermCmpVarSecondInpt» c)) «valOpsDtVar» \<in> «valCmpTypShortName»«valCmpVarInputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c))))
-				««« Inputport Case with cmpvar portref as second input
 				«ELSEIF agpval.agVal == 'val' && valCmpVarInputPort !== null && agpval.agValTerms.cmpVariableRef !== null && agpval.agValTerms.cmpVariableRef.cmpRef !== null »«val valCmpPortSecondInpt = agpval.agValTerms.cmpVariableRef.portRef.name»«val valCmpTypShortNameSecondInpt = agpval.agValTerms.cmpVariableRef.cmpRef.cmptypAssigned.ctsname»«val valCmpVarSecondInpt = agpval.agValTerms.cmpVariableRef.cmpRef.name»ca (\<lambda>c. «valCmpTypShortNameSecondInpt»«valCmpPortSecondInpt» («valCmpTypShortNameSecondInpt»cmp «valCmpVarSecondInpt» c) \<in> «valCmpTypShortName»«valCmpVarInputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)))«ENDIF»'''
 	        }
 	        OutputPort : {
@@ -306,7 +278,6 @@ class IsabelleTextGenerator {
 	        }
 	        }
 		}
-	    	
 	    }
 /*
 ««« Outport Case
