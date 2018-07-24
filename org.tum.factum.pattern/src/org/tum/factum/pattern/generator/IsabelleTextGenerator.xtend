@@ -147,7 +147,7 @@ class IsabelleTextGenerator {
 		return '''«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LWeakUntil == 'W'»\<WW>\<^sub>c «ENDIF»«IF binaryOp.LUntil == 'U'»\<UU>\<^sup>c «ENDIF»'''
 	}
 	def static generateUnary(UnaryOperator opvalue){
-		return '''(\«IF opvalue.ltlG == 'G'»<box>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'F'»<diamond>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'X'»<circle>\<^sub>c «ENDIF»'''
+		return '''«IF opvalue.ltlG == 'G'»\<box>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'F'»\<diamond>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'X'»\<circle>\<^sub>c «ENDIF»'''
 	}
 //CTA Dispatches
 	def static Object mapFormula(CtaFormula cf){
