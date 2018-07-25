@@ -35,7 +35,7 @@ class IsabelleTextGenerator {
 
 	def static toIsabelle(Pattern root) '''
 	theory «root.name»«"\n"»
-	imports Auxiliary«"\n"»
+	imports DynamicArchitectures.Dynamic_Architecture_Calculus«"\n"»
 	begin«"\n"»
 	
 «««	dt type declarations
