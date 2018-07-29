@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:diagram="http://www.eclipse.org/sirius/diagram/1.1.0" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:pattern="http://www.tum.org/factum/pattern/Pattern" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:viewpoint="http://www.eclipse.org/sirius/1.1.0" xsi:schemaLocation="http://www.eclipse.org/sirius/description/1.1.0 http://www.eclipse.org/sirius/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/style/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description/style">
+  <viewpoint:DAnalysis xmi:id="_84qUgNSkEee3mN8TpmsVJg" selectedViews="_BdXR8NSpEeeVT_XGEtn6MA" version="12.1.0.201708031200">
+    <semanticResources>pattern.pmodel</semanticResources>
+    <ownedViews xmi:type="viewpoint:DView" xmi:id="_BdXR8NSpEeeVT_XGEtn6MA">
+      <viewpoint xmi:type="description:Viewpoint" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']"/>
+      <ownedRepresentationDescriptors xmi:type="viewpoint:DRepresentationDescriptor" xmi:id="_HkDjYNSpEeeVT_XGEtn6MA" name="new PatternDiagram" repPath="#_Hih5YNSpEeeVT_XGEtn6MA">
+        <description xmi:type="description_1:DiagramDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']"/>
+        <target xmi:type="pattern:Pattern" href="pattern.pmodel#/"/>
+      </ownedRepresentationDescriptors>
+    </ownedViews>
+  </viewpoint:DAnalysis>
+  <diagram:DSemanticDiagram xmi:id="_Hj8OoNSpEeeVT_XGEtn6MA" name="new PatternDiagram" uid="_Hih5YNSpEeeVT_XGEtn6MA">
+    <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_Hj81sNSpEeeVT_XGEtn6MA" source="DANNOTATION_CUSTOMIZATION_KEY">
+      <data xmi:type="diagram:ComputedStyleDescriptionRegistry" xmi:id="_Hj81sdSpEeeVT_XGEtn6MA"/>
+    </ownedAnnotationEntries>
+    <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_HkxVENSpEeeVT_XGEtn6MA" source="GMF_DIAGRAMS">
+      <data xmi:type="notation:Diagram" xmi:id="_HkxVEdSpEeeVT_XGEtn6MA" type="Sirius" element="_Hj8OoNSpEeeVT_XGEtn6MA" measurementUnit="Pixel">
+        <children xmi:type="notation:Node" xmi:id="_Z-D_4HRzEeiWycYp8U7N3w" type="2001" element="_Z9q-UHRzEeiWycYp8U7N3w">
+          <children xmi:type="notation:Node" xmi:id="_Z-L7sHRzEeiWycYp8U7N3w" type="5002">
+            <layoutConstraint xmi:type="notation:Location" xmi:id="_Z-L7sXRzEeiWycYp8U7N3w" y="5"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_Z-YI8HRzEeiWycYp8U7N3w" type="3001" element="_Z9xsAHRzEeiWycYp8U7N3w">
+            <children xmi:type="notation:Node" xmi:id="_Z-YwAHRzEeiWycYp8U7N3w" type="5001">
+              <layoutConstraint xmi:type="notation:Location" xmi:id="_Z-YwAXRzEeiWycYp8U7N3w" x="-3" y="11"/>
+            </children>
+            <children xmi:type="notation:Node" xmi:id="_Z-kWMHRzEeiWycYp8U7N3w" type="3016" element="_Z9xsAXRzEeiWycYp8U7N3w">
+              <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-kWMXRzEeiWycYp8U7N3w" fontName="Ubuntu"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-kWMnRzEeiWycYp8U7N3w"/>
+            </children>
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-YI8XRzEeiWycYp8U7N3w" fontName="Ubuntu" fontHeight="8"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-YI8nRzEeiWycYp8U7N3w" x="145" y="-2" width="10" height="10"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_Z-hS4HRzEeiWycYp8U7N3w" type="3001" element="_Z9y6IHRzEeiWycYp8U7N3w">
+            <children xmi:type="notation:Node" xmi:id="_Z-h58HRzEeiWycYp8U7N3w" type="5001">
+              <layoutConstraint xmi:type="notation:Location" xmi:id="_Z-h58XRzEeiWycYp8U7N3w" x="-3" y="11"/>
+            </children>
+            <children xmi:type="notation:Node" xmi:id="_Z-k9QHRzEeiWycYp8U7N3w" type="3016" element="_Z9y6IXRzEeiWycYp8U7N3w">
+              <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-k9QXRzEeiWycYp8U7N3w" fontName="Ubuntu"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-k9QnRzEeiWycYp8U7N3w"/>
+            </children>
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-hS4XRzEeiWycYp8U7N3w" fontName="Ubuntu" fontHeight="8"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-hS4nRzEeiWycYp8U7N3w" x="48" y="-2" width="10" height="10"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_Z-jIEHRzEeiWycYp8U7N3w" type="3003" element="_Z9vPwHRzEeiWycYp8U7N3w">
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-jIEXRzEeiWycYp8U7N3w" fontName="Ubuntu"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-jIEnRzEeiWycYp8U7N3w"/>
+          </children>
+          <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-D_4XRzEeiWycYp8U7N3w" fontName="Ubuntu" fontHeight="8"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-D_4nRzEeiWycYp8U7N3w" x="46" y="166" width="200" height="100"/>
+        </children>
+        <children xmi:type="notation:Node" xmi:id="_Z-RbQHRzEeiWycYp8U7N3w" type="2001" element="_Z9wd4HRzEeiWycYp8U7N3w">
+          <children xmi:type="notation:Node" xmi:id="_Z-RbQ3RzEeiWycYp8U7N3w" type="5002">
+            <layoutConstraint xmi:type="notation:Location" xmi:id="_Z-RbRHRzEeiWycYp8U7N3w" y="5"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_Z-lkUHRzEeiWycYp8U7N3w" type="3001" element="_Z9zhMHRzEeiWycYp8U7N3w">
+            <children xmi:type="notation:Node" xmi:id="_Z-lkU3RzEeiWycYp8U7N3w" type="5001">
+              <layoutConstraint xmi:type="notation:Location" xmi:id="_Z-lkVHRzEeiWycYp8U7N3w" x="-20" y="-34"/>
+            </children>
+            <children xmi:type="notation:Node" xmi:id="_Z-oAkHRzEeiWycYp8U7N3w" type="3016" element="_Z90IQHRzEeiWycYp8U7N3w">
+              <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-oAkXRzEeiWycYp8U7N3w" fontName="Ubuntu"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-oAknRzEeiWycYp8U7N3w"/>
+            </children>
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-lkUXRzEeiWycYp8U7N3w" fontName="Ubuntu" fontHeight="8"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-lkUnRzEeiWycYp8U7N3w" x="50" y="92" width="10" height="10"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_Z-mLYHRzEeiWycYp8U7N3w" type="3001" element="_Z90vUHRzEeiWycYp8U7N3w">
+            <children xmi:type="notation:Node" xmi:id="_Z-mycHRzEeiWycYp8U7N3w" type="5001">
+              <layoutConstraint xmi:type="notation:Location" xmi:id="_Z-mycXRzEeiWycYp8U7N3w" x="-3" y="-13"/>
+            </children>
+            <children xmi:type="notation:Node" xmi:id="_Z-onoHRzEeiWycYp8U7N3w" type="3016" element="_Z90vUXRzEeiWycYp8U7N3w">
+              <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-onoXRzEeiWycYp8U7N3w" fontName="Ubuntu"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-ononRzEeiWycYp8U7N3w"/>
+            </children>
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-mLYXRzEeiWycYp8U7N3w" fontName="Ubuntu" fontHeight="8"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-mLYnRzEeiWycYp8U7N3w" x="145" y="92" width="10" height="10"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_Z-nZgHRzEeiWycYp8U7N3w" type="3003" element="_Z9xE8HRzEeiWycYp8U7N3w">
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-nZgXRzEeiWycYp8U7N3w" fontName="Ubuntu"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-nZgnRzEeiWycYp8U7N3w"/>
+          </children>
+          <styles xmi:type="notation:ShapeStyle" xmi:id="_Z-RbQXRzEeiWycYp8U7N3w" fontName="Ubuntu" fontHeight="8"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z-RbQnRzEeiWycYp8U7N3w" x="46" y="23" width="200" height="100"/>
+        </children>
+        <styles xmi:type="notation:DiagramStyle" xmi:id="_HkxVEtSpEeeVT_XGEtn6MA"/>
+        <edges xmi:type="notation:Edge" xmi:id="_LLWoYHVWEei_mNIIvOl_OA" type="4001" element="_LLBRMHVWEei_mNIIvOl_OA" source="_Z-mLYHRzEeiWycYp8U7N3w" target="_Z-YI8HRzEeiWycYp8U7N3w">
+          <children xmi:type="notation:Node" xmi:id="_LLcvAHVWEei_mNIIvOl_OA" type="6001">
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LLcvAXVWEei_mNIIvOl_OA" y="-3"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_LLdWEHVWEei_mNIIvOl_OA" type="6002">
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LLdWEXVWEei_mNIIvOl_OA" x="9" y="19"/>
+          </children>
+          <children xmi:type="notation:Node" xmi:id="_LLd9IHVWEei_mNIIvOl_OA" type="6003">
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LLd9IXVWEei_mNIIvOl_OA" x="7" y="10"/>
+          </children>
+          <styles xmi:type="notation:ConnectorStyle" xmi:id="_LLWoYXVWEei_mNIIvOl_OA"/>
+          <styles xmi:type="notation:FontStyle" xmi:id="_LLWoYnVWEei_mNIIvOl_OA" fontName="Ubuntu" fontHeight="8"/>
+          <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_LLWoY3VWEei_mNIIvOl_OA" points="[-1, 5, 2, -41]$[-3, 44, 0, -2]"/>
+          <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_LLhngHVWEei_mNIIvOl_OA" id="(0.5,0.5)"/>
+          <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_LLhngXVWEei_mNIIvOl_OA" id="(0.25,0.2)"/>
+        </edges>
+      </data>
+    </ownedAnnotationEntries>
+    <ownedDiagramElements xmi:type="diagram:DNode" xmi:id="_Z9q-UHRzEeiWycYp8U7N3w" name="Publisher" width="20" height="10" resizeKind="NSEW">
+      <target xmi:type="pattern:ComponentType" href="pattern.pmodel#//@componentTypes.0"/>
+      <semanticElements xmi:type="pattern:ComponentType" href="pattern.pmodel#//@componentTypes.0"/>
+      <ownedBorderedNodes xmi:type="diagram:DNode" xmi:id="_Z9xsAHRzEeiWycYp8U7N3w" name="psb" incomingEdges="_LLBRMHVWEei_mNIIvOl_OA" width="1" height="1" resizeKind="NSEW">
+        <target xmi:type="pattern:InputPort" href="pattern.pmodel#//@componentTypes.0/@inputPorts.0"/>
+        <semanticElements xmi:type="pattern:InputPort" href="pattern.pmodel#//@componentTypes.0/@inputPorts.0"/>
+        <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
+        <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
+        <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
+        <ownedStyle xmi:type="diagram:Ellipse" xmi:id="_Z9xsAXRzEeiWycYp8U7N3w" showIcon="false" labelAlignment="RIGHT" borderSize="1" borderSizeComputationExpression="1" color="255,255,255">
+          <description xmi:type="style:EllipseNodeDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='InputPortNode']/@style"/>
+        </ownedStyle>
+        <actualMapping xmi:type="description_1:NodeMapping" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='InputPortNode']"/>
+      </ownedBorderedNodes>
+      <ownedBorderedNodes xmi:type="diagram:DNode" xmi:id="_Z9y6IHRzEeiWycYp8U7N3w" name="pnt" width="1" height="1" resizeKind="NSEW">
+        <target xmi:type="pattern:OutputPort" href="pattern.pmodel#//@componentTypes.0/@outputPorts.0"/>
+        <semanticElements xmi:type="pattern:OutputPort" href="pattern.pmodel#//@componentTypes.0/@outputPorts.0"/>
+        <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
+        <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
+        <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
+        <ownedStyle xmi:type="diagram:Ellipse" xmi:id="_Z9y6IXRzEeiWycYp8U7N3w" showIcon="false" labelAlignment="RIGHT" borderSize="1" borderSizeComputationExpression="1" color="0,0,0">
+          <description xmi:type="style:EllipseNodeDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='OutputPortNode']/@style"/>
+        </ownedStyle>
+        <actualMapping xmi:type="description_1:NodeMapping" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='OutputPortNode']"/>
+      </ownedBorderedNodes>
+      <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
+      <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
+      <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
+      <ownedStyle xmi:type="diagram:Square" xmi:id="_Z9vPwHRzEeiWycYp8U7N3w" iconPath="/org.tum.factum.sample01.pattern/icons/Component.gif" labelPosition="node" width="20" height="10" color="209,209,209">
+        <description xmi:type="style:SquareDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@style"/>
+      </ownedStyle>
+      <actualMapping xmi:type="description_1:NodeMapping" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']"/>
+    </ownedDiagramElements>
+    <ownedDiagramElements xmi:type="diagram:DNode" xmi:id="_Z9wd4HRzEeiWycYp8U7N3w" name="Subscriber" width="20" height="10" resizeKind="NSEW">
+      <target xmi:type="pattern:ComponentType" href="pattern.pmodel#//@componentTypes.1"/>
+      <semanticElements xmi:type="pattern:ComponentType" href="pattern.pmodel#//@componentTypes.1"/>
+      <ownedBorderedNodes xmi:type="diagram:DNode" xmi:id="_Z9zhMHRzEeiWycYp8U7N3w" name="snt" width="1" height="1" resizeKind="NSEW">
+        <target xmi:type="pattern:InputPort" href="pattern.pmodel#//@componentTypes.1/@inputPorts.0"/>
+        <semanticElements xmi:type="pattern:InputPort" href="pattern.pmodel#//@componentTypes.1/@inputPorts.0"/>
+        <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
+        <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
+        <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
+        <ownedStyle xmi:type="diagram:Ellipse" xmi:id="_Z90IQHRzEeiWycYp8U7N3w" showIcon="false" labelAlignment="RIGHT" borderSize="1" borderSizeComputationExpression="1" color="255,255,255">
+          <customFeatures>borderSize</customFeatures>
+          <description xmi:type="style:EllipseNodeDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='InputPortNode']/@style"/>
+        </ownedStyle>
+        <actualMapping xmi:type="description_1:NodeMapping" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='InputPortNode']"/>
+      </ownedBorderedNodes>
+      <ownedBorderedNodes xmi:type="diagram:DNode" xmi:id="_Z90vUHRzEeiWycYp8U7N3w" name="ssb" outgoingEdges="_LLBRMHVWEei_mNIIvOl_OA" width="1" height="1" resizeKind="NSEW">
+        <target xmi:type="pattern:OutputPort" href="pattern.pmodel#//@componentTypes.1/@outputPorts.0"/>
+        <semanticElements xmi:type="pattern:OutputPort" href="pattern.pmodel#//@componentTypes.1/@outputPorts.0"/>
+        <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
+        <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
+        <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
+        <ownedStyle xmi:type="diagram:Ellipse" xmi:id="_Z90vUXRzEeiWycYp8U7N3w" showIcon="false" labelAlignment="RIGHT" borderSize="1" borderSizeComputationExpression="1" color="0,0,0">
+          <description xmi:type="style:EllipseNodeDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='OutputPortNode']/@style"/>
+        </ownedStyle>
+        <actualMapping xmi:type="description_1:NodeMapping" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='OutputPortNode']"/>
+      </ownedBorderedNodes>
+      <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
+      <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
+      <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
+      <ownedStyle xmi:type="diagram:Square" xmi:id="_Z9xE8HRzEeiWycYp8U7N3w" iconPath="/org.tum.factum.sample01.pattern/icons/Component.gif" labelPosition="node" width="20" height="10" color="209,209,209">
+        <description xmi:type="style:SquareDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@style"/>
+      </ownedStyle>
+      <actualMapping xmi:type="description_1:NodeMapping" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']"/>
+    </ownedDiagramElements>
+    <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_LLBRMHVWEei_mNIIvOl_OA" sourceNode="_Z90vUHRzEeiWycYp8U7N3w" targetNode="_Z9xsAHRzEeiWycYp8U7N3w">
+      <target xmi:type="pattern:OutputPort" href="pattern.pmodel#//@componentTypes.1/@outputPorts.0"/>
+      <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_LLEUgHVWEei_mNIIvOl_OA" strokeColor="0,0,0">
+        <customFeatures>lineStyle</customFeatures>
+        <description xmi:type="style:EdgeStyleDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@edgeMappings[name='interface']/@style"/>
+        <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_LLEUgXVWEei_mNIIvOl_OA" showIcon="false"/>
+      </ownedStyle>
+      <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@edgeMappings[name='interface']"/>
+    </ownedDiagramElements>
+    <description xmi:type="description_1:DiagramDescription" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']"/>
+    <filterVariableHistory xmi:type="diagram:FilterVariableHistory" xmi:id="_Hj81v9SpEeeVT_XGEtn6MA"/>
+    <activatedLayers xmi:type="description_1:Layer" href="platform:/resource/org.tum.factum.pattern.design/description/pattern.odesign#//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer"/>
+    <target xmi:type="pattern:Pattern" href="pattern.pmodel#/"/>
+  </diagram:DSemanticDiagram>
+</xmi:XMI>
