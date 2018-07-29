@@ -1,0 +1,320 @@
+grammar org.tum.factum.pattern.Pattern with org.eclipse.xtext.common.Terminals
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+generate pattern "http://www.tum.org/factum/pattern/Pattern"
+Pattern returns Pattern:
+	{Pattern} 
+	'Pattern' name=ID 'ShortName' psname=ID
+	'{'
+		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
+		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
+ 
+	    ('ArchSpec' '{'
+	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
+	    	ctaDtVars=DTVariables 														//Declaration of DT Variables
+
+			(ctaFormulaIds+=CtaFormulasID)*
+	    	'}'
+	    )?
+	    ('ArchGuarantee' '{'
+			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
+			agDtVars=DTVariables
+			
+			(agFormulaIds+=AgFormulasID)*
+	    '}')?
+	    
+		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
+	'}'
+;
+ComponentType returns ComponentType:
+	{ComponentType} 
+	'CType'	name=ID ('ShortName' ctsname=ID)? 
+	'{'
+	    ('InputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
+	    ('OutputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
+	    ('Parameters' '{' parameters+=Parameter ( "," parameters+=Parameter)* '}' )?
+	    
+	    ('BTA' '{' //Behavior Trace Assertions (BTA)
+	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
+			(btaFormulaIds+=BtaFormulasID)*
+	    )?
+	'}'
+;
+Parameter returns Parameter:
+	{Parameter}
+	'Parameter' name=ID '(' 
+		('Type' ':' paramSrtTyp=[Sort|QualifiedName])? 
+	')'
+;
+OutputPort returns OutputPort:
+	{OutputPort} 
+	'OutputPort' name=EString '(' 
+		('Type' ':' outputPrtSrtTyp=[Sort|QualifiedName])? 
+		('connects' connects+=[InputPort|QualifiedName]*)?
+	')'
+;
+InputPort returns InputPort:
+	{InputPort}	
+	'InputPort' name=ID '('
+		('Type' ':' inputPrtSrtTyp=[Sort|QualifiedName])?
+	    ('connects' connects+=[OutputPort|QualifiedName]*)?
+	')'
+;
+DataTypeSpec returns DataTypeSpec:
+	{DataTypeSpec}	
+	'DT' name =ID	'('
+		('Param' (dtParam+=Sort ("," dtParam+=Sort)*))?
+		('Sort' (dtSorts+=Sort ("," dtSorts+=Sort)*))?
+		('Operation' (dtOps+=Operation ("," dtOps+=Operation)*))?
+		('Predicate' (dtPredicate+=DTPredicate ("," dtPredicate+=DTPredicate)*))?
+		(sortName=[Sort|ID] 'generatedBy' (returnOps+=[Operation|ID] ("," returnOps+=[Operation|ID])*))?		
+	')'
+;
+DTPredicate:
+	name=ID ':' (pInput+=[Sort|QualifiedName] ("," pInput+=[Sort|QualifiedName])*)?
+;
+Operation:
+	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' (dtOutput=[Sort|QualifiedName])?
+;
+Sort:
+	name=ID
+;
+//Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
+VariableStatus: 
+	'rig' | 'flex'
+;
+ComponentVariable:
+	VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
+;
+DataTypeVariable: 
+	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
+;
+DTVariables:
+	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
+;
+PortRef:
+	InputPort | OutputPort | Parameter
+	//inp=InputPort | outp=OutputPort | par=Parameter
+;
+CmpVariableRef:
+	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
+;
+//Terms:
+//	termsDtVar=DataTypeVariable  | DataTypeVariable
+//;
+Term:
+	cmpVariableRef=CmpVariableRef |
+	dtTypeVars=[DataTypeVariable|ID] | 
+	termOperatorFunction=TermOperatorFunction
+;
+TermOperatorFunction:
+	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*) ")" 
+;
+//RefComponentVariableParameter:
+//	parameterCmpRef=[ComponentVariable|ID] '.' parameterRef=[Parameter|ID]
+//;
+RefComponentVariableInputPort:
+	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
+;
+RefComponentVariableOutputPort:
+	outptPrtCmpRef=[ComponentVariable|ID] '.' outputPrtrf=[OutputPort|ID]
+;
+//End
+
+//Begin Configuration Trace Assertions(CTA) - Architectural Configuration or Configuration Trace Assertion 
+//BeginBaseTerms
+CtaPredicateTerms:
+	ctaPTerm1=Term equalityOperator=EqualityElementOperator ctaPTerm2=Term
+;
+CtaPredicateConn: 
+	ctaConn='conn' ('(' ctaConnCmpVarOutputPort=RefComponentVariableOutputPort ','	ctaConnCmpVarInptPort=RefComponentVariableInputPort ')')
+; 
+CtaPredicateEq: 
+	ctaEq='eq' ('(' ctaComponentVariable1=[ComponentVariable|ID] ',' ctaComponentVariable2=[ComponentVariable|ID] ')')
+;
+CtaPredicateVal:
+	ctaVal='val' ('(' valCmpVariableRef=CmpVariableRef ',' ctaValTerms=Term ')') 
+;
+CtaPredicateCAct:
+	cAct='cAct' ('('cActCmpVar=[ComponentVariable|ID] ')')
+;
+CtaPredicatePAct:
+	pAct='pAct' ('(' pActCtaCmpVaref=CmpVariableRef ')') 
+;
+//EndBaseTerms
+
+//BeginCtaFormulaExpression
+CtaFormula returns CtaFormula:
+	ctaUnaryFormulas=CtaUnaryFormulas | 
+	ctaBinaryFormulas=CtaBinaryFormulas |
+	ctaQuantifiedFormulas=CtaQuantifiedFormulas
+;
+CtaUnaryFormulas returns CtaFormula:
+	{CtaUnaryFormulas} (unaryOperator=UnaryOperator ctaFormulaLtl=CtaFormula)
+;
+
+CtaQuantifiedFormulas:
+ 	{CtaQuantifiedFormulas} (quantifierOperator=QuantifierOperator ctaQuantifiedFs=CtaFormula)
+;
+CtaBinaryFormulas returns CtaFormula:
+	{CtaBinaryFormulas}	
+	ctaPrimary=CtaPrimary (
+		{CtaBinaryFormulas.left=current} binaryOperator=BinaryOperator right=CtaPrimary 
+		)*
+;
+CtaPrimary returns CtaFormula:
+	(ctaFormulaWithBracket=CtaFormulaWithBracket | ctaBaseTerms=CtaBaseTerms)
+;
+CtaFormulaWithBracket:
+	leftBracket='(' ctaPrimaryFormula=CtaFormula rightBracket=')'
+;
+CtaBaseTerms:
+		ctaPredicateTerms=CtaPredicateTerms | 
+		ctaPredicateConn=CtaPredicateConn | 
+		ctaPredicateVal=CtaPredicateVal | 
+		ctaPredicateEq=CtaPredicateEq | //This might be duplicate to CtaPredicateTerms?
+		ctaPredicateCAct=CtaPredicateCAct | 
+		ctaPredicatePAct=CtaPredicatePAct 
+;
+//EndCtaFormulaExpression
+
+CtaFormulasID:
+	name=ID ':' ctaFormula=CtaFormula
+;
+// End CTA
+
+// Begin Architectural Guarantee
+//BeginBaseTerms
+AgPredicateTerms:
+	agPTerm1=Term equalityOperator=EqualityElementOperator agPTerm2=Term
+;
+AgPredicateConn: 
+	agConn='conn' ('(' agConnCmpVarOutputPort=RefComponentVariableOutputPort ',' agConnCmpVarInptPort=RefComponentVariableInputPort ')')
+; 
+AgPredicateEq: 
+	agEq='eq' ('(' agComponentVariable1=[ComponentVariable|ID] ',' agComponentVariable2=[ComponentVariable|ID] ')')
+;
+AgPredicateVal:
+	agVal='val' ('(' valCmpVariableRef=CmpVariableRef ',' agValTerms=Term ')') 
+;
+AgPredicateCAct:
+	cAct='cAct' ('('cActCmpVar=[ComponentVariable|ID] ')')
+;
+AgPredicatePAct:
+	pAct='pAct' ('(' pActAgCmpVaref=CmpVariableRef ')') 
+;
+//EndBaseTerms
+
+//BeginAgFormulaExpression
+AgFormula returns AgFormula:
+	agUnaryFormulas=AgUnaryFormulas | 
+	agBinaryFormulas=AgBinaryFormulas |
+	agQuantifiedFormulas=AgQuantifiedFormulas
+;
+AgUnaryFormulas returns AgFormula:
+	{AgUnaryFormulas} (unaryOperator=UnaryOperator agFormulaLtl=AgFormula)
+;
+
+AgQuantifiedFormulas:
+ 	{AgQuantifiedFormulas} (quantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula)
+;
+AgBinaryFormulas returns AgFormula:
+	{AgBinaryFormulas}	
+	agPrimary=AgPrimary (
+		{AgBinaryFormulas.left=current} binaryOperator=BinaryOperator right=AgPrimary 
+		)*
+;
+AgPrimary returns AgFormula:
+	(agFormulaWithBracket=AgFormulaWithBracket | agBaseTerms=AgBaseTerms)
+;
+AgFormulaWithBracket:
+	leftBracket='(' agPrimaryFormula=AgFormula rightBracket=')'
+;
+AgBaseTerms:
+		agPredicateTerms=AgPredicateTerms | 
+		agPredicateConn=AgPredicateConn | 
+		agPredicateVal=AgPredicateVal | 
+		agPredicateEq=AgPredicateEq | //This might be duplicate to AgPredicateTerms?
+		agPredicateCAct=AgPredicateCAct | 
+		agPredicatePAct=AgPredicatePAct 
+;
+//EndAgFormulaExpression
+AgFormulasID:
+	name=ID ':' agFormula=AgFormula
+;
+// End AG
+
+// Begin Behavior Trace Assertions(BTA) 
+BtaTerms:
+	prtRef=PortRef | DataTypeVariable	
+;
+BtaTermOperatorFunction:
+	btaTrmOperator=[Operation|QualifiedName] "(" (btaTrmOperands+=BtaTerm ("," btaTrmOperands+=BtaTerm)*) ")"
+;
+BtaTerm:
+	btaTerms=[BtaTerms|ID] | btaTrmOperatorFunction=BtaTermOperatorFunction
+;
+BtaPredicate:
+	(btaTerm1=BtaTerm EqualityElementOperator btaTerm2=BtaTerm) 
+;
+BtUrinaryFormulas:
+	UnaryOperator  btaFormulaLtl=BtaFormula
+;
+//BtaBinaryFormulas:
+//	'('(btaFormulaLgk+=BtaFormula (binaryOperator+=BinaryOperator btaFormulaLgk+=BtaFormula)*) ')' //try with brackets for better non LL
+//;
+BtaQuantifiedFormulas:
+	QuantifierOperator btaQuantifiedFs=BtaFormula 
+;
+BtaFormula:
+	BtaPredicate | 
+	BtUrinaryFormulas | 
+	//BtaBinaryFormulas |  
+	BtaQuantifiedFormulas
+;
+BtaFormulasID:
+	name=ID ':' btaFormula=BtaFormula
+;
+//End BTA
+
+//Begin Operator rules for CTA, BTA, and AG ....
+UnaryOperator: 
+	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
+	neg='¬' // Negation logic operator
+;
+BinaryOperator: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
+
+	lAnd='∧' | 
+	lDisjunct='∨' |
+	lImplies='⇒' | lDoubleImplies='⇔' |
+	lWeakUntil='W' | lUntil='U' 
+
+;
+/*
+BinaryOperatorOr: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
+	lDisjunct='∨'
+;
+BinaryOperatorAnd:
+	lAnd='∧'
+;
+BinaryOperatorImplies:
+	lImplies='⇒' | lDoubleImplies='⇔'
+;
+BinaryOperatorUntil:
+	lWeakUntil='W' | lUntil='U'
+;
+*/
+EqualityElementOperator: //Maybe not needed (check?)
+	'='
+;
+
+QuantifierOperator:
+	exists='∃'quantifiedExistsVar=[ComponentVariable|ID]'.' | all='∀'quantifiedAllVar=[ComponentVariable|ID]'.'
+;
+//End
+QualifiedName:
+    ID ('.' ID)*
+;
+EString returns ecore::EString:
+	STRING | ID
+;
