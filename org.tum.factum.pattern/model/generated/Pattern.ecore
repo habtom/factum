@@ -154,17 +154,17 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="pActCtaCmpVaref" eType="#//CmpVariableRef"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CtaUnaryFormulas">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="unaryOperator" eType="#//UnaryOperator"
+  <eClassifiers xsi:type="ecore:EClass" name="CtaFormula">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaUnaryFormulas" eType="#//CtaFormula"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaFormulaLtl" eType="#//CtaFormula"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaBinaryFormulas" eType="#//CtaFormula"
         containment="true"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CtaBinaryFormulas">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaFormulaLgk" upperBound="-1"
-        eType="#//CtaFormula" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="binaryOperator" upperBound="-1"
-        eType="#//BinaryOperator" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaQuantifiedFormulas"
+        eType="#//CtaQuantifiedFormulas" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaFormulaWithBracket"
+        eType="#//CtaFormulaWithBracket" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaBaseTerms" eType="#//CtaBaseTerms"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CtaQuantifiedFormulas">
     <eStructuralFeatures xsi:type="ecore:EReference" name="quantifierOperator" eType="#//QuantifierOperator"
@@ -172,21 +172,13 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ctaQuantifiedFs" eType="#//CtaFormula"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CtaBeginParentheses">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="begin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CtaEndParentheses">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="end" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CtaFormulaParentheses">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaBeginParentheses" eType="#//CtaBeginParentheses"
+  <eClassifiers xsi:type="ecore:EClass" name="CtaFormulaWithBracket">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="leftBracket" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaPrimaryFormula" eType="#//CtaFormula"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaFormulaParentheses"
-        eType="#//CtaFormula" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaEndParentheses" eType="#//CtaEndParentheses"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rightBracket" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CtaFormula">
+  <eClassifiers xsi:type="ecore:EClass" name="CtaBaseTerms">
     <eStructuralFeatures xsi:type="ecore:EReference" name="ctaPredicateTerms" eType="#//CtaPredicateTerms"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ctaPredicateConn" eType="#//CtaPredicateConn"
@@ -199,12 +191,6 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ctaPredicatePAct" eType="#//CtaPredicatePAct"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaUnaryFormulas" eType="#//CtaUnaryFormulas"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaBinaryFormulas" eType="#//CtaBinaryFormulas"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaQuantifiedFormulas"
-        eType="#//CtaQuantifiedFormulas" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CtaFormulasID">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -246,17 +232,17 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="pActAgCmpVaref" eType="#//CmpVariableRef"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AgUnaryFormulas">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="unaryOperator" eType="#//UnaryOperator"
+  <eClassifiers xsi:type="ecore:EClass" name="AgFormula">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agUnaryFormulas" eType="#//AgFormula"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agFormulaLtl" eType="#//AgFormula"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agBinaryFormulas" eType="#//AgFormula"
         containment="true"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AgBinaryFormulas">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agFormulaLgk" upperBound="-1"
-        eType="#//AgFormula" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="binaryOperator" upperBound="-1"
-        eType="#//BinaryOperator" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agQuantifiedFormulas" eType="#//AgQuantifiedFormulas"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agFormulaWithBracket" eType="#//AgFormulaWithBracket"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agBaseTerms" eType="#//AgBaseTerms"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AgQuantifiedFormulas">
     <eStructuralFeatures xsi:type="ecore:EReference" name="quantifierOperator" eType="#//QuantifierOperator"
@@ -264,21 +250,13 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="agQuantifiedFs" eType="#//AgFormula"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AgBeginParentheses">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="begin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AgEndParentheses">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="end" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AgFormulaParentheses">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agBeginParentheses" eType="#//AgBeginParentheses"
+  <eClassifiers xsi:type="ecore:EClass" name="AgFormulaWithBracket">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="leftBracket" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agPrimaryFormula" eType="#//AgFormula"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agFormulaParentheses" eType="#//AgFormula"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agEndParentheses" eType="#//AgEndParentheses"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rightBracket" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="AgFormula">
+  <eClassifiers xsi:type="ecore:EClass" name="AgBaseTerms">
     <eStructuralFeatures xsi:type="ecore:EReference" name="agPredicateTerms" eType="#//AgPredicateTerms"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="agPredicateConn" eType="#//AgPredicateConn"
@@ -290,12 +268,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="agPredicateCAct" eType="#//AgPredicateCAct"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="agPredicatePAct" eType="#//AgPredicatePAct"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agUnaryFormulas" eType="#//AgUnaryFormulas"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agBinaryFormulas" eType="#//AgBinaryFormulas"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="agQuantifiedFormulas" eType="#//AgQuantifiedFormulas"
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AgFormulasID">
@@ -324,12 +296,6 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="BtUrinaryFormulas" eSuperTypes="#//BtaFormula"/>
-  <eClassifiers xsi:type="ecore:EClass" name="BtaBinaryFormulas" eSuperTypes="#//BtaFormula">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="btaFormulaLgk" upperBound="-1"
-        eType="#//BtaFormula" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="binaryOperator" upperBound="-1"
-        eType="#//BinaryOperator" containment="true"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="BtaQuantifiedFormulas" eSuperTypes="#//BtaFormula"/>
   <eClassifiers xsi:type="ecore:EClass" name="BtaFormula"/>
   <eClassifiers xsi:type="ecore:EClass" name="BtaFormulasID">
@@ -346,9 +312,9 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="neg" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="BinaryOperator">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lImplies" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lAnd" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lDisjunct" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lImplies" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lDoubleImplies" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lWeakUntil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lUntil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -360,5 +326,37 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="quantifiedExistsVar" eType="#//ComponentVariable"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="all" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="quantifiedAllVar" eType="#//ComponentVariable"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CtaUnaryFormulas" eSuperTypes="#//CtaFormula">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="unaryOperator" eType="#//UnaryOperator"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaFormulaLtl" eType="#//CtaFormula"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CtaBinaryFormulas" eSuperTypes="#//CtaFormula">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ctaPrimary" eType="#//CtaFormula"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//CtaBinaryFormulas"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="binaryOperator" eType="#//BinaryOperator"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="right" eType="#//CtaFormula"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AgUnaryFormulas" eSuperTypes="#//AgFormula">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="unaryOperator" eType="#//UnaryOperator"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agFormulaLtl" eType="#//AgFormula"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AgBinaryFormulas" eSuperTypes="#//AgFormula">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="agPrimary" eType="#//AgFormula"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//AgBinaryFormulas"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="binaryOperator" eType="#//BinaryOperator"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="right" eType="#//AgFormula"
+        containment="true"/>
   </eClassifiers>
 </ecore:EPackage>
