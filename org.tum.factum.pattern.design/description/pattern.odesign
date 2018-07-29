@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<description:Group xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:tool="http://www.eclipse.org/sirius/diagram/description/tool/1.1.0" xmlns:tool_1="http://www.eclipse.org/sirius/description/tool/1.1.0" name="pattern" version="12.0.0.2017041100">
+  <ownedViewpoints name="PatternViewpoint" modelFileExtension="ecore xtext pmodel">
+    <ownedRepresentations xsi:type="description_1:DiagramDescription" name="PatternDiagarm" label="PatternDiagram" domainClass="pattern::Pattern" enablePopupBars="true">
+      <metamodel href="http://www.tum.org/factum/pattern/Pattern#/"/>
+      <defaultLayer name="Default">
+        <nodeMappings name="ComponentTypeNode" semanticCandidatesExpression="feature:componentTypes" domainClass="pattern::ComponentType">
+          <borderedNodeMappings name="InputPortNode" semanticCandidatesExpression="feature:inputPorts" domainClass="pattern::InputPort">
+            <style xsi:type="style:EllipseNodeDescription" borderSizeComputationExpression="1" showIcon="false" labelAlignment="RIGHT" sizeComputationExpression="1" resizeKind="NSEW" horizontalDiameterComputationExpression="1.2" verticalDiameterComputationExpression="1.2">
+              <borderColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+              <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+              <color xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='white']"/>
+            </style>
+          </borderedNodeMappings>
+          <borderedNodeMappings name="OutputPortNode" label="OutputPortNode" semanticCandidatesExpression="feature:outputPorts" domainClass="pattern::OutputPort">
+            <style xsi:type="style:EllipseNodeDescription" borderSizeComputationExpression="1" showIcon="false" labelAlignment="RIGHT" sizeComputationExpression="1" resizeKind="NSEW" horizontalDiameterComputationExpression="1.2" verticalDiameterComputationExpression="1.2">
+              <borderColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+              <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+              <color xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            </style>
+          </borderedNodeMappings>
+          <style xsi:type="style:SquareDescription" iconPath="/org.tum.factum.sample01.pattern/icons/Component.gif" labelPosition="node" resizeKind="NSEW" width="20" height="10">
+            <borderColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            <color xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='light_gray']"/>
+          </style>
+        </nodeMappings>
+        <edgeMappings name="interface" sourceMapping="//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='OutputPortNode']" targetMapping="//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='InputPortNode']" targetFinderExpression="feature:connects">
+          <style lineStyle="dash">
+            <strokeColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            <centerLabelStyleDescription showIcon="false">
+              <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            </centerLabelStyleDescription>
+          </style>
+        </edgeMappings>
+        <toolSections>
+          <ownedTools xsi:type="tool:NodeCreationDescription" name="createComponentType" label="ComponentType" nodeMappings="//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']" iconPath="/org.tum.factum.sample01.pattern/icons/Component.gif">
+            <variable name="container"/>
+            <viewVariable name="containerView"/>
+            <initialOperation>
+              <firstModelOperations xsi:type="tool_1:ChangeContext" browseExpression="var:container">
+                <subModelOperations xsi:type="tool_1:CreateInstance" typeName="pattern::ComponentType" referenceName="componentTypes">
+                  <subModelOperations xsi:type="tool_1:SetValue" featureName="name" valueExpression="aql:'C'+container.componentTypes->filter(pattern::ComponentType)->size()"/>
+                </subModelOperations>
+              </firstModelOperations>
+            </initialOperation>
+          </ownedTools>
+          <ownedTools xsi:type="tool:NodeCreationDescription" name="createInputPort" label="Input Port" nodeMappings="//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='InputPortNode']" iconPath="/org.tum.factum.sample01.pattern/icons/Prt.gif">
+            <variable name="container"/>
+            <viewVariable name="containerView"/>
+            <initialOperation>
+              <firstModelOperations xsi:type="tool_1:ChangeContext" browseExpression="var:container">
+                <subModelOperations xsi:type="tool_1:CreateInstance" typeName="pattern::InputPort" referenceName="inputPorts">
+                  <subModelOperations xsi:type="tool_1:SetValue" featureName="name" valueExpression="aql:'IP'+container.inputPorts->filter(pattern::InputPort)->size()"/>
+                </subModelOperations>
+              </firstModelOperations>
+            </initialOperation>
+          </ownedTools>
+          <ownedTools xsi:type="tool:NodeCreationDescription" name="createOutputPort" label="Output Port" nodeMappings="//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@nodeMappings[name='ComponentTypeNode']/@borderedNodeMappings[name='OutputPortNode']" iconPath="/org.tum.factum.sample01.pattern/icons/Prt.gif">
+            <variable name="container"/>
+            <viewVariable name="containerView"/>
+            <initialOperation>
+              <firstModelOperations xsi:type="tool_1:ChangeContext" browseExpression="var:container">
+                <subModelOperations xsi:type="tool_1:CreateInstance" typeName="pattern::OutputPort" referenceName="outputPorts">
+                  <subModelOperations xsi:type="tool_1:SetValue" featureName="name" valueExpression="aql:'OP'+container.outputPorts->filter(pattern::OutputPort)->size()"/>
+                </subModelOperations>
+              </firstModelOperations>
+            </initialOperation>
+          </ownedTools>
+          <ownedTools xsi:type="tool:EdgeCreationDescription" name="setInterface" label="Interface" edgeMappings="//@ownedViewpoints[name='PatternViewpoint']/@ownedRepresentations[name='PatternDiagarm']/@defaultLayer/@edgeMappings[name='interface']">
+            <sourceVariable name="source"/>
+            <targetVariable name="target"/>
+            <sourceViewVariable name="sourceView"/>
+            <targetViewVariable name="targetView"/>
+            <initialOperation>
+              <firstModelOperations xsi:type="tool_1:ChangeContext" browseExpression="var:source">
+                <subModelOperations xsi:type="tool_1:SetValue" featureName="connects" valueExpression="var:target"/>
+              </firstModelOperations>
+            </initialOperation>
+          </ownedTools>
+        </toolSections>
+      </defaultLayer>
+    </ownedRepresentations>
+    <ownedJavaExtensions qualifiedClassName="org.tum.factum.pattern.design.Services"/>
+  </ownedViewpoints>
+</description:Group>
