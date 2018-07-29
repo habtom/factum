@@ -11,14 +11,14 @@ Pattern returns Pattern:
  
 	    ('ArchSpec' '{'
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
-	    	ctaDtVars=DTVariables 														//Declaration of DT Variables
+	    	(ctaDtVars=DTVariables)?														//Declaration of DT Variables
 
 			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
 	    )?
 	    ('ArchGuarantee' '{'
 			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
-			agDtVars=DTVariables
+			(agDtVars=DTVariables)?
 			
 			(agFormulaIds+=AgFormulasID)*
 	    '}')?
@@ -94,14 +94,10 @@ DTVariables:
 ;
 PortRef:
 	InputPort | OutputPort | Parameter
-	//inp=InputPort | outp=OutputPort | par=Parameter
 ;
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
 ;
-//Terms:
-//	termsDtVar=DataTypeVariable  | DataTypeVariable
-//;
 Term:
 	cmpVariableRef=CmpVariableRef |
 	dtTypeVars=[DataTypeVariable|ID] | 
@@ -214,7 +210,6 @@ AgFormula returns AgFormula:
 AgUnaryFormulas returns AgFormula:
 	{AgUnaryFormulas} (unaryOperator=UnaryOperator agFormulaLtl=AgFormula)
 ;
-
 AgQuantifiedFormulas:
  	{AgQuantifiedFormulas} (quantifierOperator=QuantifierOperator agQuantifiedFs=AgFormula)
 ;
@@ -234,7 +229,7 @@ AgBaseTerms:
 		agPredicateTerms=AgPredicateTerms | 
 		agPredicateConn=AgPredicateConn | 
 		agPredicateVal=AgPredicateVal | 
-		agPredicateEq=AgPredicateEq | //This might be duplicate to AgPredicateTerms?
+		agPredicateEq=AgPredicateEq |
 		agPredicateCAct=AgPredicateCAct | 
 		agPredicatePAct=AgPredicatePAct 
 ;
@@ -260,9 +255,6 @@ BtaPredicate:
 BtUrinaryFormulas:
 	UnaryOperator  btaFormulaLtl=BtaFormula
 ;
-//BtaBinaryFormulas:
-//	'('(btaFormulaLgk+=BtaFormula (binaryOperator+=BinaryOperator btaFormulaLgk+=BtaFormula)*) ')' //try with brackets for better non LL
-//;
 BtaQuantifiedFormulas:
 	QuantifierOperator btaQuantifiedFs=BtaFormula 
 ;
@@ -304,7 +296,7 @@ BinaryOperatorUntil:
 	lWeakUntil='W' | lUntil='U'
 ;
 */
-EqualityElementOperator: //Maybe not needed (check?)
+EqualityElementOperator:
 	'='
 ;
 
