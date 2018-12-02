@@ -17,11 +17,11 @@ At this stage of development, the tool has the following key features mainly for
 * Specification of architectural guarantees and
 * Generation of Isabelle/HOL theory from ADP specification.
 
-The tool is developed using the Eclipse Modeling Framework (EMF), which includes Sirius, Xtext, and Xtend.  
+The tool is developed using the Eclipse Modeling Framework (EMF), particularly, with [Obeo](https://www.obeo.fr/en/)'s free and ready-to-use Eclipse package Obeo Designer Community. It includes the technologies required for the development, such as Sirius, Xtext, and Xtend.
 
 ## Installation Instructions
 
-A working copy of Obeo Designer Community edition should enable the importing of the FACTum tool metamodel project and runtime sample to start and try the tool. You may download files required from the following links:
+A working copy of Obeo Designer Community edition should enable the importing of the FACTum tool metamodel project and runtime sample to start and try the tool. Currently, FACTum Studio works with Obeo Designer Community Version 10.1. Other versions may not run as expected. You may download files required from the following links:
 
 * [Download Eclipse, Obeo Designer](https://www.obeodesigner.com/en/download) *(Needs installing Obeo Designer Community Edition Extensions including Xtext)*
 
