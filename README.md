@@ -1,6 +1,13 @@
 # FACTum Studio
 [//]: # (Architectural Design Constraints Specification and Verification)
 
+### Contents
+**[Overview](#overview)**<br>
+**[Installation Instructions](#installation-instructions)**<br>
+**[Publish-subscribe Pattern Tutorial](#publish-subscribe-pattern-tutorial)**<br>
+
+## Overview 
+
 FACTum Studio is a tool that supports Architectural Design Patterns (ADPs) specification and verification with the support of interactive verification in Isabelle/HOL.
 
 At this stage of development, the tool has the following key features mainly for specification of ADPs:
@@ -11,6 +18,8 @@ At this stage of development, the tool has the following key features mainly for
 * Generation of Isabelle/HOL theory from ADP specification.
 
 The tool is developed using the Eclipse Modeling Framework (EMF), which includes Sirius, Xtext, and Xtend.  
+
+## Installation Instructions
 
 A working copy of Obeo Designer Community edition should enable the importing of the FACTum tool metamodel project and runtime sample to start and try the tool. You may download files required from the following links:
 
