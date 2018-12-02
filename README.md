@@ -14,7 +14,7 @@ The tool is developed using the Eclipse Modeling Framework (EMF), which includes
 
 A working copy of Obeo Designer Community edition should enable the importing of the FACTum tool metamodel project and runtime sample to start and try the tool. You may download files required from the following links:
 
-* [Download Eclipse, Obeo Designer](https://www.obeodesigner.com/en/download) *(Needs installing Obeo Designer Community Extensions)*
+* [Download Eclipse, Obeo Designer](https://www.obeodesigner.com/en/download) *(Needs installing Obeo Designer Community Extensions including Xtext)*
 
 * [Download FACTum Metamodel Project and Runtime Application](https://goo.gl/fgZN2Y) *(Contains files 'metamodelFACTumS.zip' and 'runtimeFACTumS.zip' )*
   * First, import the project file *'metamodelFACTumS.zip'* into your Obeo Designer Community workspace, 
