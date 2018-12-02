@@ -16,6 +16,10 @@ A working copy of Obeo Designer Community edition should enable the importing of
 
 * [Download Eclipse, Obeo Designer](https://www.obeodesigner.com/en/download) *(Needs installing Obeo Designer Community Extensions including Xtext)*
 
+  * First, extract the downloaded Obeo Designer Community zip file into a directory where you would intend to run it.
+  * Next, go to the extracted directory and run the file 'obeodesigner' which is the program launcher. 
+  * Then, when the program is open and running install required plugins, (Help menu -> Install New Software), such as 'Sirius Integration with Xtext' and 'Xtext Complete SDK' from the Obeo Designer Community Edition Extensions.
+
 * [Download FACTum Metamodel Project and Runtime Application](https://goo.gl/fgZN2Y) *(Contains files 'metamodelFACTumS.zip' and 'runtimeFACTumS.zip' )*
   * First, import the project file *'metamodelFACTumS.zip'* into your Obeo Designer Community workspace, 
   * Then, generate Xtext Artifacts from the file Pattern.xtext. 
