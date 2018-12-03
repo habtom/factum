@@ -40,5 +40,5 @@ A working copy of Obeo Designer Community edition should enable the importing of
 
 The video tutorial below shows a brief overview of using FACTum Studio. The tutorial demonstrates the tool with a specification of the publish-subscribe pattern and transforms the specification to Isabelle/HOL for verification.
 
-[![Publish-subscribe pattern tutorial](https://img.youtube.com/vi/OgJUhAG_4WI/hq1.jpg)](http://www.youtube.com/watch?v=OgJUhAG_4WI&t=2275s)
+[![Publish-subscribe pattern tutorial](https://img.youtube.com/vi/oN74qLb66xs/mqdefault.jpg)](http://www.youtube.com/watch?v=will_be_available_soon)
 
