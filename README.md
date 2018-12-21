@@ -27,7 +27,7 @@ A working copy of Obeo Designer Community edition should enable the importing of
 
   * First, extract the downloaded Obeo Designer Community zip file into a directory where you would intend to run it.
   * Next, go to the extracted directory and run the file 'obeodesigner' which is the program launcher. 
-  * Then, when the program is open and running install required plugins, (Help menu -> Install New Software), such as 'Sirius Integration with Xtext' and 'Xtext Complete SDK' from the Obeo Designer Community Edition Extensions.
+  * Then, when the program is open and running, install required plugins - Help menu -> Install New Software, these are plugins such as the 'Sirius Integration with Xtext' and 'Xtext Complete SDK' from the Obeo Designer Community Edition Extensions.
 
 * [Download FACTum Metamodel Project and Runtime Application](https://goo.gl/fgZN2Y) *(Contains files 'metamodelFACTumS.zip' and 'runtimeFACTumS.zip' )*
   * First, import the project file *'metamodelFACTumS.zip'* into your Obeo Designer Community workspace, 
