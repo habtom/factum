@@ -289,7 +289,7 @@ BtaFormula:
 BtaFormulasID:
 	name=ID ':' btaFormula=BtaFormula
 ;
-//End BTA
+//End BTA 
 
 //Begin Operator rules for CTA, BTA, and AG ....
 UnaryOperator: 

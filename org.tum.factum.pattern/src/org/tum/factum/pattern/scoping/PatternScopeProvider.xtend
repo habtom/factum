@@ -47,7 +47,6 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 	
 		return super.getScope(context, reference);
 	}
-	///Hi Long
 	//Scope for Component Variable reference or constraint (for input and output ports)
 	private def getScopeCtaCmpVarPorts(CmpVariableRef cmpvar) {
 		val cmpvarefin = cmpvar.cmpRef.cmptypAssigned.inputPorts
