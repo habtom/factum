@@ -3,19 +3,27 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 generate pattern "http://www.tum.org/factum/pattern/Pattern"
 Pattern returns Pattern:
-	{Pattern} 
+	{Pattern}
 	'Pattern' name=ID 'ShortName' psname=ID
 	'{'
+		//Language Part 1 - Specification of Data Types
 		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
-		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
- 
+		
+		//Language Part 2 - Specification of Component Types (CTypes)
+		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}'
+		)?
+		
+ 		//Language Part 3 - Specification of Architectural Constraints
 	    ('ArchSpec' '{'
-	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
-	    	(ctaDtVars=DTVariables)?														//Declaration of DT Variables
+	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 		//Declaration of Component Variables
+	    	(ctaDtVars=DTVariables)?												//Declaration of DT Variables
+
+			//(actFormulaIds+=ActivationFormulasID)*
 
 			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
 	    )?
+	    //Part 4 - Specification of Architectural Guarantees
 	    ('ArchGuarantee' '{'
 			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
 			(agDtVars=DTVariables)?
@@ -30,13 +38,26 @@ ComponentType returns ComponentType:
 	{ComponentType} 
 	'CType'	name=ID ('ShortName' ctsname=ID)? 
 	'{'
-	    ('InputPorts' '{' inputPorts+=InputPort ( "," inputPorts+=InputPort)* '}' )?
-	    ('OutputPorts' '{' outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* '}' )?
-	    ('Parameters' '{' parameters+=Parameter ( "," parameters+=Parameter)* '}' )?
-	    
+	    //Part 2.1 of Spec
+	    ('InputPorts' '{' 
+	    	inputPorts+=InputPort ( "," inputPorts+=InputPort)* 
+	    	'}'
+	    )?
+	    //Part 2.2 of Spec
+	    ('OutputPorts' '{' 
+	    	outputPorts+=OutputPort ( "," outputPorts+=OutputPort)* 
+	    	'}'
+	    )?
+	    //Part 2.3 of Spec
+	    ('Parameters' '{' 
+	    	parameters+=Parameter ( "," parameters+=Parameter)* 
+	    	'}'
+	    )?
+	    //Part 2.4 of Spec
 	    ('BTA' '{' //Behavior Trace Assertions (BTA)
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
 			(btaFormulaIds+=BtaFormulasID)*
+			'}'
 	    )?
 	'}'
 ;
@@ -50,7 +71,7 @@ OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=EString '(' 
 		('Type' ':' outputPrtSrtTyp=[Sort|QualifiedName])? 
-		('connects' connects+=[InputPort|QualifiedName]*)?
+		('connects' connects+=[InputPort|QualifiedName]*)? 
 	')'
 ;
 InputPort returns InputPort:
@@ -84,9 +105,10 @@ VariableStatus:
 	'rig' | 'flex'
 ;
 ComponentVariable:
+	//cmptypAssigned => Component Type assigned or associated to the component variable
 	VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
 ;
-DataTypeVariable: 
+DataTypeVariable:
 	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
 ;
 DTVariables:
@@ -274,6 +296,7 @@ UnaryOperator:
 	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
 	neg='¬' // Negation logic operator
 ;
+
 BinaryOperator: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
 
 	lAnd='∧' | 
