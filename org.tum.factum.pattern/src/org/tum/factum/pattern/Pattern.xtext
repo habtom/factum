@@ -92,7 +92,12 @@ DataTypeSpec returns DataTypeSpec:
 		('Sort' (dtSorts+=Sort ("," dtSorts+=Sort)*))?
 		('Operation' (dtOps+=Operation ("," dtOps+=Operation)*))?
 		('Predicate' (dtPredicate+=DTPredicate ("," dtPredicate+=DTPredicate)*))?
-		(sortName=[Sort|ID] 'generatedBy' (returnOps+=[Operation|ID] ("," returnOps+=[Operation|ID])*))?		
+		(sortName=[Sort|ID] 'generatedBy' (returnOps+=[Operation|ID] ("," returnOps+=[Operation|ID])*))?
+	    ('DTA' '{' //Datatype Assertions (DTA)
+	    	(dtaDtVar+=DataTypeVariable ("," dtaDtVar+=DataTypeVariable)*)?
+			(dtaFormulaIds+=DtaFormulasID)*
+			'}'
+	    )?		
 	')'
 ;
 DTPredicate:
@@ -264,6 +269,42 @@ AgFormulasID:
 	name=ID ':' agFormula=AgFormula
 ;
 // End AG
+
+// Begin Datatype Assertion 
+DtaTerms:
+	DataTypeVariable	
+;
+DtaTermPredicateFunction:
+	dtaPredOperator=[DTPredicate|QualifiedName] "(" (dtaTrmOperands+=DtaTerm ("," dtaTrmOperands+=DtaTerm)*) ")" 
+;
+DtaTermOperatorFunction:
+	dtaTrmOperator=[Operation|QualifiedName] "(" (dtaTrmOperands+=DtaTerm ("," dtaTrmOperands+=DtaTerm)*) ")" 
+;
+DtaTerm:
+	dtaTerms=[DtaTerms|ID] | dtaTrmOperatorFunction=DtaTermOperatorFunction
+;
+DtaPredicate1:
+	(dtaTerm1=DtaTerm EqualityElementOperator dtaTerm2=DtaTerm)
+;
+DtaPredicate:
+	(DtaPredicate1) | (dtaPred=DtaTermPredicateFunction)
+;
+DtaUrinaryFormulas:
+	UnaryOperator  dtaFormulaLtl=DtaFormula
+;
+DtaQuantifiedFormulas:
+	QuantifierOperator dtaQuantifiedFs=DtaFormula 
+;
+DtaFormula:
+	DtaPredicate// | 
+	//DtaUrinaryFormulas | 
+	//BtaBinaryFormulas |  
+	//DtaQuantifiedFormulas
+;
+DtaFormulasID:
+	name=ID ':' dtaFormula=DtaFormula
+;
+//End DTA
 
 // Begin Behavior Trace Assertions(BTA) 
 BtaTerms:

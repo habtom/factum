@@ -65,6 +65,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sortName" eType="#//Sort"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="returnOps" unique="false"
         upperBound="-1" eType="#//Operation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaDtVar" upperBound="-1"
+        eType="#//DataTypeVariable" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaFormulaIds" upperBound="-1"
+        eType="#//DtaFormulasID" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DTPredicate">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -84,7 +88,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="cmptypAssigned" eType="#//ComponentType"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DataTypeVariable" eSuperTypes="#//BtaTerms">
+  <eClassifiers xsi:type="ecore:EClass" name="DataTypeVariable" eSuperTypes="#//DtaTerms #//BtaTerms">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="varSortType" eType="#//Sort"/>
   </eClassifiers>
@@ -277,6 +281,40 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="agFormula" eType="#//AgFormula"
         containment="true"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaTerms"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaTermPredicateFunction">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaPredOperator" eType="#//DTPredicate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaTrmOperands" upperBound="-1"
+        eType="#//DtaTerm" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaTermOperatorFunction">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaTrmOperator" eType="#//Operation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaTrmOperands" upperBound="-1"
+        eType="#//DtaTerm" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaTerm">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaTerms" eType="#//DtaTerms"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaTrmOperatorFunction"
+        eType="#//DtaTermOperatorFunction" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaPredicate1" eSuperTypes="#//DtaPredicate">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaTerm1" eType="#//DtaTerm"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaTerm2" eType="#//DtaTerm"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaPredicate" eSuperTypes="#//DtaFormula">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaPred" eType="#//DtaTermPredicateFunction"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaUrinaryFormulas"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaQuantifiedFormulas"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaFormula"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DtaFormulasID">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaFormula" eType="#//DtaFormula"
+        containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="BtaTerms">
     <eStructuralFeatures xsi:type="ecore:EReference" name="prtRef" eType="#//PortRef"
         containment="true"/>
@@ -305,7 +343,9 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="btaFormula" eType="#//BtaFormula"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="UnaryOperator" eSuperTypes="#//BtUrinaryFormulas">
+  <eClassifiers xsi:type="ecore:EClass" name="UnaryOperator" eSuperTypes="#//DtaUrinaryFormulas #//BtUrinaryFormulas">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaFormulaLtl" eType="#//DtaFormula"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="btaFormulaLtl" eType="#//BtaFormula"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ltlG" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -321,7 +361,9 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lWeakUntil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lUntil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="QuantifierOperator" eSuperTypes="#//BtaQuantifiedFormulas">
+  <eClassifiers xsi:type="ecore:EClass" name="QuantifierOperator" eSuperTypes="#//DtaQuantifiedFormulas #//BtaQuantifiedFormulas">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dtaQuantifiedFs" eType="#//DtaFormula"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="btaQuantifiedFs" eType="#//BtaFormula"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="exists" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
