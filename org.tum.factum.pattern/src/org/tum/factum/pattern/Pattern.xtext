@@ -36,7 +36,9 @@ Pattern returns Pattern:
 ;
 ComponentType returns ComponentType:
 	{ComponentType} 
-	'CType'	name=ID ('ShortName' ctsname=ID)? 
+	'CType'	name=ID ('ShortName' ctsname=ID)?
+	//Optional package declaration needed for JavaMOP
+	('Package' packageName=QualifiedName)?
 	'{'
 	    //Part 2.1 of Spec
 	    ('InputPorts' '{' 
@@ -83,7 +85,9 @@ InputPort returns InputPort:
 ;
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
-	'DT' name =ID	'('
+	'DT' name =ID
+		//Optional package declaration needed for JavaMOP
+		('Package' packageName=QualifiedName)? '('
 		('Param' (dtParam+=Sort ("," dtParam+=Sort)*))?
 		('Sort' (dtSorts+=Sort ("," dtSorts+=Sort)*))?
 		('Operation' (dtOps+=Operation ("," dtOps+=Operation)*))?

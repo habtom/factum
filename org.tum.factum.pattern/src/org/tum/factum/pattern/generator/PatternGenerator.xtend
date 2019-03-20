@@ -20,7 +20,10 @@ class PatternGenerator extends AbstractGenerator {
 		val root = resource.allContents.head as Pattern;
 		 
 		if (root !== null) {
+			//For Isabelle
 			fsa.generateFile(root.name + ".thy", IsabelleTextGenerator.toIsabelle(root))
+			//For JavaMOP
+			//fsa.generateFile(root.name + ".mop", JavaMOPTextGenerator.convertToMOP(root))
 		}
 
 	}
