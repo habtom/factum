@@ -11,6 +11,21 @@ import org.tum.factum.pattern.pattern.CmpVariableRef
 import org.tum.factum.pattern.pattern.PatternPackage
 import org.tum.factum.pattern.pattern.RefComponentVariableInputPort
 import org.tum.factum.pattern.pattern.RefComponentVariableOutputPort
+import org.tum.factum.pattern.pattern.RefActCmpVarInputPort
+import org.tum.factum.pattern.pattern.ComponentVariable
+import org.tum.factum.pattern.pattern.RefActCmpVarOutputPort
+import org.tum.factum.pattern.pattern.ActCmpVarRef
+import org.eclipse.xtext.scoping.IScope
+import org.tum.factum.pattern.pattern.Activation
+import org.tum.factum.pattern.pattern.ActComponentVariable
+import org.tum.factum.pattern.pattern.ImplicitComponentVariable
+import org.tum.factum.pattern.pattern.SndImplicitComponentVariable
+import org.tum.factum.pattern.pattern.Connection
+import org.tum.factum.pattern.pattern.OutputPort
+import org.eclipse.xtext.EcoreUtil2
+import org.tum.factum.pattern.pattern.Pattern
+import java.awt.Component.BaselineResizeBehavior
+import org.tum.factum.pattern.pattern.ComponentType
 
 //import org.tum.factum.pattern.pattern.RefComponentVariableParameter
 
@@ -36,6 +51,27 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		if (context instanceof RefComponentVariableOutputPort && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_OUTPUT_PORT__OUTPUT_PRTRF){
 			return getScopeRefComponentVariableOutputPort(context as RefComponentVariableOutputPort)
 		}
+		//Scope for Activation component variable Input Port and Output Port
+		if (context instanceof ActCmpVarRef && reference == PatternPackage.Literals.ACT_CMP_VAR_REF__ACTPORT_REF){
+			return getScopeActCmpVarPorts(context as ActCmpVarRef)
+		}
+		if (context instanceof RefActCmpVarInputPort && reference == PatternPackage.Literals.REF_ACT_CMP_VAR_INPUT_PORT__ACT_INPUT_PORT_REF){
+			return getScopeRefActCmpVarInputPort(context as RefActCmpVarInputPort)
+		}
+		if (context instanceof RefActCmpVarOutputPort && reference == PatternPackage.Literals.REF_ACT_CMP_VAR_OUTPUT_PORT__ACT_OUTPUT_PORT_REF){
+			return getScopeRefActCmpVarOutputPort(context as RefActCmpVarOutputPort)
+		}
+		
+		//The ActCmpVarRef can only access to variables which is declared in Activation part
+//		if (reference == PatternPackage.Literals.ACT_CMP_VAR_REF__ACTCMP_REF ){
+//			return getScopeForActCmpRef(context)
+//		}
+//		if (context instanceof ActCmpVarRef && reference == PatternPackage.Literals.ACT_CMP_VAR_REF__ACTCMP_REF){
+//			return getScopeActCmpVar(context as ActCmpVarRef)
+//		}
+		
+		
+		
 //		if (context instanceof RefComponentVariableParameter && reference == PatternPackage.Literals.REF_COMPONENT_VARIABLE_PARAMETER__PARAMETER_REF){
 //			return getScopeRefComponentVariableParameter(context as RefComponentVariableParameter)
 //		}
@@ -47,6 +83,8 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 	
 		return super.getScope(context, reference);
 	}
+		
+		
 	
 	//Scope for Component Variable reference or constraint (for input and output ports)
 	private def getScopeCtaCmpVarPorts(CmpVariableRef cmpvar) {
@@ -67,6 +105,68 @@ class PatternScopeProvider extends AbstractPatternScopeProvider {
 		
 		return Scopes.scopeFor(cmpvarefoutput)
 	}
+	//Scope for Activation CMP Variable port reference (for input and output ports)
+	private def getScopeActCmpVarPorts(ActCmpVarRef actvar){
+		if (actvar.actcmpRef instanceof ComponentVariable){
+			val x = actvar.actcmpRef as ComponentVariable
+			val in = x.cmptypAssigned.inputPorts
+			val out = x.cmptypAssigned.outputPorts
+			val par = x.cmptypAssigned.parameters
+			return Scopes.scopeFor(Iterables.concat(in, out, par))
+		} 
+		if (actvar.actcmpRef instanceof SndImplicitComponentVariable) { // Scope for second implicit variable
+			val sndImpVar = actvar.actcmpRef as SndImplicitComponentVariable
+			if (sndImpVar !== null) {
+				val container = EcoreUtil2.getContainerOfType(sndImpVar, OutputPort)
+				if (container !== null) {
+					val x = container.connects
+					if (x !== null) {
+						val ctype = EcoreUtil2.getContainerOfType(x.head, ComponentType)
+						if (ctype !== null) {
+							val in = ctype.inputPorts
+							val out = ctype.outputPorts
+							val par = ctype.parameters
+							return Scopes.scopeFor(Iterables.concat(in, out, par))
+						}
+					}
+				}
+			}
+		} 
+		else return super.getScope(actvar, PatternPackage.Literals.ACT_CMP_VAR_REF__ACTPORT_REF)
+	}
+
+	private def getScopeRefActCmpVarInputPort(RefActCmpVarInputPort port) {
+		if (port.actVarRef instanceof ComponentVariable){ 
+			val x = port.actVarRef as ComponentVariable
+			val  actcmpvarinput = x.cmptypAssigned.inputPorts
+			return Scopes.scopeFor(actcmpvarinput)
+		}
+		else return super.getScope(port, PatternPackage.Literals.REF_ACT_CMP_VAR_INPUT_PORT__ACT_INPUT_PORT_REF)	
+	}
+	
+	private def getScopeRefActCmpVarOutputPort(RefActCmpVarOutputPort port) {
+		if (port.actVarRef instanceof ComponentVariable){ 
+			val x = port.actVarRef as ComponentVariable
+			val  actcmpvaroutput = x.cmptypAssigned.outputPorts
+			return Scopes.scopeFor(actcmpvaroutput)
+		}
+		else return super.getScope(port, PatternPackage.Literals.REF_ACT_CMP_VAR_OUTPUT_PORT__ACT_OUTPUT_PORT_REF)	
+	}
+	
+	
+//	private def IScope getScopeForActCmpRef (EObject context){
+//		val container = context.eContainer
+//		if(container instanceof Activation){
+//			return Scopes.scopeFor(container.actCmpVar)
+//		} else return getScopeForActCmpRef(container)
+//	}
+
+//	private def  getScopeActCmpVar(ActCmpVarRef x) {
+//		val a = x.actcmpRef as ComponentVariable
+//		val aaa = a.cmptypAssigned.activation.actCmpVar
+//		val b = x.actcmpRef as ImplicitComponentVariable
+//		return Scopes.scopeFor(aaa)	  
+//	}
 //	private def getScopeRefComponentVariableParameter(RefComponentVariableParameter cmpvrp) {
 //		val cmpvarparams = cmpvrp.parameterCmpRef.cmptypAssigned.parameters
 //		
