@@ -3,6 +3,7 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 generate pattern "http://www.tum.org/factum/pattern/Pattern"
 Pattern returns Pattern:
+	
 	{Pattern} 
 	'Pattern' name=ID 'ShortName' psname=ID
 	'{'
@@ -10,11 +11,11 @@ Pattern returns Pattern:
 		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}' )?
  
 	    ('ArchSpec' '{'
-	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 			//Declaration of Component Variables
-	    	(ctaDtVars=DTVariables)?														//Declaration of DT Variables
+	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 	//Declaration of Component Variables
+	    	(ctaDtVars=DTVariables)?											//Declaration of DT Variables
 
 			(ctaFormulaIds+=CtaFormulasID)*
-	    	'}'
+	    '}'
 	    )?
 	    ('ArchGuarantee' '{'
 			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
@@ -37,9 +38,37 @@ ComponentType returns ComponentType:
 	    ('BTA' '{' //Behavior Trace Assertions (BTA)
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
 			(btaFormulaIds+=BtaFormulasID)*
-	    )?
+	     '}')?
+	    //Activation part 
+	    ('Activation' activation = Activation )?  
 	'}'
 ;
+
+Activation returns Activation:
+	{Activation}
+	'('implCmpVar = ImplicitComponentVariable')' '{'
+		(actCmpVar+=ComponentVariable (',' actCmpVar+=ComponentVariable)*)? //Declaration of Component Variables
+		('DT' actDtVars=DTVariables)? //Declaration of DT Variables
+		
+//		//Test for the scope
+//		('test' x = ActCmpVarRef )? 
+//		('test1' x1 = [ActComponentVariable|ID] )? 
+//		('inputtest'  y= RefActCmpVarInputPort)?
+//		('outputtest' z= RefActCmpVarOutputPort)?
+//		//End test for the scope
+		//Formulas
+		(actFormula += ActFormulasID (actFormula+= ActFormulasID)?)?
+	'}'
+;
+
+ImplicitComponentVariable:
+	  name=ID
+;
+
+SndImplicitComponentVariable:
+	name = ID
+;
+
 Parameter returns Parameter:
 	{Parameter}
 	'Parameter' name=ID '(' 
@@ -48,9 +77,10 @@ Parameter returns Parameter:
 ;
 OutputPort returns OutputPort:
 	{OutputPort} 
-	'OutputPort' name=EString '(' 
+	'OutputPort' name=ID '(' 
 		('Type' ':' outputPrtSrtTyp=[Sort|QualifiedName])? 
 		('connects' connects+=[InputPort|QualifiedName]*)?
+		(connection = Connection)?
 	')'
 ;
 InputPort returns InputPort:
@@ -60,6 +90,24 @@ InputPort returns InputPort:
 	    ('connects' connects+=[OutputPort|QualifiedName]*)?
 	')'
 ;
+//@Long: Rule for Connection part
+Connection returns Connection:
+	'('implCmpVar1 = ImplicitComponentVariable ',' implCmpVar2= SndImplicitComponentVariable')' 
+	'{' 
+		(cntCmpVar+=ComponentVariable ("," cntCmpVar+=ComponentVariable)*)? //Declaration of Component Variables
+		('DT'cntDtVars=DTVariables)? //Declaration of DT Variables
+	
+//		//Test for the scope
+//		('test' x = ActCmpVarRef )? 
+//		('inputtest'  y= RefActCmpVarInputPort)?
+//		('outputtest' z= RefActCmpVarOutputPort)?
+//		//End test for the scope
+		//Formulas
+		(actFormula += ActFormulasID (actFormula+= ActFormulasID)?)?
+		
+	'}'
+;
+
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
 	'DT' name =ID	'('
@@ -84,10 +132,10 @@ VariableStatus:
 	'rig' | 'flex'
 ;
 ComponentVariable:
-	VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
+	status=VariableStatus	name=ID ':' cmptypAssigned=[ComponentType|ID]?
 ;
 DataTypeVariable: 
-	VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
+	status=VariableStatus name=ID ':' varSortType=[Sort|QualifiedName]
 ;
 DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
@@ -96,8 +144,34 @@ PortRef:
 	InputPort | OutputPort | Parameter
 ;
 CmpVariableRef:
-	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
+	cmpRef=[ComponentVariable|ID]  '.' portRef=[PortRef|ID]
 ;
+
+//@Long: Implicit Component Variable References
+//ImplCmpVarRef:
+//	implRef = [ImplicitComponentVariable|ID] '.' implPortRef=[PortRef|ID]
+//;
+//RefImplCmpVarInputPort:
+//	implRef = [ImplicitComponentVariable|ID] '.' implInputPortRef=[InputPort|ID]
+//;
+//RefImplCmpVarOutputPort:
+//	implRef = [ImplicitComponentVariable|ID] '.' implOutputPortRef=[OutputPort|ID]
+//;
+
+//@Long: Common rules for both types of component variables for the activation part
+ActComponentVariable:
+	ImplicitComponentVariable |ComponentVariable | SndImplicitComponentVariable
+;
+ActCmpVarRef:
+	actcmpRef = [ActComponentVariable|ID] '.' actportRef = [PortRef|ID]
+;
+RefActCmpVarInputPort:
+	actVarRef = [ActComponentVariable|ID] '.' actInputPortRef= [InputPort|ID]
+;
+RefActCmpVarOutputPort:
+	actVarRef = [ActComponentVariable|ID] '.' actOutputPortRef= [OutputPort|ID]
+;
+
 Term:
 	cmpVariableRef=CmpVariableRef |
 	dtTypeVars=[DataTypeVariable|ID] | 
@@ -268,6 +342,90 @@ BtaFormulasID:
 	name=ID ':' btaFormula=BtaFormula
 ;
 //End BTA
+
+//Begin Formula for activation part 
+//BeginBaseTerms
+ActTerm:
+	actVariableRef= ActCmpVarRef|
+	dtTypeVars=[DataTypeVariable|ID] | 
+	termOperatorFunction=ActTermOperatorFunction
+;
+ActTermOperatorFunction:
+	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=ActTerm ("," trmOperands+=ActTerm)*) ")" 
+;
+ActPredicateTerms:
+	actPTerm1=ActTerm equalityOperator=EqualityElementOperator actPTerm2=ActTerm
+;
+ActPredicateConn: 
+	actConn='conn' ('(' actConnCmpVarOutputPort= RefActCmpVarOutputPort ','	actConnCmpVarInptPort= RefActCmpVarInputPort')'
+	)
+; 
+ActPredicateEq: 
+	actEq='eq' ('(' actComponentVariable1=[ActComponentVariable|ID] ',' 
+		actComponentVariable2=[ActComponentVariable|ID] ')')
+;
+ActPredicateVal:
+	actVal='val' ('(' valCmpVariableRef=ActCmpVarRef ',' actValTerms=ActTerm ')') 
+;
+ActPredicateCAct:
+	cAct='cAct' ('('cActCmpVar=[ActComponentVariable|ID] ')')
+;
+ActPredicatePAct:
+	pAct='pAct' ('(' pActCtaCmpVaref=ActCmpVarRef ')') 
+;
+//EndBaseTerms
+
+NegUnaryOperator://UnaryOperator for ActFormulas, not containing G,X,F operators
+	neg='¬'
+;
+ActBinaryOperator: //remove "W" and "U" operator from the BinaryOperator
+	lAnd='∧' | 
+	lDisjunct='∨' |
+	lImplies='⇒' | lDoubleImplies='⇔' 
+;
+ActQuantifierOperator: //include also the implicit component variable
+	exists='∃'actQuantifiedExistsVar=[ActComponentVariable|ID]'.' | all='∀' actQuantifiedAllVar=[ActComponentVariable|ID]'.'
+;
+
+//Begin ActFormulaExpression
+ActFormula returns ActFormula:
+	actUnaryFormulas=ActUnaryFormulas | 
+	actBinaryFormulas=ActBinaryFormulas |
+	actQuantifiedFormulas=ActQuantifiedFormulas
+;
+ActUnaryFormulas returns ActFormula:
+	{ActUnaryFormulas} (actUnaryOperator=NegUnaryOperator actFormulaLtl=ActFormula)
+;
+
+ActQuantifiedFormulas:
+ 	{ActQuantifiedFormulas} (actQuantifierOperator=ActQuantifierOperator actQuantifiedFs=ActFormula)
+;
+ActBinaryFormulas returns ActFormula:
+	{ActBinaryFormulas}	
+	actPrimary=ActPrimary (
+		{ActBinaryFormulas.left=current} actBinaryOperator=ActBinaryOperator right=ActPrimary 
+		)*
+;
+ActPrimary returns ActFormula:
+	(ActFormulaWithBracket=ActFormulaWithBracket | actBaseTerms=ActBaseTerms)
+;
+ActFormulaWithBracket:
+	leftBracket='(' actPrimaryFormula=ActFormula rightBracket=')'
+;
+ActBaseTerms:
+		actPredicateTerms=ActPredicateTerms | 
+		actPredicateConn=ActPredicateConn | 
+		actPredicateVal=ActPredicateVal | 
+		actPredicateEq=ActPredicateEq | 
+		actPredicateCAct=ActPredicateCAct | 
+		actPredicatePAct=ActPredicatePAct 
+;
+//EndActFormulaExpression
+
+ActFormulasID:
+	name=ID ':' actFormula=ActFormula
+;
+// End Formula for activation part
 
 //Begin Operator rules for CTA, BTA, and AG ....
 UnaryOperator: 
