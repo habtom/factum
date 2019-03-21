@@ -4,8 +4,11 @@
 package org.tum.factum.pattern.validation
 
 import org.eclipse.xtext.validation.Check
+import org.tum.factum.pattern.pattern.Activation
 import org.tum.factum.pattern.pattern.PatternPackage
 import org.tum.factum.pattern.pattern.TermOperatorFunction
+import org.tum.factum.pattern.pattern.Connection
+import org.tum.factum.pattern.pattern.ActTermOperatorFunction
 
 /**
  * This class contains custom validation rules. 
@@ -22,6 +25,62 @@ class PatternValidator extends AbstractPatternValidator {
 					PatternPackage.Literals.TERM_OPERATOR_FUNCTION__TRM_OPERANDS)
 		}
 	}
+	//Validate Size of Term Inputs for ActFormulaExpression
+	@Check
+	def checkTermOperandsSize(ActTermOperatorFunction term) {
+		if ( term.trmOperands.size != term.trmOperator.dtInput.size) {
+			error("Invalid number of term operands: expected " + term.trmOperator.dtInput.size + ", not " + term.trmOperands.size + "!", 
+					PatternPackage.Literals.ACT_TERM_OPERATOR_FUNCTION__TRM_OPERANDS)
+		}
+	}
+	//Limit variable status of component variables in activation to only flex
+	@Check
+	def checkVariableStatusOfCmpVarIsFlex(Activation activation) {
+		for (var i= 0; i < activation.actCmpVar.length; i++){
+			if (!activation.actCmpVar.get(i).status.equals("flex")){
+				error("The variable status of component variables must have type flex",PatternPackage.Literals.ACTIVATION__ACT_CMP_VAR,i)
+			}
+		}
+	}
+	
+	//Limit variable status of DT variables in activation to only flex
+	@Check
+	def checkVariableStatusOfDTVarIsFlex(Activation activation) {
+		for (var i = 0; i < activation.actDtVars.dtVars.length; i++) {
+			if (!activation.actDtVars.dtVars.get(i).status.equals("flex")) {
+				error("The variable status of data variables must have type flex",PatternPackage.eINSTANCE.activation_ActDtVars,i)
+			}
+		}
+	}
+	
+	//Limit variable status of component variables in connection to only flex
+	@Check
+	def checkVariableStatusOfConnectionCmpVarIsFlex(Connection connection) {
+		for (var i= 0; i < connection.cntCmpVar.length; i++){
+			if (!connection.cntCmpVar.get(i).status.equals("flex")){
+				error("The variable status of component variables must have type flex",PatternPackage.Literals.CONNECTION__CNT_CMP_VAR,i)
+			}
+		}
+	}
+	
+	//Limit variable status of DT variables in connection to only flex
+	@Check
+	def checkVariableStatusOfConnectionDTVarIsFlex(Connection connection) {
+		for (var i = 0; i < connection.cntDtVars.dtVars.length; i++) {
+			if (!connection.cntDtVars.dtVars.get(i).status.equals("flex")) {
+				error("The variable status of data variables must have type flex",PatternPackage.Literals.CONNECTION__CNT_DT_VARS,i)
+			}
+		}
+	}
+
+//	//Limit variable status of implicit component variables in activation to only flex
+//	@Check
+//	def checkVariableStatusOfImplCmpVarIsFlex(ActComponentVariable a){
+//		if (! a.status.equals("flex")){
+//			error("The variable status of all component variables in activation must have type flex",PatternPackage.Literals.ACT_COMPONENT_VARIABLE__STATUS)
+//		}
+//	}
+	
 //	@Check
 //	def checkTermOperandsType(TermOperatorFunction trm) {
 //		val tInput = trm.trmOperands.map[terms].map[it]
