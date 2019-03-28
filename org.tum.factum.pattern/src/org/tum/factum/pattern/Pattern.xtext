@@ -2,6 +2,7 @@ grammar org.tum.factum.pattern.Pattern with org.eclipse.xtext.common.Terminals
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 generate pattern "http://www.tum.org/factum/pattern/Pattern"
+
 Pattern returns Pattern:
 	{Pattern}
 	'Pattern' name=ID 'ShortName' psname=ID
@@ -56,9 +57,9 @@ ComponentType returns ComponentType:
 	    	'}'
 	    )?
 	    //Part 2.4 of Spec
-	    ('BTA' '{' //Behavior Trace Assertions (BTA)
+	    ('Contracts' '{' //Behavior Trace Assertions (BTA)
 	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
-			(btaFormulaIds+=BtaFormulasID)*
+			(behaviorTraceAssertion+=BehaviorTraceAssertion)*
 			'}'
 	    )?
 	'}'
@@ -95,20 +96,21 @@ DataTypeSpec returns DataTypeSpec:
 		(sortName=[Sort|ID] 'generatedBy' (returnOps+=[Operation|ID] ("," returnOps+=[Operation|ID])*))?
 	    ('DTA' '{' //Datatype Assertions (DTA)
 	    	(dtaDtVar+=DataTypeVariable ("," dtaDtVar+=DataTypeVariable)*)?
-			(dtaFormulaIds+=DtaFormulasID)*
+			(dataTypeAssertion+=DataTypeAssertion)*
 			'}'
 	    )?		
 	')'
 ;
 DTPredicate:
-	name=ID ':' (pInput+=[Sort|QualifiedName] ("," pInput+=[Sort|QualifiedName])*)?
+	name=ID ':' pInput+=[Sort|QualifiedName] ("," pInput+=[Sort|QualifiedName])*
 ;
 Operation:
-	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' (dtOutput=[Sort|QualifiedName])?
+	name=ID ':'  (dtInput+=[Sort|QualifiedName] ("," dtInput+=[Sort|QualifiedName])*)? '=>' dtOutput=[Sort|QualifiedName]
 ;
 Sort:
 	name=ID
 ;
+
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
 VariableStatus: 
 	'rig' | 'flex'
@@ -137,9 +139,6 @@ Term:
 TermOperatorFunction:
 	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*) ")" 
 ;
-//RefComponentVariableParameter:
-//	parameterCmpRef=[ComponentVariable|ID] '.' parameterRef=[Parameter|ID]
-//;
 RefComponentVariableInputPort:
 	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
 ;
@@ -270,85 +269,112 @@ AgFormulasID:
 ;
 // End AG
 
-// Begin Datatype Assertion 
-DtaTerms:
-	DataTypeVariable	
-;
-DtaTermPredicateFunction:
-	dtaPredOperator=[DTPredicate|QualifiedName] "(" (dtaTrmOperands+=DtaTerm ("," dtaTrmOperands+=DtaTerm)*) ")" 
-;
-DtaTermOperatorFunction:
-	dtaTrmOperator=[Operation|QualifiedName] "(" (dtaTrmOperands+=DtaTerm ("," dtaTrmOperands+=DtaTerm)*) ")" 
-;
-DtaTerm:
-	dtaTerms=[DtaTerms|ID] | dtaTrmOperatorFunction=DtaTermOperatorFunction
-;
-DtaPredicate1:
-	(dtaTerm1=DtaTerm EqualityElementOperator dtaTerm2=DtaTerm)
-;
-DtaPredicate:
-	(DtaPredicate1) | (dtaPred=DtaTermPredicateFunction)
-;
-DtaUrinaryFormulas:
-	UnaryOperator  dtaFormulaLtl=DtaFormula
-;
-DtaQuantifiedFormulas:
-	QuantifierOperator dtaQuantifiedFs=DtaFormula 
-;
-DtaFormula:
-	DtaPredicate// | 
-	//DtaUrinaryFormulas | 
-	//BtaBinaryFormulas |  
-	//DtaQuantifiedFormulas
-;
-DtaFormulasID:
+// Datatype Assertions: BEGIN
+DataTypeAssertion:
 	name=ID ':' dtaFormula=DtaFormula
 ;
-//End DTA
+DtaFormula:
+	DtaQuantification |
+	DtaLImp
+;
+DtaQuantification returns DtaFormula:
+	QuantifierOperator dtaFormula=DtaLImp
+;
+DtaLImp returns DtaFormula:
+	DtaLOr ({DtaLImp.left=current} ('⇒'|'==>') right=DtaLOr)*
+;
+DtaLOr returns DtaFormula:
+	DtaLAnd ({DtaLOr.left=current} ('∨'|'\\/') right=DtaLAnd)*
+;
+DtaLAnd returns DtaFormula:
+	DtaPrimary ({DtaLAnd.left=current} ('∧'|'/\\') right=DtaPrimary)*
+;
+DtaPrimary returns DtaFormula:
+	{Neg} ('¬'|'~') dtaFormula=DtaPrimary |
+	'(' DtaFormula ')' |
+	DtaBase
+;
+DtaBase returns DtaFormula:
+	{DtaPredicate} dtaPredicate=[DTPredicate|QualifiedName] '[' params=DtaOpParam? ']' |
+	{DtaTermEq} '[' left=DtaTerm '=' right=DtaTerm ']'
+;
+DtaTerm:
+	{DtaVariable} var=[DataTypeVariable|ID] |
+	{DtaOperation} dtaTrmOperator=[Operation|QualifiedName] '[' params=DtaOpParam? ']'
+;
+DtaOpParam:
+	dtaOperands+=DtaTerm ("," dtaOperands+=DtaTerm)*
+;
+// Datatype Assertions: END
 
-// Begin Behavior Trace Assertions(BTA) 
-BtaTerms:
-	prtRef=PortRef | DataTypeVariable	
-;
-BtaTermOperatorFunction:
-	btaTrmOperator=[Operation|QualifiedName] "(" (btaTrmOperands+=BtaTerm ("," btaTrmOperands+=BtaTerm)*) ")"
-;
-BtaTerm:
-	btaTerms=[BtaTerms|ID] | btaTrmOperatorFunction=BtaTermOperatorFunction
-;
-BtaPredicate:
-	(btaTerm1=BtaTerm EqualityElementOperator btaTerm2=BtaTerm) 
-;
-BtUrinaryFormulas:
-	UnaryOperator  btaFormulaLtl=BtaFormula
-;
-BtaQuantifiedFormulas:
-	QuantifierOperator btaQuantifiedFs=BtaFormula 
-;
-BtaFormula:
-	BtaPredicate | 
-	BtUrinaryFormulas | 
-	//BtaBinaryFormulas |  
-	BtaQuantifiedFormulas
-;
-BtaFormulasID:
+// Behavior Trace Assertions: BEGIN
+BehaviorTraceAssertion:
 	name=ID ':' btaFormula=BtaFormula
 ;
-//End BTA 
+BtaFormula:
+	BtaQuantification |
+	BtaLImp
+;
+BtaQuantification returns BtaFormula:
+	QuantifierOperator btaFormula=BtaWUntil |
+	LTLOperators btaFormula=BtaLImp
+;
+BtaWUntil returns BtaFormula:
+	BtaSUntil ({BtaWUntil.left=current} 'W' right=BtaSUntil)*
+;
+BtaSUntil returns BtaFormula:
+	BtaLImp ({BtaSUntil.left=current} 'U' right=BtaLImp)*
+;
+BtaLImp returns BtaFormula:
+	BtaLOr ({BtaLImp.left=current} ('⇒'|'==>') right=BtaLOr)*
+;
+BtaLOr returns BtaFormula:
+	BtaLAnd ({BtaLOr.left=current} ('∨'|'\\/') right=BtaLAnd)*
+;
+BtaLAnd returns BtaFormula:
+	BtaPrimary ({BtaLAnd.left=current} ('∧'|'/\\') right=BtaPrimary)*
+;
+BtaPrimary returns BtaFormula:
+	{Neg} ('¬'|'~') btaFormula=BtaPrimary |
+	'(' BtaFormula ')' |
+	BtaBase
+;
+BtaBase returns BtaFormula:
+	{BtaPredicate} btaPredicate=[DTPredicate|QualifiedName] '[' params=BtaOpParam? ']' |
+	{BtaTermEq} '[' left=BtaTerm '=' right=BtaTerm ']'
+;
+BtaTerm:
+	{BtaVariable} var=[DataTypeVariable|ID] |
+	prtRef=PortRef |
+	{BtaOperation} btaTrmOperator=[Operation|QualifiedName] '[' params=BtaOpParam? ']'
+;
+BtaOpParam:
+	btaOperands+=BtaTerm ("," btaOperands+=BtaTerm)*
+;
+// Behavior Trace Assertions: END 
 
 //Begin Operator rules for CTA, BTA, and AG ....
-UnaryOperator: 
+UnaryLogicOperator:
+	neg='¬' // Negation logic operator
+;
+BinaryLogicOperator:
+	lAnd='∧' | 
+	lDisjunct='∨' |
+	lImplies='⇒' | lDoubleImplies='⇔'
+;
+//Temporal Operators
+LTLOperators:
+	ltlG='G' | ltlX='X' |	ltlF='F'
+;
+UnaryOperator:
 	ltlG='G' | ltlX='X' |	ltlF='F' | //Linear Temporal Logic Operators
 	neg='¬' // Negation logic operator
 ;
-
 BinaryOperator: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
-
 	lAnd='∧' | 
 	lDisjunct='∨' |
 	lImplies='⇒' | lDoubleImplies='⇔' |
-	lWeakUntil='W' | lUntil='U' 
-
+	lWeakUntil='W' | lUntil='U'
 ;
 /*
 BinaryOperatorOr: //operates F and F, F is a formula (CtaFormula,  AgFormula, and BtaFormula)
@@ -367,7 +393,9 @@ BinaryOperatorUntil:
 EqualityElementOperator:
 	'='
 ;
-
+QuantifierOperatorDT:
+	exists='∃'quantifiedExistsVar=[DataTypeVariable|ID]'.' | all='∀'quantifiedAllVar=[DataTypeVariable|ID]'.'
+;
 QuantifierOperator:
 	exists='∃'quantifiedExistsVar=[ComponentVariable|ID]'.' | all='∀'quantifiedAllVar=[ComponentVariable|ID]'.'
 ;
