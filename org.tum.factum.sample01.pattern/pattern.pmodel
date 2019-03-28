@@ -1,5 +1,4 @@
 Pattern PublisherSubscriber ShortName ps {
-	
 	DTSpec {
 		DT Event (
 			Sort EVT, ESET, MSG 
@@ -9,29 +8,44 @@ Pattern PublisherSubscriber ShortName ps {
 		DT Subscription ( 
 			Sort SID, SBS
 			Operation sub: SID,Event.EVT => SBS,
-					  unsub: SID, Event.EVT => SBS
+					  unsub: SID, Event.EVT => SBS,
+					  active: Event.MSG => SID
 		)
 	}  
 	CTypes {
-		CType Publisher ShortName pb {
-			InputPorts {
-				InputPort psb(Type: Subscription.SBS)
-			}
-			OutputPorts {
-				OutputPort pnt(Type: Event.MSG) 
-			} 
-		},
 		CType Subscriber ShortName sb {
 			InputPorts { 
 				InputPort snt(Type: Event.MSG) 
 			}
 			OutputPorts { 
-				OutputPort ssb(Type: Subscription.SBS connects Publisher.psb ) 
+				OutputPort ssb(Type: Subscription.SBS) 
 			}
 			Parameters {
-				Parameter id(Type: Subscription.SID) 
+				Parameter id(Type: Subscription.SID)
 			}
-		} 
+		} ,
+		CType Publisher ShortName pb {
+			InputPorts {
+				InputPort psb(Type: Subscription.SBS)
+			}
+			OutputPorts {
+				OutputPort pnt(Type: Event.MSG connects Subscriber.snt (i1,i2) {				
+				//Data Type Variables 
+				DT flex e: Event.EVT
+				
+				//ActFormulas
+				upper: cAct(i1) ∧ val(i1.psb, Subscription.sub(i2.id, e))
+				}
+				)
+			} 
+			Activation (i) {
+				//Component Variables
+				flex p: Publisher
+				//There must be only 1 Publisher instance at any time and it must be active
+				lower: ∀p. (cAct(p) ⇒ eq(p,i)) 
+				
+			}
+		}
 	} 
 	//Container for Architectural Assumptions
 	ArchSpec {
@@ -60,5 +74,6 @@ Pattern PublisherSubscriber ShortName ps {
 		 
 		//Configuration Trace Assertions
 		delivery: (G(cAct(s) ∧ val(s.ssb, Subscription.sub(s.id,e)) ⇒ ((cAct(s) ∧ e = Event.evt(p.pnt) ⇒ val(s.snt, p.pnt)) W (cAct(p) ∧ val(p.psb, Subscription.unsub(s.id,e))))))
-		}
+	}
+
 }
