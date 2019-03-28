@@ -1,35 +1,55 @@
 package org.tum.factum.pattern.generator
 ///*
 
+import org.eclipse.xtext.EcoreUtil2
+import org.tum.factum.pattern.pattern.ActBaseTerms
+import org.tum.factum.pattern.pattern.ActBinaryFormulas
+import org.tum.factum.pattern.pattern.ActBinaryOperator
+import org.tum.factum.pattern.pattern.ActComponentVariable
+import org.tum.factum.pattern.pattern.ActFormula
+import org.tum.factum.pattern.pattern.ActFormulaWithBracket
+import org.tum.factum.pattern.pattern.ActPredicateCAct
+import org.tum.factum.pattern.pattern.ActPredicateConn
+import org.tum.factum.pattern.pattern.ActPredicateEq
+import org.tum.factum.pattern.pattern.ActPredicatePAct
+import org.tum.factum.pattern.pattern.ActPredicateTerms
+import org.tum.factum.pattern.pattern.ActPredicateVal
+import org.tum.factum.pattern.pattern.ActQuantifiedFormulas
+import org.tum.factum.pattern.pattern.ActUnaryFormulas
+import org.tum.factum.pattern.pattern.AgBaseTerms
+import org.tum.factum.pattern.pattern.AgBinaryFormulas
+import org.tum.factum.pattern.pattern.AgFormula
+import org.tum.factum.pattern.pattern.AgFormulaWithBracket
+import org.tum.factum.pattern.pattern.AgPredicateCAct
+import org.tum.factum.pattern.pattern.AgPredicateConn
+import org.tum.factum.pattern.pattern.AgPredicateEq
+import org.tum.factum.pattern.pattern.AgPredicatePAct
+import org.tum.factum.pattern.pattern.AgPredicateTerms
+import org.tum.factum.pattern.pattern.AgPredicateVal
+import org.tum.factum.pattern.pattern.AgQuantifiedFormulas
+import org.tum.factum.pattern.pattern.AgUnaryFormulas
+import org.tum.factum.pattern.pattern.BinaryOperator
+import org.tum.factum.pattern.pattern.ComponentType
+import org.tum.factum.pattern.pattern.ComponentVariable
 import org.tum.factum.pattern.pattern.CtaBaseTerms
+import org.tum.factum.pattern.pattern.CtaBinaryFormulas
 import org.tum.factum.pattern.pattern.CtaFormula
+import org.tum.factum.pattern.pattern.CtaFormulaWithBracket
 import org.tum.factum.pattern.pattern.CtaPredicateCAct
 import org.tum.factum.pattern.pattern.CtaPredicateConn
 import org.tum.factum.pattern.pattern.CtaPredicateEq
 import org.tum.factum.pattern.pattern.CtaPredicatePAct
 import org.tum.factum.pattern.pattern.CtaPredicateTerms
 import org.tum.factum.pattern.pattern.CtaPredicateVal
-import org.tum.factum.pattern.pattern.Pattern
-import org.tum.factum.pattern.pattern.UnaryOperator
-import org.tum.factum.pattern.pattern.CtaUnaryFormulas
 import org.tum.factum.pattern.pattern.CtaQuantifiedFormulas
-import org.tum.factum.pattern.pattern.CtaBinaryFormulas
-import org.tum.factum.pattern.pattern.BinaryOperator
-import org.tum.factum.pattern.pattern.CtaFormulaWithBracket
-import org.tum.factum.pattern.pattern.AgPredicateEq
-import org.tum.factum.pattern.pattern.AgPredicateVal
-import org.tum.factum.pattern.pattern.AgPredicateConn
-import org.tum.factum.pattern.pattern.AgPredicatePAct
-import org.tum.factum.pattern.pattern.AgPredicateCAct
-import org.tum.factum.pattern.pattern.AgPredicateTerms
-import org.tum.factum.pattern.pattern.AgBaseTerms
-import org.tum.factum.pattern.pattern.AgUnaryFormulas
-import org.tum.factum.pattern.pattern.AgFormulaWithBracket
-import org.tum.factum.pattern.pattern.AgQuantifiedFormulas
-import org.tum.factum.pattern.pattern.AgBinaryFormulas
-import org.tum.factum.pattern.pattern.AgFormula
-import org.tum.factum.pattern.pattern.OutputPort
+import org.tum.factum.pattern.pattern.CtaUnaryFormulas
+import org.tum.factum.pattern.pattern.ImplicitComponentVariable
 import org.tum.factum.pattern.pattern.InputPort
+import org.tum.factum.pattern.pattern.NegUnaryOperator
+import org.tum.factum.pattern.pattern.OutputPort
+import org.tum.factum.pattern.pattern.Pattern
+import org.tum.factum.pattern.pattern.SndImplicitComponentVariable
+import org.tum.factum.pattern.pattern.UnaryOperator
 
 class IsabelleTextGenerator {
 
@@ -45,7 +65,7 @@ class IsabelleTextGenerator {
 	«FOR dtdecl0 : root.dtSpec»
 	«FOR dts : dtdecl0.dtSorts.drop(2)»
 	typedecl «dts.name»
-	«ENDFOR»
+	«ENDFOR» 
 	«ENDFOR»
 	consts «dtOps0.name»::"«FOR dti : dtOps0.dtInput»«dti.name» \<Rightarrow> «ENDFOR»«dtOps0.dtOutput.name»"
 	
@@ -103,7 +123,36 @@ class IsabelleTextGenerator {
 	«"\t"»«ctpName»«»«ctParam»_ex: "\<And>«ctpName»«»«ctParam»'. \<exists>«ctpName». «ctpName»«»«ctParam» «ctpName» = «ctpName»«ctParam»'" and«"\n"»
 «««	«ctpName»id_ex: "\<And>sid. \<exists>«ctpName». «ctpName»«ctParam» «ctpName» = sid"
 	«ENDFOR»
-
+	«««	Activation formulas
+		«FOR ct : root.componentTypes» 
+			«IF ct.activation !== null»
+				«IF ct.activation.lower !== null»
+					«"\t"»act_«ct.ctsname»_lb: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> (\<box>\<^sub>c ((«mapFormula(ct.activation.lower)») \<longrightarrow>\<^sup>c ca (\<lambda>c. «ct.ctsname»active «ct.activation.implCmpVar.name» c))) t 0" and
+				«ENDIF»
+				«IF ct.activation.upper !== null»
+					«"\t"»act_«ct.ctsname»_ub: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> (\<box>\<^sub>c (ca (\<lambda>c. «ct.ctsname»active «ct.activation.implCmpVar.name» c) \<longrightarrow>\<^sup>c («mapFormula(ct.activation.upper)»))) t 0" and
+				«ENDIF»
+			«ENDIF»
+		«ENDFOR»
+	«««	End of activation formulas
+	«««	Begin of connection
+		«FOR ct : root.componentTypes»
+			«FOR op: ct.outputPorts»
+				«IF op.connection !== null»
+					«val sndCTypeShortname = mapActComponentVariableToComponentType(op.connection.implCmpVar2).ctsname»
+					«val inputPort = op.connects.name»
+					«val sndImplVar = op.connection.implCmpVar2.name»
+					«val fstImplVar = op.connection.implCmpVar1.name»
+					«IF op.connection.lower !== null»
+						«"\t"»conn_«ct.ctsname»_lb: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> (\<box>\<^sub>c ((«mapFormula(op.connection.lower)») \<longrightarrow>\<^sup>c ca (\<lambda>c. «ct.ctsname»«op.name» («ct.ctsname»cmp «fstImplVar» c) \<in> «sndCTypeShortname»«inputPort» («sndCTypeShortname»cmp «sndImplVar» c))) t 0" and
+					«ENDIF»
+					«IF op.connection.upper !== null»
+						«"\t"»conn_«ct.ctsname»_ub: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> (\<box>\<^sub>c (ca (\<lambda>c. «ct.ctsname»«op.name» («ct.ctsname»cmp «fstImplVar» c) \<in> «sndCTypeShortname»«inputPort» («sndCTypeShortname»cmp «sndImplVar» c)) \<longrightarrow>\<^sup>c («mapFormula(op.connection.upper)»))) t 0" and
+					«ENDIF»
+				«ENDIF»
+			«ENDFOR»
+		«ENDFOR»
+	«««	End of connection
 «««	«ENDIF»
 «««	«ENDFOR»«"\t"»
 «««	«FOR p: root.componentTypes.map[parameters]»
@@ -139,15 +188,16 @@ class IsabelleTextGenerator {
 «««	«ENDFOR»
 	
 «««	...«"\n"»
-	
 	end
+
 	'''
-	def static generateBinary(BinaryOperator binaryOp){
+	def dispatch static generateBinary(BinaryOperator binaryOp){
 		return '''«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LWeakUntil == 'W'»\<WW>\<^sub>c «ENDIF»«IF binaryOp.LUntil == 'U'»\<UU>\<^sup>c «ENDIF»'''
 	}
-	def static generateUnary(UnaryOperator opvalue){
+	def dispatch static generateUnary(UnaryOperator opvalue){
 		return '''«IF opvalue.ltlG == 'G'»\<box>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'F'»\<diamond>\<^sub>c «ENDIF»«IF opvalue.ltlF == 'X'»\<circle>\<^sub>c «ENDIF»'''
 	}
+
 //CTA Dispatches
 	def static Object mapFormula(CtaFormula cf){
 		return '''«IF cf instanceof CtaBinaryFormulas»«generateFormula(cf as CtaBinaryFormulas)»«ELSE»«IF cf.ctaBaseTerms !== null»«generateCtaBaseTerms(cf.ctaBaseTerms)»«ENDIF»«IF cf.ctaUnaryFormulas !== null»«generateFormula(cf.ctaUnaryFormulas)»«ENDIF»«IF cf.ctaQuantifiedFormulas !== null»«generateFormula(cf.ctaQuantifiedFormulas)»«ENDIF»«IF cf.ctaBinaryFormulas !== null»«generateFormula(cf.ctaBinaryFormulas as CtaBinaryFormulas)»«ENDIF»«IF cf.ctaFormulaWithBracket !== null»«generateFormula(cf.ctaFormulaWithBracket)»«ENDIF»«ENDIF»'''
@@ -176,6 +226,7 @@ class IsabelleTextGenerator {
 		val ctpTerm1CmpVarRef = ctat.ctaPTerm1.dtTypeVars.name
 		'''ca (\<lambda>c. «ctpTerm2Op» («ctpTerm2CmpTypSN»«ctpTerm2CmpTypPrt»	(«ctpTerm2CmpTypSN»cmp «ctpTerm2CmpVar» c)) = «ctpTerm1CmpVarRef»)'''   //needs refactoring in the next release
 	}
+	
 	def dispatch static generateFormula(CtaPredicateCAct ctapc){
 		'''«IF ctapc.CAct == 'cAct'»ca (\<lambda>c. «ctapc.CActCmpVar.cmptypAssigned.ctsname»active «ctapc.CActCmpVar.name» c)«ENDIF»'''		
 	}
@@ -217,7 +268,11 @@ class IsabelleTextGenerator {
 
 //AG dispatches
 	def static Object mapFormula(AgFormula af){
-		return '''«IF af instanceof AgBinaryFormulas»«generateFormula(af as AgBinaryFormulas)»«ELSE»«IF af.agBaseTerms !== null»«generateAgBaseTerms(af.agBaseTerms)»«ENDIF»«IF af.agUnaryFormulas !== null»«generateFormula(af.agUnaryFormulas)»«ENDIF»«IF af.agQuantifiedFormulas !== null»«generateFormula(af.agQuantifiedFormulas)»«ENDIF»«IF af.agBinaryFormulas !== null»«generateFormula(af.agBinaryFormulas as AgBinaryFormulas)»«ENDIF»«IF af.agFormulaWithBracket !== null»«generateFormula(af.agFormulaWithBracket)»«ENDIF»«ENDIF»'''
+		return '''
+			«IF af instanceof AgBinaryFormulas»«generateFormula(af as AgBinaryFormulas)»
+			«ELSE»
+			«IF af.agBaseTerms !== null»
+				«generateAgBaseTerms(af.agBaseTerms)»«ENDIF»«IF af.agUnaryFormulas !== null»«generateFormula(af.agUnaryFormulas)»«ENDIF»«IF af.agQuantifiedFormulas !== null»«generateFormula(af.agQuantifiedFormulas)»«ENDIF»«IF af.agBinaryFormulas !== null»«generateFormula(af.agBinaryFormulas as AgBinaryFormulas)»«ENDIF»«IF af.agFormulaWithBracket !== null»«generateFormula(af.agFormulaWithBracket)»«ENDIF»«ENDIF»'''
 	}
 	def static generateAgBaseTerms(AgBaseTerms baseTerms){
 		return '''«IF baseTerms.agPredicateCAct !== null»«generateFormula(baseTerms.agPredicateCAct)»«ENDIF»«IF baseTerms.agPredicatePAct !== null»«generateFormula(baseTerms.agPredicatePAct)»«ENDIF»«IF baseTerms.agPredicateTerms !== null»«generateFormula(baseTerms.agPredicateTerms)»«ENDIF»«IF baseTerms.agPredicateConn !== null»«generateFormula(baseTerms.agPredicateConn)»«ENDIF»«IF baseTerms.agPredicateVal !== null»«generateFormula(baseTerms.agPredicateVal)»«ENDIF»«IF baseTerms.agPredicateEq !== null»«generateFormula(baseTerms.agPredicateEq)»«ENDIF»'''
@@ -280,5 +335,184 @@ class IsabelleTextGenerator {
 		'''ca (\<lambda>c. «agpeq.agComponentVariable1.name» = «agpeq.agComponentVariable2.name» )'''
 	}
 //End of AG dispatches
+
+//ActFormula Dispatches
+	//	remove W and U from the BinaryOperator for ActFormula
+	def dispatch static generateBinary(ActBinaryOperator binaryOp){
+		return '''«IF binaryOp.LImplies == '⇒'»\<longrightarrow>\<^sup>c «ENDIF»«IF binaryOp.LAnd == '∧'»\<and>\<^sup>c «ENDIF»«IF binaryOp.LDisjunct == '∨'»\<or>\<^sup>c «ENDIF»«IF binaryOp.LDoubleImplies == '⇔'»\<longrightarrow>\<^sup>c «ENDIF»'''
+	}
+	
+	//remove the G,X,F from the UnaryOperator	
+	def dispatch static generateUnary(NegUnaryOperator opvalue){
+		 return '''\<not>\<^sup>c'''
+	}
+	
+	def static Object mapFormula(ActFormula af){
+		return '''
+			«IF af instanceof ActBinaryFormulas»
+				«generateFormula(af as ActBinaryFormulas)»
+			«ELSE»
+			«IF af.actBaseTerms !== null»
+				«generateActBaseTerms(af.actBaseTerms)»
+			«ENDIF»
+			«IF af.actUnaryFormulas !== null»
+				«generateFormula(af.actUnaryFormulas)»
+			«ENDIF»
+			«IF af.actQuantifiedFormulas !== null»
+				«generateFormula(af.actQuantifiedFormulas)»
+			«ENDIF»
+			«IF af.actBinaryFormulas !== null»
+				«generateFormula(af.actBinaryFormulas as ActBinaryFormulas)»
+			«ENDIF»
+			«IF af.actFormulaWithBracket !== null»
+				«generateFormula(af.actFormulaWithBracket)»
+			«ENDIF»
+			«ENDIF»'''
+	}
+	
+	def static generateActBaseTerms(ActBaseTerms abt) {
+		return '''
+			«IF abt.actPredicateCAct !== null»
+				«generateFormula(abt.actPredicateCAct)»
+			«ENDIF»
+			«IF abt.actPredicatePAct !== null»
+				«generateFormula(abt.actPredicatePAct)»
+			«ENDIF»
+			«IF abt.actPredicateTerms !== null»
+				«generateFormula(abt.actPredicateTerms)»
+			«ENDIF»
+			«IF abt.actPredicateConn !== null»
+				«generateFormula(abt.actPredicateConn)»
+			«ENDIF»
+			«IF abt.actPredicateVal !== null»
+				«generateFormula(abt.actPredicateVal)»
+			«ENDIF»
+			«IF abt.actPredicateEq !== null»
+				«generateFormula(abt.actPredicateEq)»
+			«ENDIF»			
+		'''
+	}
+	
+	def dispatch static generateFormula(ActBinaryFormulas abf){
+		return '''
+			«IF abf.actBinaryOperator !== null»
+				«mapFormula(abf.left)» «generateBinary(abf.actBinaryOperator)» «mapFormula(abf.right)»
+			«ENDIF»
+			«IF abf.actPrimary !== null»
+				«mapFormula(abf.actPrimary)»
+			«ENDIF»
+		'''
+	}
+	
+	def dispatch static generateFormula(ActQuantifiedFormulas aqf){
+		'''
+		«IF aqf.actQuantifierOperator.exists == '∃'»
+			\<exists>\<^sub>c «aqf.actQuantifierOperator.actQuantifiedExistsVar.name». «
+		»«ENDIF»«
+		»«IF aqf.actQuantifierOperator.all == '∀'»
+			\<forall>\<^sub>c «aqf.actQuantifierOperator.actQuantifiedAllVar.name». «
+		»«ENDIF»«
+		»«mapFormula(aqf.actQuantifiedFs)»
+		'''
+	} 
+	
+	def dispatch static generateFormula(ActFormulaWithBracket fwb){
+		'''«IF fwb.leftBracket == '('»(«ENDIF»«mapFormula(fwb.actPrimaryFormula)»«IF fwb.rightBracket == ')'»)«ENDIF»'''
+	}
+	
+	def dispatch static generateFormula(ActUnaryFormulas auf){
+		'''
+		«IF auf.actUnaryOperator !== null»
+			«generateUnary(auf.actUnaryOperator)»
+		«ENDIF»
+		«IF auf.actFormulaLtl !== null»
+			«mapFormula(auf.actFormulaLtl)»
+		«ENDIF»
+		«IF auf.actBaseTerms !== null»
+			«generateActBaseTerms(auf.actBaseTerms)»
+		«ENDIF»
+		'''
+	}
+	def dispatch static generateFormula(ActPredicateTerms apt){
+		val func = apt.actPTerm2.termOperatorFunction
+		val term2Op = func.trmOperator.name
+		val term2CTypeShortName = func.trmOperands.map[actVariableRef.actcmpRef.mapActComponentVariableToComponentType.ctsname].toString.replaceAll("\\[|\\]", "")
+		val term2CTypePort = func.trmOperands.map[actVariableRef.actportRef.name].toString.replaceAll("\\[|\\]", "")
+		val term2CmpVar = func.trmOperands.map[actVariableRef.actcmpRef.name].toString.replaceAll("\\[|\\]", "")
+		val term1DTypeVar = apt.actPTerm1.dtTypeVars.name
+		'''ca (\<lambda>c. «term2Op» («term2CTypeShortName»«term2CTypePort» («term2CTypeShortName»cmp «term2CmpVar» c)) = «term1DTypeVar»)'''
+	}
+	def dispatch static generateFormula(ActPredicateCAct apc){
+		'''ca (\<lambda>c. «apc.CActCmpVar.mapActComponentVariableToComponentType.ctsname»active «apc.CActCmpVar.name» c)'''
+	}
+	
+	def dispatch static generateFormula(ActPredicatePAct app){
+		'''ca (\<lambda>c. «app.PActCtaCmpVaref.actcmpRef.mapActComponentVariableToComponentType.ctsname»active «app.PActCtaCmpVaref.actcmpRef.name» c)'''
+	}
+	def dispatch static generateFormula(ActPredicateConn apc){
+		val cTypeShortName1 = apc.actConnCmpVarInptPort.actVarRef.mapActComponentVariableToComponentType.ctsname
+		val cTypeShortName2 = apc.actConnCmpVarOutputPort.actVarRef.mapActComponentVariableToComponentType.ctsname
+		val inputport = apc.actConnCmpVarInptPort.actInputPortRef.name
+		val outputport = apc.actConnCmpVarOutputPort.actOutputPortRef.name
+		val var1 = apc.actConnCmpVarInptPort.actVarRef.name
+		val var2 = apc.actConnCmpVarOutputPort.actVarRef.name
+		'''ca (\<lambda>c. «cTypeShortName2»«outputport» («cTypeShortName2»cmp «var2» c) \<in> «cTypeShortName1»«
+			inputport» («cTypeShortName1»cmp «var1» c))'''
+	}
+	def dispatch static generateFormula(ActPredicateVal apv){
+		val cTypeShortName = apv.valCmpVariableRef.actcmpRef.mapActComponentVariableToComponentType.ctsname
+		val firstInptCmpVar = apv.valCmpVariableRef.actcmpRef.name
+		val cmpPortRef = apv.valCmpVariableRef.actportRef
+		
+		if (apv.valCmpVariableRef !== null && apv.actValTerms !== null){
+			switch cmpPortRef{
+				InputPort: {
+					if (apv.actValTerms.termOperatorFunction !== null){ //check if actValTerms is instance of TermOperatorFunction
+						val valOp = apv.actValTerms.termOperatorFunction.trmOperator.name
+						val valDTVar = apv.actValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name
+						val valCmpParam = apv.actValTerms.termOperatorFunction.trmOperands.get(0).actVariableRef.actcmpRef.mapActComponentVariableToComponentType.parameters.get(0).name
+						val valSndInputCTypeShortName = apv.actValTerms.termOperatorFunction.trmOperands.get(0).actVariableRef.actcmpRef.mapActComponentVariableToComponentType.ctsname
+						val valSndInputCmpVar = apv.actValTerms.termOperatorFunction.trmOperands.get(0).actVariableRef.actcmpRef.name
+						return '''ca (\<lambda>c. («valOp» («valSndInputCTypeShortName»«valCmpParam» («valSndInputCTypeShortName»cmp «valSndInputCmpVar» c)) «
+						valDTVar» \<in> «cTypeShortName»«cmpPortRef.name» («cTypeShortName»cmp «firstInptCmpVar» c)))'''
+					}
+					if (apv.actValTerms.actVariableRef !== null){ ////check if actValTerms is instance of ActCmpVarRef
+						val valSndInputCmpPort = apv.actValTerms.actVariableRef.actportRef.name
+						val valSndInputCTypeShortName = apv.actValTerms.actVariableRef.actcmpRef.mapActComponentVariableToComponentType.ctsname
+						val valSndInputCmpVar = apv.actValTerms.actVariableRef.actcmpRef.name
+						return '''ca (\<lambda>c. «valSndInputCTypeShortName»«valSndInputCmpPort» («valSndInputCTypeShortName»cmp «valSndInputCmpVar» c) \<in> «
+							cTypeShortName»«cmpPortRef.name» («cTypeShortName»cmp «firstInptCmpVar» c))'''
+					}	
+				}
+				OutputPort: {
+					 val func = apv.actValTerms.termOperatorFunction
+					 val valOp = func.trmOperator.name
+					 val valDTVar = func.trmOperands.get(1).dtTypeVars.name
+					 val valCmpParam = func.trmOperands.get(0).actVariableRef.actcmpRef.mapActComponentVariableToComponentType.parameters.get(0).name
+					 '''ca (\<lambda>c. («valOp» («cTypeShortName»«valCmpParam» («cTypeShortName»cmp «firstInptCmpVar» c)) «
+					 	valDTVar» = «cTypeShortName»«cmpPortRef.name» («cTypeShortName»cmp «firstInptCmpVar» c)))'''
+				}
+			}
+		}
+	}
+	def dispatch static generateFormula(ActPredicateEq apeq){
+		'''ca (\<lambda>c. «apeq.actComponentVariable1.name» = «apeq.actComponentVariable2.name» )'''
+	}
+	//Help function to return ComponentType of an ActComponentVariable
+	def static mapActComponentVariableToComponentType (ActComponentVariable acv){
+		if(acv instanceof ComponentVariable){
+			return acv.cmptypAssigned
+		}
+		if(acv instanceof ImplicitComponentVariable){
+			return EcoreUtil2.getContainerOfType(acv, ComponentType)
+		}
+		if(acv instanceof SndImplicitComponentVariable){
+			val outputPort = EcoreUtil2.getContainerOfType(acv, OutputPort)
+			val ctype = EcoreUtil2.getContainerOfType(outputPort.connects, ComponentType)
+			return ctype
+		}
+	}
+	
+//End of ActFormula Dispatches
 }
 
