@@ -50,14 +50,9 @@ Activation returns Activation:
 		(actCmpVar+=ComponentVariable (',' actCmpVar+=ComponentVariable)*)? //Declaration of Component Variables
 		('DT' actDtVars=DTVariables)? //Declaration of DT Variables
 		
-//		//Test for the scope
-//		('test' x = ActCmpVarRef )? 
-//		('test1' x1 = [ActComponentVariable|ID] )? 
-//		('inputtest'  y= RefActCmpVarInputPort)?
-//		('outputtest' z= RefActCmpVarOutputPort)?
-//		//End test for the scope
-		//Formulas
-		(actFormula += ActFormulasID (actFormula+= ActFormulasID)?)?
+	//Formulas
+		('lower' ':' lower= ActFormula )?
+		('upper' ':' upper= ActFormula )? 
 	'}'
 ;
 
@@ -79,15 +74,14 @@ OutputPort returns OutputPort:
 	{OutputPort} 
 	'OutputPort' name=ID '(' 
 		('Type' ':' outputPrtSrtTyp=[Sort|QualifiedName])? 
-		('connects' connects+=[InputPort|QualifiedName]*)?
-		(connection = Connection)?
+		('connects' connects=[InputPort|QualifiedName] (connection = Connection)?)? //the output port now connects to 1 input port
 	')'
 ;
 InputPort returns InputPort:
 	{InputPort}	
 	'InputPort' name=ID '('
 		('Type' ':' inputPrtSrtTyp=[Sort|QualifiedName])?
-	    ('connects' connects+=[OutputPort|QualifiedName]*)?
+	    ('connects' connects=[OutputPort|QualifiedName])? //the input port connects to 1 output port
 	')'
 ;
 //@Long: Rule for Connection part
@@ -97,14 +91,9 @@ Connection returns Connection:
 		(cntCmpVar+=ComponentVariable ("," cntCmpVar+=ComponentVariable)*)? //Declaration of Component Variables
 		('DT'cntDtVars=DTVariables)? //Declaration of DT Variables
 	
-//		//Test for the scope
-//		('test' x = ActCmpVarRef )? 
-//		('inputtest'  y= RefActCmpVarInputPort)?
-//		('outputtest' z= RefActCmpVarOutputPort)?
-//		//End test for the scope
 		//Formulas
-		(actFormula += ActFormulasID (actFormula+= ActFormulasID)?)?
-		
+		('lower' ':' lower= ActFormula )?
+		('upper' ':' upper= ActFormula )? 
 	'}'
 ;
 
@@ -343,7 +332,7 @@ BtaFormulasID:
 ;
 //End BTA
 
-//Begin Formula for activation part 
+//Begin activation annotations formula
 //BeginBaseTerms
 ActTerm:
 	actVariableRef= ActCmpVarRef|
