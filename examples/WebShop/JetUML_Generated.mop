@@ -1,0 +1,25 @@
+package mop;
+
+import java.io.*;
+import java.util.*;
+import ca.mcgill.cs.jetuml.geom.Point;
+import javafx.scene.canvas.GraphicsContext;
+import ca.mcgill.cs.jetuml.diagram.Node;
+import ca.mcgill.cs.jetuml.diagram.builder.DiagramBuilder;
+import ca.mcgill.cs.jetuml.views.DiagramView;
+
+JetUML(DiagramBuilder db, Node p1_node, Point p1_point, DiagramView dv, Node p2_node, GraphicsContext p2_graphics) {
+
+
+	event createaddnodeoperation_db_p1_node_p1_point before(DiagramBuilder db, Node p1_node,  Point p1_point) : 
+		execution(* DiagramBuilder.createAddNodeOperation(Node,  Point) && args(p1_node, p1_point) && target(db) && within(DiagramBuilder) && p1_node == p2_node { }
+
+	event drawnode_dv_p2_node_p2_graphics before(DiagramView dv, Node p2_node,  GraphicsContext p2_graphics) : 
+		execution(* DiagramView.drawNode(Node,  GraphicsContext) && args(p2_node, p2_graphics) && target(dv) && within(DiagramView) && p1_node == p2_node { }
+
+
+	ltl: [] ((createaddnodeoperation_db_p1_node_p1_point) => (o (drawnode_dv_p2_node_p2_graphics) and (not drawnode_dv_p2_node_p2_graphics U createaddnodeoperation_db_p1_node_p1_point)))
+
+	@violation { System.out.println("ltl violated!"); }
+
+}
