@@ -11,8 +11,7 @@ Pattern returns Pattern:
 		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
 		
 		//Language Part 2 - Specification of Component Types (CTypes)
-		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}'
-		)?
+		('CTypes' '{' componentTypes+=ComponentType ( "," componentTypes+=ComponentType)* '}' )?
 		
  		//Language Part 3 - Specification of Architectural Constraints
 	    ('ArchSpec' '{'
@@ -23,14 +22,14 @@ Pattern returns Pattern:
 
 			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
-	    )?
+	    )*
 	    //Part 4 - Specification of Architectural Guarantees
 	    ('ArchGuarantee' '{'
 			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
 			(agDtVars=DTVariables)?
 			
 			(agFormulaIds+=AgFormulasID)*
-	    '}')?
+	    '}')*
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
@@ -62,8 +61,20 @@ ComponentType returns ComponentType:
 			(behaviorTraceAssertion+=BehaviorTraceAssertion)*
 			'}'
 	    )?
+	    //Part 2.5 of Spec
+	   	('Behavior' '{'
+	   			'States' states+=State ( "," states+=State)*	
+	   			'Initial' initial=[State|QualifiedName]
+	   			('Transitions' '{'
+					transitions+=Transition
+					transitions+=Transition*
+					'}'
+				)?
+	   		'}'
+	   	)?   	
 	'}'
 ;
+
 Parameter returns Parameter:
 	{Parameter}
 	'Parameter' name=ID '(' 
@@ -83,6 +94,16 @@ InputPort returns InputPort:
 		('Type' ':' inputPrtSrtTyp=[Sort|QualifiedName])?
 	    ('connects' connects+=[OutputPort|QualifiedName]*)?
 	')'
+;
+
+State returns State:
+	{State}
+	name=ID
+;
+
+Transition returns Transition:
+	{Transition}
+	transitionStart=[State|QualifiedName] '->' transitionEnd=[State|QualifiedName]
 ;
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	

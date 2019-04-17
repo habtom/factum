@@ -25,8 +25,8 @@ class PatternFormatter extends AbstractFormatter2 {
 //		for (Interface _interface : pattern.getPatternConnections()) {
 //			_interface.format;
 //		}
-		for (ComponentType componentType : pattern.getComponentTypes()) {
-			componentType.format;
+		for (ComponentType ComponentType : pattern.getComponentTypes()) {
+			ComponentType.format;
 		}
 //		for (Interface _interface : pattern.getHasInterfaces()) {
 //			_interface.format;
@@ -42,21 +42,21 @@ class PatternFormatter extends AbstractFormatter2 {
 		}
 	}
 
-	def dispatch void format(ComponentType componentType, extension IFormattableDocument document) {
+	def dispatch void format(ComponentType ComponentType, extension IFormattableDocument document) {
 		//component.regionFor.keyword("{").append[newLine]
 		//component.regionFor.keyword("}").prepend[newLine]
 		//component.regionFor.keyword(",").append[newLine]
 		//component.regionFor.keyword(",").prepend[newLine]
 		
 		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
-//		for (Interface _interface : componentType.getHasEdges()) {
+//		for (Interface _interface : ComponentType.getHasEdges()) {
 //			_interface.format;
 //		}
 		//uncomment this for sirius
-		for (InputPort inputPort : componentType.getInputPorts()) {
+		for (InputPort inputPort : ComponentType.getInputPorts()) {
 			inputPort.format;
 		}
-		for (OutputPort outputPort : componentType.getOutputPorts()) {
+		for (OutputPort outputPort : ComponentType.getOutputPorts()) {
 			outputPort.format;
 		}
 	
