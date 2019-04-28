@@ -63,8 +63,9 @@ ComponentType returns ComponentType:
 	    )?
 	    //Part 2.5 of Spec
 	   	('Behavior' '{'
-	   			'States' states+=State ( "," states+=State)*	
-	   			'Initial' initial=[State|QualifiedName]
+	   			('Var' vars+=Variable ( ',' vars+=Variable)*)?
+	   			'States' states+=State ( ',' states+=State)*	
+	   			'Initial' initial=Initialisation
 	   			('Transitions' '{'
 					transitions+=Transition
 					transitions+=Transition*
@@ -96,15 +97,41 @@ InputPort returns InputPort:
 	')'
 ;
 
+// FSM Implementation: BEGIN
+// Supported data types by NuXmv
+DataType:
+	typeName = ('Int' | 'Real' | 'Bool') // NuXmv also supports: Word, Enums, Array, Set
+;
+
+Variable returns Variable:
+	{Variable}
+	name=ID':' dataType=DataType
+;
+
 State returns State:
 	{State}
 	name=ID
 ;
 
+Initialisation returns Initialisation:
+	{Initialisation}
+	initialState+=[State|QualifiedName] | 
+	'{' 
+		'State' initial+=[State|QualifiedName]
+		'Var' vars+=[Variable|QualifiedName] '=' (inputPort+=[InputPort|QualifiedName] | number+=Number | boolean+=Bool) 
+		(',' vars+=[Variable|QualifiedName] '=' (inputPort+=[InputPort|QualifiedName] | number+=Number | boolean+=Bool))* 
+	'}'
+;
+
 Transition returns Transition:
 	{Transition}
-	transitionStart=[State|QualifiedName] '->' transitionEnd=[State|QualifiedName]
+	transitionStart=[State|QualifiedName] 
+	('['guards+=FsmFormula']')? '->' ('['guards+=FsmFormula']')?
+	transitionEnd=[State|QualifiedName]
 ;
+
+// FSM Implementation: END
+
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
 	'DT' name =ID
@@ -373,6 +400,54 @@ BtaOpParam:
 	btaOperands+=BtaTerm ("," btaOperands+=BtaTerm)*
 ;
 // Behavior Trace Assertions: END 
+
+// FSM Assertions: BEGIN
+FsmFormula:
+	FsmLImp 
+;
+FsmLImp returns FsmFormula:
+	FsmLOr ({FsmLImp.left=current} ('⇒'|'==>') right=FsmLOr)*
+;
+FsmLOr returns FsmFormula:
+	FsmLAnd ({FsmLOr.left=current} ('∨'|'\\/') right=FsmLAnd)*
+;
+FsmLAnd returns FsmFormula:
+	FsmEquality ({FsmLAnd.left=current} ('∧'|'/\\') right=FsmEquality)*
+;
+FsmEquality returns FsmFormula:
+	 FsmComparison ({FsmEquality.left=current} ("=="|"!=") right=FsmComparison)*
+;
+FsmComparison returns FsmFormula: 
+	FsmPlusMinus ({Comparison.left=current} (">="|"<="|">"|"<") right=FsmPlusMinus)*
+;
+FsmPlusMinus returns FsmFormula:
+	FsmMultDiv (({Plus.left=current} '+' | {Minus.left=current} '-' ) right=FsmMultDiv)*
+;
+FsmMultDiv returns FsmFormula:
+	FsmEquals (({Mult.left=current} '*'  | {Div.left=current} '/' ) right=FsmEquals)*
+;
+FsmEquals returns FsmFormula:
+	 FsmPrimary ({Equals.left=current} '=' rigth=FsmPrimary)*
+;
+FsmPrimary returns FsmFormula:
+	{LogicNeg} ('¬'|'~') fsmPrimary=FsmPrimary |
+	{MathNeg} ('-') fsmPrimary=FsmPrimary |
+	'(' FsmFormula ')' |
+	FsmBase
+;
+FsmBase returns FsmFormula:
+	number=Number |
+	bool=Bool |
+	var=[Variable|ID]
+;
+Number:
+	{Int} INT | 
+	{Real} INT'.'INT 
+;
+Bool:
+	'True' | 'False'
+;
+// FSM Assertions: END
 
 //Begin Operator rules for CTA, BTA, and AG ....
 UnaryLogicOperator:
