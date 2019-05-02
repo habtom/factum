@@ -1,0 +1,63 @@
+Pattern Calculator ShortName cc {
+	
+	DTSpec {
+		DT Numbers (
+			Sort INT1, INT2
+			Operation   zero: => INT1,
+						two: => INT1,
+						three: => INT1,
+						add: INT1, INT1 => INT1,
+						mult: INT1, INT1 => INT2,
+						sub: INT1, INT1 => INT1
+			Predicate i: INT1, b : INT1
+		DTMap {
+			Sort INT1 -> 0 .. 10,
+				 INT2 -> 0 .. 100
+			Operation add[x, y] -> x + y,
+					  zero[] -> 0,
+					  two[] -> 2,
+					  three[] -> 3,
+					  mult[x, y] -> x * y,
+					  sub[x, y] -> x - y
+			}
+		)
+	}  
+	
+	CTypes {
+		CType Multiplier ShortName mp {
+			InputPorts {
+				InputPort x (Type: Numbers.INT1),
+				InputPort y (Type: Numbers.INT1)
+			}
+			OutputPorts {
+				OutputPort o (Type: Numbers.INT2)
+			} 
+			Contracts {
+				flex z1: Numbers.INT1,
+				flex z2: Numbers.INT1,
+				flex i: Numbers.INT1,
+				flex j: Numbers.INT1,
+				flex k: Numbers.INT2
+					
+				x: G (([i = z1] ∧ [j = z2]) ⇒ (F([k=Numbers.mult[z1,z2]])))
+			}
+			Behavior {
+				States wait, calc
+				Initial {
+					State wait
+					Var i = i(x),
+						j = i(y),
+						z1 = i,
+						z2 = j,
+						k = Numbers.zero[]
+				}
+				Transitions {
+					wait  [Numbers.add[i, k]] -> calc
+					calc [j>0] -> [k=Numbers.add[k,0] ∧ j=Numbers.sub[j,1]] calc
+					calc [j==0] -> [o(o)=k] wait
+				}
+				
+			}
+		} 
+	} 
+}

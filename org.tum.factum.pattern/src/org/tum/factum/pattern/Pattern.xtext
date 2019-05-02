@@ -63,7 +63,6 @@ ComponentType returns ComponentType:
 	    )?
 	    //Part 2.5 of Spec
 	   	('Behavior' '{'
-	   			('Var' vars+=Variable ( ',' vars+=Variable)*)?
 	   			'States' states+=State ( ',' states+=State)*	
 	   			'Initial' initial=Initialisation
 	   			('Transitions' '{'
@@ -98,16 +97,6 @@ InputPort returns InputPort:
 ;
 
 // FSM Implementation: BEGIN
-// Supported data types by NuXmv
-DataType:
-	typeName = ('Int' | 'Real' | 'Bool') // NuXmv also supports: Word, Enums, Array, Set
-;
-
-Variable returns Variable:
-	{Variable}
-	name=ID':' dataType=DataType
-;
-
 State returns State:
 	{State}
 	name=ID
@@ -118,9 +107,15 @@ Initialisation returns Initialisation:
 	initialState+=[State|QualifiedName] | 
 	'{' 
 		'State' initial+=[State|QualifiedName]
-		'Var' vars+=[Variable|QualifiedName] '=' (inputPort+=[InputPort|QualifiedName] | number+=Number | boolean+=Bool) 
-		(',' vars+=[Variable|QualifiedName] '=' (inputPort+=[InputPort|QualifiedName] | number+=Number | boolean+=Bool))* 
+		'Var' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes 
+		(',' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes)* 
 	'}'
+;
+
+InitDataTypes:
+	'i(' inputPort=[InputPort|QualifiedName] ')'|
+	variable=[DataTypeVariable|QualifiedName] |
+	op=OperationFunc
 ;
 
 Transition returns Transition:
@@ -128,6 +123,10 @@ Transition returns Transition:
 	transitionStart=[State|QualifiedName] 
 	('['guards+=FsmFormula']')? '->' ('['guards+=FsmFormula']')?
 	transitionEnd=[State|QualifiedName]
+;
+
+OperationFunc:
+	op=[Operation|QualifiedName] '['((vars+=ID | params+=INT) (',' (vars+=ID | params+=INT))*)? ']'
 ;
 
 // FSM Implementation: END
@@ -146,6 +145,12 @@ DataTypeSpec returns DataTypeSpec:
 	    	(dtaDtVar+=DataTypeVariable ("," dtaDtVar+=DataTypeVariable)*)?
 			(dataTypeAssertion+=DataTypeAssertion)*
 			'}'
+	    )?
+	    // Mapping of Sorts and Operations to work with NuXmv
+	    ('DTMap' '{'
+	    	 'Sort' mapSorts+=[Sort|ID] '->' nuSorts+=NuXmvDataType (',' mapSorts+=[Sort|ID] '->' nuSorts+=NuXmvDataType)*
+	    	 'Operation' mapOp+=MapOperation (',' mapOp+=MapOperation)*
+	    	'}'	
 	    )?		
 	')'
 ;
@@ -157,6 +162,18 @@ Operation:
 ;
 Sort:
 	name=ID
+;
+
+NuXmvDataType:
+	INT '..' INT | 'integer' | 'real' | 'bool'
+;
+
+EQUATION:
+	(INT | ID | '+' | '-' | '/' | '*')+
+;
+
+MapOperation:
+	opName=OperationFunc '->' opFunction=EQUATION 
 ;
 
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
@@ -174,7 +191,9 @@ DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
 PortRef:
-	InputPort | OutputPort | Parameter
+	'i(' port=[InputPort|ID] ')' | 
+	'o(' port=[OutputPort|ID] ')' | 
+	'p(' port=[Parameter|ID] ')'
 ;
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
@@ -403,7 +422,7 @@ BtaOpParam:
 
 // FSM Assertions: BEGIN
 FsmFormula:
-	FsmLImp 
+	FsmLImp
 ;
 FsmLImp returns FsmFormula:
 	FsmLOr ({FsmLImp.left=current} ('⇒'|'==>') right=FsmLOr)*
@@ -418,13 +437,7 @@ FsmEquality returns FsmFormula:
 	 FsmComparison ({FsmEquality.left=current} ("=="|"!=") right=FsmComparison)*
 ;
 FsmComparison returns FsmFormula: 
-	FsmPlusMinus ({Comparison.left=current} (">="|"<="|">"|"<") right=FsmPlusMinus)*
-;
-FsmPlusMinus returns FsmFormula:
-	FsmMultDiv (({Plus.left=current} '+' | {Minus.left=current} '-' ) right=FsmMultDiv)*
-;
-FsmMultDiv returns FsmFormula:
-	FsmEquals (({Mult.left=current} '*'  | {Div.left=current} '/' ) right=FsmEquals)*
+	FsmEquals ({Comparison.left=current} (">="|"<="|">"|"<") right=FsmEquals)*
 ;
 FsmEquals returns FsmFormula:
 	 FsmPrimary ({Equals.left=current} '=' rigth=FsmPrimary)*
@@ -436,13 +449,15 @@ FsmPrimary returns FsmFormula:
 	FsmBase
 ;
 FsmBase returns FsmFormula:
-	number=Number |
-	bool=Bool |
-	var=[Variable|ID]
+	primitive=FsmPrimitive |
+	var=[DataTypeVariable|ID] |
+	'o(' outputPort=[OutputPort|EString] ')' |
+	func=OperationFunc 
 ;
-Number:
+FsmPrimitive:
 	{Int} INT | 
-	{Real} INT'.'INT 
+	{Real} INT'.'INT |
+	{Bool} Bool
 ;
 Bool:
 	'True' | 'False'
