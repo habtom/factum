@@ -16,6 +16,10 @@ import org.eclipse.emf.common.util.EList
 import org.tum.factum.pattern.pattern.DtaOpParam
 import org.tum.factum.pattern.pattern.BtaOpParam
 import org.tum.factum.pattern.pattern.BtaVariable
+import org.tum.factum.pattern.pattern.FsmPrimitive
+import org.tum.factum.pattern.pattern.ComponentType
+import org.tum.factum.pattern.pattern.InputPort
+import java.util.HashSet
 
 /**
  * This class contains custom validation rules. 
@@ -137,4 +141,37 @@ class PatternValidator extends AbstractPatternValidator {
 			checkSorts(signature,parameters)
 		}
 	}
+	
+	// FSM
+	@Check
+	def checkInitialParameter(ComponentType ct) {
+		val btaVars = ct.getBtaDtVar()
+		val init = ct.getInitial()
+		val initVars = init.getVars()
+		if (hasDuplicate(initVars)) {
+			error("Invalid redeclaration", init, PatternPackage.Literals.INITIALISATION__VARS)
+		}
+		if (btaVars.size() > init.vars.size()) {
+			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALISATION__INITIAL)
+		} 
+		var i = 0
+		for (variable : initVars) {
+			var dataTypes = init.getDataTypes()
+			if (dataTypes.size() > i) {
+				var a = dataTypes.get(i)
+				var btaVar = a.getVariable()
+				if (btaVar == variable) {
+					error("Invalid self declaration ", init, PatternPackage.Literals.INITIALISATION__VARS)
+				}
+			}
+			i++
+		}	
+	}
+	
+	def <T> boolean hasDuplicate(Iterable<T> all) {
+    	val set = new HashSet<T>();
+    	for (T each: all) if (!set.add(each)) return true;
+    	return false;
+	}
+
 }

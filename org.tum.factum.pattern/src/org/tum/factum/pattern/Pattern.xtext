@@ -11,8 +11,7 @@ Pattern returns Pattern:
 		('DTSpec' '{' dtSpec+=DataTypeSpec( "," dtSpec+=DataTypeSpec)* '}' )?
 		
 		//Language Part 2 - Specification of Component Types (CTypes)
-		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}'
-		)?
+		('CTypes' '{' componentTypes+=ComponentType ( "," componentTypes+=ComponentType)* '}' )?
 		
  		//Language Part 3 - Specification of Architectural Constraints
 	    ('ArchSpec' '{'
@@ -23,14 +22,14 @@ Pattern returns Pattern:
 
 			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
-	    )?
+	    )*
 	    //Part 4 - Specification of Architectural Guarantees
 	    ('ArchGuarantee' '{'
 			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
 			(agDtVars=DTVariables)?
 			
 			(agFormulaIds+=AgFormulasID)*
-	    '}')?
+	    '}')*
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
@@ -62,8 +61,20 @@ ComponentType returns ComponentType:
 			(behaviorTraceAssertion+=BehaviorTraceAssertion)*
 			'}'
 	    )?
+	    //Part 2.5 of Spec
+	   	('Behavior' '{'
+	   			'States' states+=State ( ',' states+=State)*	
+	   			'Initial' initial=Initialisation
+	   			('Transitions' '{'
+					transitions+=Transition
+					transitions+=Transition*
+					'}'
+				)?
+	   		'}'
+	   	)?   	
 	'}'
 ;
+
 Parameter returns Parameter:
 	{Parameter}
 	'Parameter' name=ID '(' 
@@ -84,6 +95,42 @@ InputPort returns InputPort:
 	    ('connects' connects+=[OutputPort|QualifiedName]*)?
 	')'
 ;
+
+// FSM Implementation: BEGIN
+State returns State:
+	{State}
+	name=ID
+;
+
+Initialisation returns Initialisation:
+	{Initialisation}
+	initialState+=[State|QualifiedName] | 
+	'{' 
+		'State' initial+=[State|QualifiedName]
+		'Var' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes 
+		(',' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes)* 
+	'}'
+;
+
+InitDataTypes:
+	'i(' inputPort=[InputPort|QualifiedName] ')'|
+	variable=[DataTypeVariable|QualifiedName] |
+	op=OperationFunc
+;
+
+Transition returns Transition:
+	{Transition}
+	transitionStart=[State|QualifiedName] 
+	('['guards+=FsmFormula']')? '->' ('['guards+=FsmFormula']')?
+	transitionEnd=[State|QualifiedName]
+;
+
+OperationFunc:
+	op=[Operation|QualifiedName] '['((vars+=ID | params+=INT) (',' (vars+=ID | params+=INT))*)? ']'
+;
+
+// FSM Implementation: END
+
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
 	'DT' name =ID
@@ -98,6 +145,12 @@ DataTypeSpec returns DataTypeSpec:
 	    	(dtaDtVar+=DataTypeVariable ("," dtaDtVar+=DataTypeVariable)*)?
 			(dataTypeAssertion+=DataTypeAssertion)*
 			'}'
+	    )?
+	    // Mapping of Sorts and Operations to work with NuXmv
+	    ('DTMap' '{'
+	    	 'Sort' mapSorts+=[Sort|ID] '->' nuSorts+=NuXmvDataType (',' mapSorts+=[Sort|ID] '->' nuSorts+=NuXmvDataType)*
+	    	 'Operation' mapOp+=MapOperation (',' mapOp+=MapOperation)*
+	    	'}'	
 	    )?		
 	')'
 ;
@@ -109,6 +162,18 @@ Operation:
 ;
 Sort:
 	name=ID
+;
+
+NuXmvDataType:
+	INT '..' INT | 'integer' | 'real' | 'bool'
+;
+
+EQUATION:
+	(INT | ID | '+' | '-' | '/' | '*')+
+;
+
+MapOperation:
+	opName=OperationFunc '->' opFunction=EQUATION 
 ;
 
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
@@ -126,7 +191,9 @@ DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
 PortRef:
-	InputPort | OutputPort | Parameter
+	'i(' port=[InputPort|ID] ')' | 
+	'o(' port=[OutputPort|ID] ')' | 
+	'p(' port=[Parameter|ID] ')'
 ;
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
@@ -352,6 +419,50 @@ BtaOpParam:
 	btaOperands+=BtaTerm ("," btaOperands+=BtaTerm)*
 ;
 // Behavior Trace Assertions: END 
+
+// FSM Assertions: BEGIN
+FsmFormula:
+	FsmLImp
+;
+FsmLImp returns FsmFormula:
+	FsmLOr ({FsmLImp.left=current} ('⇒'|'==>') right=FsmLOr)*
+;
+FsmLOr returns FsmFormula:
+	FsmLAnd ({FsmLOr.left=current} ('∨'|'\\/') right=FsmLAnd)*
+;
+FsmLAnd returns FsmFormula:
+	FsmEquality ({FsmLAnd.left=current} ('∧'|'/\\') right=FsmEquality)*
+;
+FsmEquality returns FsmFormula:
+	 FsmComparison ({FsmEquality.left=current} ("=="|"!=") right=FsmComparison)*
+;
+FsmComparison returns FsmFormula: 
+	FsmEquals ({Comparison.left=current} (">="|"<="|">"|"<") right=FsmEquals)*
+;
+FsmEquals returns FsmFormula:
+	 FsmPrimary ({Equals.left=current} '=' rigth=FsmPrimary)*
+;
+FsmPrimary returns FsmFormula:
+	{LogicNeg} ('¬'|'~') fsmPrimary=FsmPrimary |
+	{MathNeg} ('-') fsmPrimary=FsmPrimary |
+	'(' FsmFormula ')' |
+	FsmBase
+;
+FsmBase returns FsmFormula:
+	primitive=FsmPrimitive |
+	var=[DataTypeVariable|ID] |
+	'o(' outputPort=[OutputPort|EString] ')' |
+	func=OperationFunc 
+;
+FsmPrimitive:
+	{Int} INT | 
+	{Real} INT'.'INT |
+	{Bool} Bool
+;
+Bool:
+	'True' | 'False'
+;
+// FSM Assertions: END
 
 //Begin Operator rules for CTA, BTA, and AG ....
 UnaryLogicOperator:
