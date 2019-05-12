@@ -66,8 +66,7 @@ ComponentType returns ComponentType:
 	   			'States' states+=State ( ',' states+=State)*	
 	   			'Initial' initial=Initialisation
 	   			('Transitions' '{'
-					transitions+=Transition
-					transitions+=Transition*
+					transitions+=Transition+
 					'}'
 				)?
 	   		'}'
@@ -98,15 +97,14 @@ InputPort returns InputPort:
 
 // FSM Implementation: BEGIN
 State returns State:
-	{State}
 	name=ID
 ;
 
 Initialisation returns Initialisation:
 	{Initialisation}
-	initialState+=[State|QualifiedName] | 
+	initialState=[State|QualifiedName] | 
 	'{' 
-		'State' initial+=[State|QualifiedName]
+		'State' initialState=[State|QualifiedName]
 		'Var' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes 
 		(',' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes)* 
 	'}'
@@ -121,12 +119,12 @@ InitDataTypes:
 Transition returns Transition:
 	{Transition}
 	transitionStart=[State|QualifiedName] 
-	('['guards+=FsmFormula']')? '->' ('['guards+=FsmFormula']')?
+	('['guardLeft=FsmFormula']')? '->' ('['guardRight=FsmFormula']')?
 	transitionEnd=[State|QualifiedName]
 ;
 
 OperationFunc:
-	op=[Operation|QualifiedName] '['((vars+=ID | params+=INT) (',' (vars+=ID | params+=INT))*)? ']'
+	op=[Operation|QualifiedName] '['(params+=FsmPrimitive (',' params+=FsmPrimitive)*)? ']'
 ;
 
 // FSM Implementation: END
@@ -148,7 +146,7 @@ DataTypeSpec returns DataTypeSpec:
 	    )?
 	    // Mapping of Sorts and Operations to work with NuXmv
 	    ('DTMap' '{'
-	    	 'Sort' mapSorts+=[Sort|ID] '->' nuSorts+=NuXmvDataType (',' mapSorts+=[Sort|ID] '->' nuSorts+=NuXmvDataType)*
+	    	 'Sort' mapSorts+=MapSort  (',' mapSorts+=MapSort)*
 	    	 'Operation' mapOp+=MapOperation (',' mapOp+=MapOperation)*
 	    	'}'	
 	    )?		
@@ -168,12 +166,16 @@ NuXmvDataType:
 	INT '..' INT | 'integer' | 'real' | 'bool'
 ;
 
-EQUATION:
+Equation:
 	(INT | ID | '+' | '-' | '/' | '*')+
 ;
 
 MapOperation:
-	opName=OperationFunc '->' opFunction=EQUATION 
+	op=[Operation|QualifiedName] '['(vars+=ID (',' vars+=ID)*)? ']' '->' opFunction=Equation 
+;
+
+MapSort:
+	sortName=[Sort|ID] '->' dataType=NuXmvDataType
 ;
 
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
@@ -434,13 +436,13 @@ FsmLAnd returns FsmFormula:
 	FsmEquality ({FsmLAnd.left=current} ('∧'|'/\\') right=FsmEquality)*
 ;
 FsmEquality returns FsmFormula:
-	 FsmComparison ({FsmEquality.left=current} ("=="|"!=") right=FsmComparison)*
+	 FsmComparison ({FsmEquality.left=current} (eq="=="| neq="!=") right=FsmComparison)*
 ;
 FsmComparison returns FsmFormula: 
-	FsmEquals ({Comparison.left=current} (">="|"<="|">"|"<") right=FsmEquals)*
+	FsmEquals ({Comparison.left=current} comp=(">="|"<="|">"|"<") right=FsmEquals)*
 ;
 FsmEquals returns FsmFormula:
-	 FsmPrimary ({Equals.left=current} '=' rigth=FsmPrimary)*
+	 FsmPrimary ({Equals.left=current} '=' right=FsmPrimary)*
 ;
 FsmPrimary returns FsmFormula:
 	{LogicNeg} ('¬'|'~') fsmPrimary=FsmPrimary |
@@ -450,17 +452,22 @@ FsmPrimary returns FsmFormula:
 ;
 FsmBase returns FsmFormula:
 	primitive=FsmPrimitive |
-	var=[DataTypeVariable|ID] |
 	'o(' outputPort=[OutputPort|EString] ')' |
 	func=OperationFunc 
 ;
 FsmPrimitive:
-	{Int} INT | 
-	{Real} INT'.'INT |
-	{Bool} Bool
+	dtVar = [DataTypeVariable|ID] |
+	integer = INT | 
+	real = Real |
+	bool = Bool 
 ;
+
+Real:
+	INT'.'INT
+;
+
 Bool:
-	'True' | 'False'
+	'TRUE' | 'FALSE'
 ;
 // FSM Assertions: END
 

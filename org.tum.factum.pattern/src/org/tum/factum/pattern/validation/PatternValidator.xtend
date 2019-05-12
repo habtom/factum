@@ -143,30 +143,30 @@ class PatternValidator extends AbstractPatternValidator {
 	}
 	
 	// FSM
-	@Check
-	def checkInitialParameter(ComponentType ct) {
-		val btaVars = ct.getBtaDtVar()
-		val init = ct.getInitial()
-		val initVars = init.getVars()
-		if (hasDuplicate(initVars)) {
-			error("Invalid redeclaration", init, PatternPackage.Literals.INITIALISATION__VARS)
-		}
-		if (btaVars.size() > init.vars.size()) {
-			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALISATION__INITIAL)
-		} 
-		var i = 0
-		for (variable : initVars) {
-			var dataTypes = init.getDataTypes()
-			if (dataTypes.size() > i) {
-				var a = dataTypes.get(i)
-				var btaVar = a.getVariable()
-				if (btaVar == variable) {
-					error("Invalid self declaration ", init, PatternPackage.Literals.INITIALISATION__VARS)
-				}
-			}
-			i++
-		}	
-	}
+//	@Check
+//	def checkInitialParameter(ComponentType ct) {
+//		val btaVars = ct.getBtaDtVar()
+//		val init = ct.getInitial()
+//		val initVars = init.getVars()
+//		if (hasDuplicate(initVars)) {
+//			error("Invalid redeclaration of variable", init, PatternPackage.Literals.INITIALISATION__VARS)
+//		}
+//		if (btaVars.size() > init.vars.size()) {
+//			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALISATION__INITIAL)
+//		} 
+//		var i = 0
+//		for (variable : initVars) {
+//			var dataTypes = init.getDataTypes()
+//			if (dataTypes.size() > i) {
+//				var a = dataTypes.get(i)
+//				var btaVar = a.getVariable()
+//				if (btaVar == variable) {
+//					error("Invalid self declaration ", init, PatternPackage.Literals.INITIALISATION__VARS)
+//				}
+//			}
+//			i++
+//		}	
+//	}
 	
 	def <T> boolean hasDuplicate(Iterable<T> all) {
     	val set = new HashSet<T>();

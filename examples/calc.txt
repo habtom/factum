@@ -52,11 +52,10 @@ Pattern Calculator ShortName cc {
 						k = Numbers.zero[]
 				}
 				Transitions {
-					wait  [Numbers.add[i, k]] -> calc
-					calc [j>0] -> [k=Numbers.add[k,0] ∧ j=Numbers.sub[j,1]] calc
+					wait -> calc
+					calc [j>1 ∧ k <= 90] -> [k=Numbers.add[k,i] ∧ j=Numbers.sub[j,1]] calc
 					calc [j==0] -> [o(o)=k] wait
 				}
-				
 			}
 		} 
 	} 

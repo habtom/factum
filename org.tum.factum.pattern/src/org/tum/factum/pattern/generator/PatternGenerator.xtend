@@ -23,7 +23,12 @@ class PatternGenerator extends AbstractGenerator {
 			//For Isabelle
 //			fsa.generateFile(root.name + ".thy", IsabelleTextGenerator.toIsabelle(root))
 			//For JavaMOP
-			//fsa.generateFile(root.name + ".mop", JavaMOPTextGenerator.convertToMOP(root))
+//			fsa.generateFile(root.name + ".mop", JavaMOPTextGenerator.convertToMOP(root))
+			//For nuXmv
+			for (var i = 0; i < root.componentTypes.size; i++) {
+				val cType = root.componentTypes.get(i)
+				fsa.generateFile(root.name + i + ".smv", NuXmvTextGenerator.toNuXmv(root, cType))
+			}
 		}
 
 	}
