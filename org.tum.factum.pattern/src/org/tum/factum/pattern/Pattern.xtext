@@ -60,12 +60,17 @@ ComponentType returns ComponentType:
 	    )?
 	    //Part 2.4 of Spec
 	    ('Contracts' '{' //Behavior Trace Assertions (BTA)
-	    	(contractDtVar+=DataTypeVariable ("," contractDtVar+=DataTypeVariable)*)?
-			"trigger" trigger+=ContractFormula ("," trigger+=ContractFormula)*
-			"guarantee" guarantee+=ContractFormula ("," trigger+=ContractFormula)*
-			"duration" duration+=ContractDuration
-			'}'
+	    	contracts+=Contract ( "," contracts+=Contract)*
 	    )?
+	'}'
+;
+Contract returns Contract:
+	'Contract' cname = ID '{'
+    	(contractDtVar+=DataTypeVariable ("," contractDtVar+=DataTypeVariable)*)?
+		"trigger" trigger+=ContractFormula ("," trigger+=ContractFormula)*
+		"guarantee" guarantee+=ContractFormula ("," trigger+=ContractFormula)*
+		"duration" duration+=ContractDuration
+		'}'
 	'}'
 ;
 Parameter returns Parameter:
