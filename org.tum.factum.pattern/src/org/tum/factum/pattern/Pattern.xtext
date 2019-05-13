@@ -117,7 +117,7 @@ Sort:
 
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
 VariableStatus: 
-	'rig' | 'flex'
+	'rig' | 'flex' | 'var'
 ;
 ComponentVariable:
 	//cmptypAssigned => Component Type assigned or associated to the component variable
