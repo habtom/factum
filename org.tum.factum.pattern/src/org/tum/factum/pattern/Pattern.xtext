@@ -61,6 +61,7 @@ ComponentType returns ComponentType:
 	    //Part 2.4 of Spec
 	    ('Contracts' '{' //Behavior Trace Assertions (BTA)
 	    	contracts+=Contract ( "," contracts+=Contract)*
+	    	'}'
 	    )?
 	'}'
 ;
@@ -393,8 +394,8 @@ ContractTerm:
 ContractOpParam:
 	contractOperands+=ContractTerm ("," contractOperands+=ContractTerm)*
 ;
-ContractDuration returns  ecore::EInt :
- '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'+
+ContractDuration:
+ 	INT
 ;
 // Behavior Trace Assertions: END 
 
