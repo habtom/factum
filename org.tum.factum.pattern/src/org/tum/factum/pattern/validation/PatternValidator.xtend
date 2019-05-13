@@ -20,6 +20,8 @@ import org.tum.factum.pattern.pattern.FsmPrimitive
 import org.tum.factum.pattern.pattern.ComponentType
 import org.tum.factum.pattern.pattern.InputPort
 import java.util.HashSet
+import org.tum.factum.pattern.pattern.MapOperation
+import org.tum.factum.pattern.pattern.OperationFunc
 
 /**
  * This class contains custom validation rules. 
@@ -143,30 +145,48 @@ class PatternValidator extends AbstractPatternValidator {
 	}
 	
 	// FSM
-//	@Check
-//	def checkInitialParameter(ComponentType ct) {
-//		val btaVars = ct.getBtaDtVar()
-//		val init = ct.getInitial()
-//		val initVars = init.getVars()
-//		if (hasDuplicate(initVars)) {
-//			error("Invalid redeclaration of variable", init, PatternPackage.Literals.INITIALISATION__VARS)
-//		}
-//		if (btaVars.size() > init.vars.size()) {
-//			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALISATION__INITIAL)
-//		} 
-//		var i = 0
-//		for (variable : initVars) {
-//			var dataTypes = init.getDataTypes()
-//			if (dataTypes.size() > i) {
-//				var a = dataTypes.get(i)
-//				var btaVar = a.getVariable()
-//				if (btaVar == variable) {
-//					error("Invalid self declaration ", init, PatternPackage.Literals.INITIALISATION__VARS)
-//				}
-//			}
-//			i++
-//		}	
-//	}
+	@Check
+	def checkInitialParameter(ComponentType ct) {
+		val btaVars = ct.btaDtVar
+		val init = ct.initial
+		val initVars = init.vars
+		if (hasDuplicate(initVars)) {
+			error("Invalid redeclaration of variable", init, PatternPackage.Literals.INITIALISATION__VARS)
+		}
+		if (btaVars.size > init.vars.size) {
+			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALISATION__VARS)
+		} 
+		var i = 0
+		for (variable : initVars) {
+			var dataTypes = init.dataTypes
+			if (dataTypes.size > i) {
+				var a = dataTypes.get(i)
+				var btaVar = a.variable
+				if (btaVar == variable) {
+					error("Invalid self declaration ", init, PatternPackage.Literals.INITIALISATION__VARS, i)
+				}
+			}
+			i++
+		}	
+	}
+	
+	@Check
+	def checkMapOperationSize(MapOperation mo) {
+		val signature = mo.op.dtInput
+		val parameters = mo.vars
+		if (parameters.size != signature.size) {
+			error("Invalid number of operands: expected " + signature.size + ", not " + parameters.size, PatternPackage.Literals.MAP_OPERATION__VARS)
+		}
+	}
+	
+	@Check
+	def checkFsmOperation(OperationFunc of) {
+		val signature = of.op.dtInput
+		val parameters = of.params
+		if (parameters.size != signature.size) {
+			error("Invalid number of operands: expected " + signature.size + ", not " + parameters.size, PatternPackage.Literals.OPERATION_FUNC__PARAMS)
+		}
+	}
 	
 	def <T> boolean hasDuplicate(Iterable<T> all) {
     	val set = new HashSet<T>();
