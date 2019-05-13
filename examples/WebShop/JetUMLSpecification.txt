@@ -1,0 +1,51 @@
+Pattern JetUML ShortName jUML{
+	
+	DTSpec {
+		DT EventParams Package ca.mcgill.cs.jetuml.geom.Point (
+			Sort Point		 			
+		),
+		DT GraphicsContext Package javafx.scene.canvas.GraphicsContext (
+			Sort GraphicsContext			 			
+		),
+		DT Node Package ca.mcgill.cs.jetuml.diagram.Node (
+			Sort Node, params1, params2
+			
+			Operation point: params1 => EventParams.Point,
+			graphics: params2 => GraphicsContext.GraphicsContext,
+			node: params1 => Node,
+			node: params2 => Node			
+		)
+	}  
+	CTypes {
+		CType DiagramBuilder Package ca.mcgill.cs.jetuml.diagram.builder.DiagramBuilder {
+			InputPorts {
+				InputPort createAddNodeOperation(Type: Node.params1)
+			}
+			OutputPorts{
+				OutputPort drawNode(Type: Node.params2)
+			}
+			
+		},
+		CType DiagramView Package ca.mcgill.cs.jetuml.views.DiagramView {
+			InputPorts{
+				InputPort drawNode(Type: Node.params2)
+			}
+			
+			Parameters  {
+				Parameter point(Type: EventParams.Point)
+			}
+		}
+	} 
+	//Container for Architectural Assumptions
+	ArchSpec {
+		//Component Variables
+		rig db : DiagramBuilder,
+		rig dv : DiagramView
+		
+		rig p1: Node.params1,
+		rig p2: Node.params2
+
+		ltl_formula: G(val(db.createAddNodeOperation, p1) ⇒ (X val(dv.drawNode, p2) ∧ (¬ val(dv.drawNode, p2) U val(db.createAddNodeOperation, p1))))
+		//ltl_formula: G((val(db.createAddNodeOperation, p1) ∧ (Node.node(p1) = Node.node(p2))) ⇒ (X (val(dv.drawNode, p2) ∧ (Node.node(p1) = Node.node(p2)))  ∧ (¬ val(dv.drawNode, p2) U val(db.createAddNodeOperation, p1))))
+	}
+}

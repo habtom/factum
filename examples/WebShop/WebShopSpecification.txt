@@ -1,0 +1,42 @@
+Pattern WebshopSystem ShortName wss {
+	
+	DTSpec {
+		DT EventParams Package ca.mcgill.cs.jetuml.View (
+			Sort String, params, Name
+			
+			Operation name: params => String,
+			price: params => String
+				
+		)
+	}  
+	CTypes {
+		CType StartWindow Package ca.mcgill.cs.jetuml.StartWindow {
+			InputPorts {
+				InputPort addItem(Type: EventParams.params)
+			}
+		},
+		CType Item ShortName sb Package ca.mcgill.cs.jetuml.Item {
+			OutputPorts{
+				OutputPort addItem(Type: EventParams.params)
+			}
+			
+			Parameters  {
+				Parameter param(Type: EventParams.params),
+				Parameter name(Type: EventParams.String),
+				Parameter price(Type: EventParams.String)
+			}
+		} 
+	} 
+	//Container for Architectural Assumptions
+	ArchSpec {
+		//Component Variables
+		rig s : StartWindow,
+		rig i : Item
+		
+		rig x: EventParams.params,
+		rig n: EventParams.String
+
+		ltl_formula: G((val(s.addItem, x)) ⇒ ((X (¬ val(s.addItem, x))) U (cAct (i) ∧ val(i.name, x) ∧ val(i.price, x))))
+
+	}
+}

@@ -1,0 +1,30 @@
+package mop;
+
+import java.io.*;
+import java.util.*;
+import ca.mcgill.cs.jetuml.View;
+import ca.mcgill.cs.jetuml.StartWindow;
+import ca.mcgill.cs.jetuml.Item;
+
+WebshopSystem(StartWindow s, String x_price, String x_name, Item i, String x) {
+
+
+	event additem_s_x_price_x_name before(StartWindow s, String x_price,  String x_name) : 
+		execution(* StartWindow.addItem(String,  String) && args(x_price, x_name) && target(s) && within(StartWindow)  { }
+
+	event item_cact_i before(Item i) : 
+		execution(* Item.new(..)) && target(i) && within(Item) { }
+
+	event set_name_i_x before(Item i, String x) : 
+		set(String Item.name) && args(x) && target(i) { }
+
+	event set_price_i_x before(Item i, String x) : 
+		set(String Item.price) && args(x) && target(i) { }
+
+
+	ltl: [] ((additem_s_x_price_x_name) => ((o (not additem_s_x_price_x_name)) U (item_cact_i and set_name_i_x and set_price_i_x)))
+
+	@violation { System.out.println("ltl violated!"); }
+
+}
+
