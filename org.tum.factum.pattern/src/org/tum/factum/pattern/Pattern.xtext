@@ -70,7 +70,6 @@ Contract returns Contract:
 		"trigger" trigger+=ContractFormula ("," trigger+=ContractFormula)*
 		"guarantee" guarantee+=ContractFormula ("," trigger+=ContractFormula)*
 		"duration" duration+=ContractDuration
-		'}'
 	'}'
 ;
 Parameter returns Parameter:
