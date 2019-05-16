@@ -15,7 +15,8 @@ Pattern returns Pattern:
 		//Language Part 2 - Specification of Component Types (CTypes)
 		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}'
 		)?
-		
+		('Contracts' '{' contracts+=Contract ( "," contracts+=Contract)* '}'
+	    )?
  		//Language Part 3 - Specification of Architectural Constraints
 	    ('ArchSpec' '{'
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 		//Declaration of Component Variables
@@ -66,11 +67,12 @@ ComponentType returns ComponentType:
 	'}'
 ;
 Contract returns Contract:
+	{Contract}
 	'Contract' cname = ID '{'
-    	(contractDtVar+=DataTypeVariable ("," contractDtVar+=DataTypeVariable)*)?
-		"trigger" trigger+=ContractFormula ("," trigger+=ContractFormula)*
-		"guarantee" guarantee+=ContractFormula ("," trigger+=ContractFormula)*
-		"duration" duration+=ContractDuration
+    	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
+		'trigger' trigger+=ContractFormula (',' trigger+=ContractFormula 'at' timestep+=Timestep)*
+		'guarantee' guarantee+=ContractFormula //(',' guarantee+=ContractFormula)*
+		'duration' duration+=Timestep
 	'}'
 ;
 Parameter returns Parameter:
@@ -135,7 +137,7 @@ DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
 PortRef:
-	InputPort | OutputPort | Parameter
+	InputPort | OutputPort | Parameter | DataTypeVariable
 ;
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
@@ -390,14 +392,13 @@ ContractBase returns ContractFormula:
 	{ContractTermEq} '[' left=ContractTerm '=' right=ContractTerm ']'
 ;
 ContractTerm:
-	{ContractVariable} var=[DataTypeVariable|ID] |
-	prtRef=PortRef |
+	{ContractBaseTerm} portRef=[PortRef|QualifiedName] |
 	{ContractOperation} contractTrmOperator=[Operation|QualifiedName] '[' params=ContractOpParam? ']'
 ;
 ContractOpParam:
 	contractOperands+=ContractTerm ("," contractOperands+=ContractTerm)*
 ;
-ContractDuration:
+Timestep:
  	INT
 ;
 // Behavior Trace Assertions: END 
