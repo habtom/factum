@@ -22,13 +22,13 @@ import org.tum.factum.pattern.pattern.BtaLImp
 import org.tum.factum.pattern.pattern.BtaLOr
 import org.tum.factum.pattern.pattern.BtaLAnd
 import org.tum.factum.pattern.pattern.BtaTerm
-import org.tum.factum.pattern.pattern.BtaVariable
 import org.tum.factum.pattern.pattern.LTLOperators
 import org.tum.factum.pattern.pattern.BtaTermEq
 import org.tum.factum.pattern.pattern.BtaOperation
 import org.tum.factum.pattern.pattern.Neg
 import org.tum.factum.pattern.pattern.LogicNeg
 import org.tum.factum.pattern.pattern.MathNeg
+import org.tum.factum.pattern.pattern.BtaBaseTerm
 
 class NuXmvTextGenerator {
 	
@@ -213,7 +213,7 @@ class NuXmvTextGenerator {
 	
 	def static String btaTerm(BtaTerm term) {
 		switch term {
-			BtaVariable : return term.getVar.name
+			BtaBaseTerm : return term.btaRef.name
 			BtaOperation : return btaFunction(term.btaTrmOperator.name, term.params.btaOperands)
 		}
 	}
