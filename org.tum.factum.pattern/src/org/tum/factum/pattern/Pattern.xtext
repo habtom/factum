@@ -3,6 +3,8 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 generate pattern "http://www.tum.org/factum/pattern/Pattern"
 
+
+
 Pattern returns Pattern:
 	{Pattern}
 	'Pattern' name=ID 'ShortName' psname=ID
@@ -13,7 +15,8 @@ Pattern returns Pattern:
 		//Language Part 2 - Specification of Component Types (CTypes)
 		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}'
 		)?
-		
+		('Contracts' '{' contracts+=Contract ( "," contracts+=Contract)* '}'
+	    )?
  		//Language Part 3 - Specification of Architectural Constraints
 	    ('ArchSpec' '{'
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 		//Declaration of Component Variables
@@ -58,10 +61,18 @@ ComponentType returns ComponentType:
 	    )?
 	    //Part 2.4 of Spec
 	    ('Contracts' '{' //Behavior Trace Assertions (BTA)
-	    	(btaDtVar+=DataTypeVariable ("," btaDtVar+=DataTypeVariable)*)?
-			(behaviorTraceAssertion+=BehaviorTraceAssertion)*
-			'}'
+	    	contracts+=Contract ( "," contracts+=Contract)*
+	    	'}'
 	    )?
+	'}'
+;
+Contract returns Contract:
+	{Contract}
+	'Contract' cname = ID '{'
+    	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
+		'trigger' trigger+=ContractFormula (',' trigger+=ContractFormula 'at' timestep+=Timestep)*
+		'guarantee' guarantee+=ContractFormula //(',' guarantee+=ContractFormula)*
+		'duration' duration+=Timestep
 	'}'
 ;
 Parameter returns Parameter:
@@ -113,7 +124,7 @@ Sort:
 
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
 VariableStatus: 
-	'rig' | 'flex'
+	'rig' | 'flex' | 'var'
 ;
 ComponentVariable:
 	//cmptypAssigned => Component Type assigned or associated to the component variable
@@ -126,7 +137,7 @@ DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
 PortRef:
-	InputPort | OutputPort | Parameter
+	InputPort | OutputPort | Parameter | DataTypeVariable
 ;
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
@@ -308,6 +319,10 @@ DtaOpParam:
 // Datatype Assertions: END
 
 // Behavior Trace Assertions: BEGIN
+//BtaRef is needed to avoid multiple input problems with referencing
+BtaRef:
+	InputPort | OutputPort | Parameter | DataTypeVariable
+;
 BehaviorTraceAssertion:
 	name=ID ':' btaFormula=BtaFormula
 ;
@@ -344,12 +359,47 @@ BtaBase returns BtaFormula:
 	{BtaTermEq} '[' left=BtaTerm '=' right=BtaTerm ']'
 ;
 BtaTerm:
-	{BtaVariable} var=[DataTypeVariable|ID] |
-	prtRef=PortRef |
+	{BtaBaseTerm} btaRef=[BtaRef] |
 	{BtaOperation} btaTrmOperator=[Operation|QualifiedName] '[' params=BtaOpParam? ']'
 ;
 BtaOpParam:
 	btaOperands+=BtaTerm ("," btaOperands+=BtaTerm)*
+;
+// Contract formula
+ContractFormula:
+	ContractQuantification |
+	ContractLImp
+;
+ContractQuantification returns ContractFormula:
+	QuantifierOperator contractFormula=ContractLImp
+;
+ContractLImp returns ContractFormula:
+	ContractLOr ({ContractLImp.left=current} ('⇒'|'==>') right=ContractLOr)*
+;
+ContractLOr returns ContractFormula:
+	ContractLAnd ({ContractLOr.left=current} ('∨'|'\\/') right=ContractLAnd)*
+;
+ContractLAnd returns ContractFormula:
+	ContractPrimary ({ContractLAnd.left=current} ('∧'|'/\\') right=ContractPrimary)*
+;
+ContractPrimary returns ContractFormula:
+	{Neg} ('¬'|'~') contractFormula=ContractPrimary |
+	'(' ContractFormula ')' |
+	ContractBase
+;
+ContractBase returns ContractFormula:
+	{ContractPredicate} contractPredicate=[DTPredicate|QualifiedName] '[' params=ContractOpParam? ']' |
+	{ContractTermEq} '[' left=ContractTerm '=' right=ContractTerm ']'
+;
+ContractTerm:
+	{ContractBaseTerm} portRef=[PortRef|QualifiedName] |
+	{ContractOperation} contractTrmOperator=[Operation|QualifiedName] '[' params=ContractOpParam? ']'
+;
+ContractOpParam:
+	contractOperands+=ContractTerm ("," contractOperands+=ContractTerm)*
+;
+Timestep:
+ 	INT
 ;
 // Behavior Trace Assertions: END 
 
