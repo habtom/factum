@@ -15,7 +15,12 @@ import org.tum.factum.pattern.pattern.Sort
 import org.eclipse.emf.common.util.EList
 import org.tum.factum.pattern.pattern.DtaOpParam
 import org.tum.factum.pattern.pattern.BtaOpParam
-import org.tum.factum.pattern.pattern.BtaVariable
+import org.tum.factum.pattern.pattern.BtaBaseTerm
+import org.tum.factum.pattern.pattern.DataTypeVariable
+import org.tum.factum.pattern.pattern.InputPort
+import org.tum.factum.pattern.pattern.OutputPort
+import org.tum.factum.pattern.pattern.Parameter
+import org.tum.factum.pattern.pattern.ComponentType
 
 /**
  * This class contains custom validation rules. 
@@ -86,6 +91,30 @@ class PatternValidator extends AbstractPatternValidator {
 	}
 
 	/*
+	 * Validators for Component Types 
+	 */
+	@Check
+	def checkCTPorts(ComponentType cType) {
+		var i=0
+		while (i<cType.outputPorts.size) {
+			val oPort=cType.outputPorts.get(i)
+			if (cType.inputPorts.exists[name.equals(oPort.name)]) {
+				error("An input port with the same name already exists!",PatternPackage.Literals.COMPONENT_TYPE__OUTPUT_PORTS,i)
+			}
+			i++
+		}
+		i=0
+		while (i<cType.parameters.size) {
+			val par=cType.outputPorts.get(i)
+			if (cType.inputPorts.exists[name.equals(par.name)]) {
+				error("An input port with the same name already exists!",PatternPackage.Literals.COMPONENT_TYPE__PARAMETERS,i)
+			} else if (cType.outputPorts.exists[name.equals(par.name)]) {
+				error("An output port with the same name already exists!",PatternPackage.Literals.COMPONENT_TYPE__PARAMETERS,i)
+			}
+		}
+	}
+
+	/*
 	 * Validators for Behavior Trace Assertions 
 	 */
 	def checkSorts(EList<Sort> signature, BtaOpParam parameters) {
@@ -93,9 +122,22 @@ class PatternValidator extends AbstractPatternValidator {
 		while (i<signature.size) {
 			val param = parameters.btaOperands.get(i)
 			var pSort = null as Sort
-			if (param instanceof BtaVariable) {
-				val x=param as BtaVariable
-				pSort=x.^var.varSortType
+			if (param instanceof BtaBaseTerm) {
+				val x=param as BtaBaseTerm
+				val pRef=x.^btaRef
+				if (pRef instanceof DataTypeVariable) {
+					val dtaVar = pRef as DataTypeVariable
+					pSort=dtaVar.varSortType
+				} else if (pRef instanceof InputPort) {
+					val iPort = pRef as InputPort
+					pSort=iPort.inputPrtSrtTyp
+				} else if (pRef instanceof OutputPort) {
+					val iPort = pRef as OutputPort
+					pSort=iPort.outputPrtSrtTyp
+				} else if (pRef instanceof Parameter) {
+					val iPort = pRef as Parameter
+					pSort=iPort.paramSrtTyp
+				}
 			} else if (param instanceof BtaOperation) {
 				val x=param as BtaOperation
 				pSort=x.btaTrmOperator.dtOutput

@@ -317,6 +317,10 @@ DtaOpParam:
 // Datatype Assertions: END
 
 // Behavior Trace Assertions: BEGIN
+//BtaRef is needed to avoid multiple input problems with referencing
+BtaRef:
+	InputPort | OutputPort | Parameter | DataTypeVariable
+;
 BehaviorTraceAssertion:
 	name=ID ':' btaFormula=BtaFormula
 ;
@@ -353,8 +357,7 @@ BtaBase returns BtaFormula:
 	{BtaTermEq} '[' left=BtaTerm '=' right=BtaTerm ']'
 ;
 BtaTerm:
-	{BtaVariable} var=[DataTypeVariable|ID] |
-	prtRef=PortRef |
+	{BtaBaseTerm} btaRef=[BtaRef] |
 	{BtaOperation} btaTrmOperator=[Operation|QualifiedName] '[' params=BtaOpParam? ']'
 ;
 BtaOpParam:
