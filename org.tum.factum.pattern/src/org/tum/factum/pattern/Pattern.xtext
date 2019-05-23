@@ -33,6 +33,9 @@ Pattern returns Pattern:
 			(agDtVars=DTVariables)?
 			
 			(agFormulaIds+=AgFormulasID)*
+			
+			(proof=Proof)?
+			
 	    '}')?
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
@@ -66,13 +69,21 @@ ComponentType returns ComponentType:
 	    )?
 	'}'
 ;
+Proof returns Proof:
+	{Proof}
+	'Proof' '{' (pKey += INT ':' proofStep += ProofStep)* '}'
+;
+ProofStep returns ProofStep:
+	{ProofStep}
+	'at' timepoint=Timepoint
+;
 Contract returns Contract:
 	{Contract}
 	'Contract' cname = ID '{'
     	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
-		'trigger' trigger+=ContractFormula (',' trigger+=ContractFormula 'at' timestep+=Timestep)*
+		'trigger' trigger+=ContractFormula (',' trigger+=ContractFormula 'at' timepoint+=Timepoint)*
 		'guarantee' guarantee+=ContractFormula //(',' guarantee+=ContractFormula)*
-		'duration' duration+=Timestep
+		'duration' duration+=Timepoint
 	'}'
 ;
 Parameter returns Parameter:
@@ -398,7 +409,7 @@ ContractTerm:
 ContractOpParam:
 	contractOperands+=ContractTerm ("," contractOperands+=ContractTerm)*
 ;
-Timestep:
+Timepoint:
  	INT
 ;
 // Behavior Trace Assertions: END 
