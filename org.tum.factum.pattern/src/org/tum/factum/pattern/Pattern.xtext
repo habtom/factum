@@ -71,20 +71,38 @@ ComponentType returns ComponentType:
 ;
 Proof returns Proof:
 	{Proof}
-	'Proof' '{' (pKey += INT ':' proofStep += ProofStep)* '}'
+	'Proof' '{' 
+		proofStatements+=ProofStatement (',' proofStatements+=ProofStatement)* 
+	'}'
+;
+ProofStatement returns ProofStatement:
+	{ProofStep}
+	name = ID ':' proofStep = ProofStep
 ;
 ProofStep returns ProofStep:
 	{ProofStep}
-	'at' timepoint=Timepoint
+	'at' timepoint+=Timepoint 'have' state = BasicFormula 
+	'using' contract = [ContractRef|QualifiedName] //'of' proofStepRef = [ProofStepRef] // should we really add this reference?
+	('with' '[' proofConnection += ProofConnection ( ',' proofConnection += ProofConnection)* ']')?
+;
+ProofStepRef:
+	ProofStep
+;
+ProofConnection returns ProofConnection:
+	{ProofConnection}
+	'('input = [PortRef|QualifiedName] ',' output = [PortRef|QualifiedName]')'
 ;
 Contract returns Contract:
 	{Contract}
-	'Contract' cname = ID '{'
+	'Contract' name = ID '{'
     	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
-		'trigger' trigger+=ContractFormula (',' trigger+=ContractFormula 'at' timepoint+=Timepoint)*
-		'guarantee' guarantee+=ContractFormula //(',' guarantee+=ContractFormula)*
+		'trigger' trigger+=BasicFormula (',' trigger+=BasicFormula 'at' timepoint+=Timepoint)*
+		'guarantee' guarantee+=BasicFormula
 		'duration' duration+=Timepoint
 	'}'
+;
+ContractRef:
+	Contract
 ;
 Parameter returns Parameter:
 	{Parameter}
@@ -377,37 +395,37 @@ BtaOpParam:
 	btaOperands+=BtaTerm ("," btaOperands+=BtaTerm)*
 ;
 // Contract formula
-ContractFormula:
-	ContractQuantification |
-	ContractLImp
+BasicFormula:
+	BasicQuantification |
+	BasicLImp
 ;
-ContractQuantification returns ContractFormula:
-	QuantifierOperator contractFormula=ContractLImp
+BasicQuantification returns BasicFormula:
+	QuantifierOperator basicFormula=BasicLImp
 ;
-ContractLImp returns ContractFormula:
-	ContractLOr ({ContractLImp.left=current} ('⇒'|'==>') right=ContractLOr)*
+BasicLImp returns BasicFormula:
+	BasicLOr ({BasicLImp.left=current} ('⇒'|'==>') right=BasicLOr)*
 ;
-ContractLOr returns ContractFormula:
-	ContractLAnd ({ContractLOr.left=current} ('∨'|'\\/') right=ContractLAnd)*
+BasicLOr returns BasicFormula:
+	BasicLAnd ({BasicLOr.left=current} ('∨'|'\\/') right=BasicLAnd)*
 ;
-ContractLAnd returns ContractFormula:
-	ContractPrimary ({ContractLAnd.left=current} ('∧'|'/\\') right=ContractPrimary)*
+BasicLAnd returns BasicFormula:
+	BasicPrimary ({BasicLAnd.left=current} ('∧'|'/\\') right=BasicPrimary)*
 ;
-ContractPrimary returns ContractFormula:
-	{Neg} ('¬'|'~') contractFormula=ContractPrimary |
-	'(' ContractFormula ')' |
-	ContractBase
+BasicPrimary returns BasicFormula:
+	{Neg} ('¬'|'~') basicFormula=BasicPrimary |
+	'(' BasicFormula ')' |
+	BasicBase
 ;
-ContractBase returns ContractFormula:
-	{ContractPredicate} contractPredicate=[DTPredicate|QualifiedName] '[' params=ContractOpParam? ']' |
+BasicBase returns BasicFormula:
+	{ContractPredicate} contractPredicate=[DTPredicate|QualifiedName] '[' params=BasicOpParam? ']' |
 	{ContractTermEq} '[' left=ContractTerm '=' right=ContractTerm ']'
 ;
 ContractTerm:
-	{ContractBaseTerm} portRef=[PortRef|QualifiedName] |
-	{ContractOperation} contractTrmOperator=[Operation|QualifiedName] '[' params=ContractOpParam? ']'
+	{BasicBaseTerm} portRef=[PortRef|QualifiedName] |
+	{BasicOperation} contractTrmOperator=[Operation|QualifiedName] '[' params=BasicOpParam? ']'
 ;
-ContractOpParam:
-	contractOperands+=ContractTerm ("," contractOperands+=ContractTerm)*
+BasicOpParam:
+	basicOperands+=ContractTerm ("," basicOperands+=ContractTerm)*
 ;
 Timepoint:
  	INT
