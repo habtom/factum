@@ -76,14 +76,14 @@ Proof returns Proof:
 	'}'
 ;
 ProofStatement returns ProofStatement:
-	{ProofStep}
+	{ProofStatement}
 	name = ID ':' proofStep = ProofStep
 ;
 ProofStep returns ProofStep:
 	{ProofStep}
-	'at' timepoint+=Timepoint 'have' state = BasicFormula 
+	'at' timepoint = Timepoint 'have' state = BasicFormula 
 	'using' contract = [ContractRef|QualifiedName] //'of' proofStepRef = [ProofStepRef] // should we really add this reference?
-	('with' '[' proofConnection += ProofConnection ( ',' proofConnection += ProofConnection)* ']')?
+	('with' '[' proofConnections += ProofConnection ( ',' proofConnections += ProofConnection)* ']')?
 ;
 ProofStepRef:
 	ProofStep
@@ -96,9 +96,9 @@ Contract returns Contract:
 	{Contract}
 	'Contract' name = ID '{'
     	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
-		'trigger' trigger+=BasicFormula (',' trigger+=BasicFormula 'at' timepoint+=Timepoint)*
-		'guarantee' guarantee+=BasicFormula
-		'duration' duration+=Timepoint
+		'trigger' triggers+=BasicFormula (',' triggers+=BasicFormula 'at' triggerTimepoints+=Timepoint)*
+		'guarantee' guarantees+=BasicFormula
+		'duration' duration=Timepoint
 	'}'
 ;
 ContractRef:
@@ -417,15 +417,15 @@ BasicPrimary returns BasicFormula:
 	BasicBase
 ;
 BasicBase returns BasicFormula:
-	{ContractPredicate} contractPredicate=[DTPredicate|QualifiedName] '[' params=BasicOpParam? ']' |
-	{ContractTermEq} '[' left=ContractTerm '=' right=ContractTerm ']'
+	{BasicPredicate} basicPredicate=[DTPredicate|QualifiedName] '[' params=BasicOpParam? ']' |
+	{BasicTermEq} '[' left=BasicTerm '=' right=BasicTerm ']'
 ;
-ContractTerm:
+BasicTerm:
 	{BasicBaseTerm} portRef=[PortRef|QualifiedName] |
 	{BasicOperation} contractTrmOperator=[Operation|QualifiedName] '[' params=BasicOpParam? ']'
 ;
 BasicOpParam:
-	basicOperands+=ContractTerm ("," basicOperands+=ContractTerm)*
+	basicOperands+=BasicTerm ("," basicOperands+=BasicTerm)*
 ;
 Timepoint:
  	INT
