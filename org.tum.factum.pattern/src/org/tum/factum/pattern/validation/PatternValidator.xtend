@@ -24,6 +24,7 @@ import org.tum.factum.pattern.pattern.BtaBaseTerm
 import org.tum.factum.pattern.pattern.DataTypeVariable
 import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Parameter
+import org.tum.factum.pattern.pattern.FsmPrimitive
 
 /**
  * This class contains custom validation rules. 
@@ -215,7 +216,7 @@ class PatternValidator extends AbstractPatternValidator {
 		val parameters = mo.vars
 		if (parameters.size != signature.size) {
 			error("Invalid number of operands: expected " + signature.size + ", not " + parameters.size, PatternPackage.Literals.MAP_OPERATION__VARS)
-		}
+		} 
 	}
 	
 	@Check
@@ -224,6 +225,23 @@ class PatternValidator extends AbstractPatternValidator {
 		val parameters = of.params
 		if (parameters.size != signature.size) {
 			error("Invalid number of operands: expected " + signature.size + ", not " + parameters.size, PatternPackage.Literals.OPERATION_FUNC__PARAMS)
+		} else {
+			checkSortsOp(signature, parameters)
+		} 
+		
+	}
+	
+	def checkSortsOp(EList<Sort> signature, EList<FsmPrimitive> parameters) {
+		val iteratorSign = signature.iterator
+		val iteratorParam = parameters.iterator
+		var i = 0
+		while (iteratorSign.hasNext && iteratorParam.hasNext) {
+			var param = iteratorParam.next
+			var sort = iteratorSign.next
+			if (param.dtVar !== null && param.dtVar.varSortType != sort) {
+				error("Invalid sort: expected " + sort.name + ", not " + param.dtVar.varSortType.name, PatternPackage.Literals.OPERATION_FUNC__PARAMS)
+			}
+			i++
 		}
 	}
 	

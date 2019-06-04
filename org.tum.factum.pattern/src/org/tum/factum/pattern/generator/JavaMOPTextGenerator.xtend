@@ -278,7 +278,7 @@ import java.util.*;«"\n"»
 			
 			//Event name should be "portName_pact_objectName".
 			//For example: If portName is "addItem" and objectName is "w" => event name will be - "additem_pact_w"
-			var eventName = ctapPact.PActCtaCmpVaref.portRef.name.toLowerCase() + "_pact";
+			var eventName = ctapPact.PActCtaCmpVaref.portRef.port.name.toLowerCase() + "_pact";
 			var targetObject = "";
 			var eventParameters = "";
 			
@@ -308,7 +308,7 @@ import java.util.*;«"\n"»
 				
 				var equalityOperator = getEqualityOperator(pair);
 				
-				event += "(* " + objectType + "." + ctapPact.PActCtaCmpVaref.portRef.name + "(..))" + targetObject + " && within(" + objectType + ")" + equalityOperator + " { }";
+				event += "(* " + objectType + "." + ctapPact.PActCtaCmpVaref.portRef.port.name + "(..))" + targetObject + " && within(" + objectType + ")" + equalityOperator + " { }";
 				
 				//Add new event to eventList
 				eventList.put(eventName, event);
@@ -407,7 +407,7 @@ import java.util.*;«"\n"»
 				paramsTypes = ctapVal.ctaValTerms.termOperatorFunction.trmOperator.dtOutput.name;
 			}
 			
-			var eventName = valCmpPortRef.name.toLowerCase();
+			var eventName = valCmpPortRef.port.name.toLowerCase();
 			var event = "";
 			var params = parameterName;	
 			var fullParams= paramsTypes + " " + paramsNames;			
@@ -459,7 +459,7 @@ import java.util.*;«"\n"»
 				eventName += "_" + params;
 				if(!eventList.containsKey(eventName)){
 					event += "event " + eventName + " before(" + eventParameters + fullParams + ") : \n\t\t" +
-						eventType + "(* "+ objectType + "." + valCmpPortRef.name + "(" +
+						eventType + "(* "+ objectType + "." + valCmpPortRef.port.name + "(" +
 						paramsTypes + ") && args(" + paramsNames + ")" + targetObject + " && within(" + objectType + ") " + equalityOperator + " { }";
 				        	
 			    	eventList.put(eventName, event);
@@ -470,7 +470,7 @@ import java.util.*;«"\n"»
 			   	
 			    if(!eventList.containsKey(eventName)){
 				   	event += "event " + eventName + " before(" + eventParameters + fullParams + ") : \n\t\t" +
-						 "set" + "(" + paramsTypes + " " + objectType + "." + valCmpPortRef.name + 
+						 "set" + "(" + paramsTypes + " " + objectType + "." + valCmpPortRef.port.name + 
 						 ") && args(" + paramsNames + ")" + targetObject + equalityOperator + " { }";
 				 
 					eventList.put(eventName, event);
