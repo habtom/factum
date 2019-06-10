@@ -64,6 +64,11 @@ class NuXmvTextGenerator {
 	def static convertToNuXmv(ComponentType cType) '''
 			«val states = cType.states.stream.map[n | n.name].collect(Collectors.joining(",", "{" , "};"))»
 			«val transitions = cType.transitions»
+			-- Instructions:
+			-- ~$ nuXmv -int «cType.name».smv
+			-- > go
+			-- > check_ltlspec
+			
 			MODULE main
 				
 			VAR 

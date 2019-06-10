@@ -27,7 +27,9 @@ class PatternGenerator extends AbstractGenerator {
 			//For nuXmv
 			for (var i = 0; i < root.componentTypes.size; i++) {
 				val cType = root.componentTypes.get(i)
-				fsa.generateFile(root.name + i + ".smv", NuXmvTextGenerator.toNuXmv(root, cType))
+				if (!cType.states.isEmpty) {
+					fsa.generateFile(cType.name + ".smv", NuXmvTextGenerator.toNuXmv(root, cType))
+				}
 			}
 		}
 
