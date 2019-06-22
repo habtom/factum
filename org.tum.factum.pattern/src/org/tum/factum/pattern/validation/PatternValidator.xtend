@@ -24,7 +24,8 @@ import org.tum.factum.pattern.pattern.BtaBaseTerm
 import org.tum.factum.pattern.pattern.DataTypeVariable
 import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Parameter
-import org.tum.factum.pattern.pattern.FsmPrimitive
+import org.tum.factum.pattern.pattern.OperationDataType
+import org.tum.factum.pattern.pattern.BtaRef
 
 /**
  * This class contains custom validation rules. 
@@ -191,19 +192,18 @@ class PatternValidator extends AbstractPatternValidator {
 		val init = ct.initial
 		val initVars = init.vars
 		if (hasDuplicate(initVars)) {
-			error("Invalid redeclaration of variable", init, PatternPackage.Literals.INITIALISATION__VARS)
+			error("Invalid redeclaration of variable", init, PatternPackage.Literals.INITIALIZATION__VARS)
 		}
 		if (btaVars.size > init.vars.size) {
-			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALISATION__VARS)
+			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALIZATION__VARS)
 		} 
 		var i = 0
 		for (variable : initVars) {
 			var dataTypes = init.dataTypes
 			if (dataTypes.size > i) {
-				var a = dataTypes.get(i)
-				var btaVar = a.variable
-				if (btaVar == variable) {
-					error("Invalid self declaration ", init, PatternPackage.Literals.INITIALISATION__VARS, i)
+				var dtVar = dataTypes.get(i).variable
+				if (dtVar == variable) {
+					error("Invalid self declaration ", init, PatternPackage.Literals.INITIALIZATION__VARS, i)
 				}
 			}
 			i++
@@ -231,15 +231,15 @@ class PatternValidator extends AbstractPatternValidator {
 		
 	}
 	
-	def checkSortsOp(EList<Sort> signature, EList<FsmPrimitive> parameters) {
+	def checkSortsOp(EList<Sort> signature, EList<OperationDataType> parameters) {
 		val iteratorSign = signature.iterator
 		val iteratorParam = parameters.iterator
 		var i = 0
 		while (iteratorSign.hasNext && iteratorParam.hasNext) {
-			var param = iteratorParam.next
 			var sort = iteratorSign.next
-			if (param.dtVar !== null && param.dtVar.varSortType != sort) {
-				error("Invalid sort: expected " + sort.name + ", not " + param.dtVar.varSortType.name, PatternPackage.Literals.OPERATION_FUNC__PARAMS)
+			var varSort = iteratorParam.next.variable.sort
+			if (varSort != sort) {
+				error("Invalid sort: expected " + sort.name + ", not " + varSort.name, PatternPackage.Literals.OPERATION_FUNC__PARAMS, i)
 			}
 			i++
 		}
@@ -249,6 +249,15 @@ class PatternValidator extends AbstractPatternValidator {
     	val set = new HashSet<T>();
     	for (T each: all) if (!set.add(each)) return true;
     	return false;
+	}
+	
+	def Sort getSort(BtaRef ref) {
+		switch ref {
+			InputPort: return ref.inputPrtSrtTyp
+			DataTypeVariable: return ref.varSortType
+			Parameter: return ref.paramSrtTyp
+			OutputPort: return ref.outputPrtSrtTyp
+		}
 	}
 
 }

@@ -36,7 +36,7 @@ Pattern returns Pattern:
 ;
 ComponentType returns ComponentType:
 	{ComponentType} 
-	'CType'	name=ID ('ShortName' ctsname=ID)?
+	'CType'	name=ID 'ShortName' ctsname=ID
 	//Optional package declaration needed for JavaMOP
 	('Package' packageName=QualifiedName)?
 	'{'
@@ -64,7 +64,7 @@ ComponentType returns ComponentType:
 	    //Part 2.5 of Spec
 	   	('Behavior' '{'
 	   			'States' states+=State ( ',' states+=State)*	
-	   			'Initial' initial=Initialisation
+	   			'Initial' initial=Initialization
 	   			('Transitions' '{'
 					transitions+=Transition+
 					'}'
@@ -100,20 +100,17 @@ State returns State:
 	name=ID
 ;
 
-Initialisation returns Initialisation:
-	{Initialisation}
+Initialization:
 	initialState=[State|QualifiedName] | 
 	'{' 
 		'State' initialState=[State|QualifiedName]
-		'Var' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes 
+		'Var' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes
 		(',' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes)* 
 	'}'
 ;
 
 InitDataTypes:
-	'i(' inputPort=[InputPort|QualifiedName] ')'|
-	variable=[DataTypeVariable|QualifiedName] |
-	op=OperationFunc
+	variable=[BtaRef] | op=OperationFunc
 ;
 
 Transition returns Transition:
@@ -124,10 +121,13 @@ Transition returns Transition:
 ;
 
 OperationFunc:
-	op=[Operation|QualifiedName] '['(params+=FsmPrimitive (',' params+=FsmPrimitive)*)? ']'
+	op=[Operation|QualifiedName] '['(params+=OperationDataType (',' params+=OperationDataType)*)? ']'
 ;
 
-// FSM Implementation: END
+OperationDataType:
+	variable=[BtaRef] | primitive=FsmPrimitive
+;
+// FSM Implementation: END  
 
 DataTypeSpec returns DataTypeSpec:
 	{DataTypeSpec}	
@@ -180,7 +180,7 @@ MapSort:
 
 //Begin common rules for CTA, Architectural Guarantee(AG) and Behavior Trace Assertions (BTA)
 VariableStatus: 
-	'rig' | 'flex'
+	 'flex' | 'rig'
 ;
 ComponentVariable:
 	//cmptypAssigned => Component Type assigned or associated to the component variable
@@ -193,12 +193,10 @@ DTVariables:
 	(dtVars+=DataTypeVariable ("," dtVars+=DataTypeVariable)*)
 ;
 PortRef:
-	'i(' port=[InputPort|ID] ')' | 
-	'o(' port=[OutputPort|ID] ')' | 
-	'p(' port=[Parameter|ID] ')'
+	InputPort | OutputPort | Parameter
 ;
 CmpVariableRef:
-	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
+	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef]
 ;
 Term:
 	cmpVariableRef=CmpVariableRef |
@@ -455,20 +453,17 @@ FsmPrimary returns FsmFormula:
 ;
 FsmBase returns FsmFormula:
 	primitive=FsmPrimitive |
-	'o(' outputPort=[OutputPort|EString] ')' |
-	func=OperationFunc 
+	variable=[BtaRef] |
+	func=OperationFunc
 ;
 FsmPrimitive:
-	dtVar = [DataTypeVariable|ID] |
-	integer = INT | 
-	real = Real |
-	bool = Bool 
+	INT | 
+	Real |
+	Bool 
 ;
-
 Real:
 	INT'.'INT
 ;
-
 Bool:
 	'TRUE' | 'FALSE'
 ;

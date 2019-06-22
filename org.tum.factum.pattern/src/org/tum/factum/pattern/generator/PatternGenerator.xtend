@@ -21,7 +21,7 @@ class PatternGenerator extends AbstractGenerator {
 		 
 		if (root !== null) {
 			//For Isabelle
-//			fsa.generateFile(root.name + ".thy", IsabelleTextGenerator.toIsabelle(root))
+			fsa.generateFile(root.name + ".thy", IsabelleTextGenerator.toIsabelle(root))
 			//For JavaMOP
 //			fsa.generateFile(root.name + ".mop", JavaMOPTextGenerator.convertToMOP(root))
 			//For nuXmv
