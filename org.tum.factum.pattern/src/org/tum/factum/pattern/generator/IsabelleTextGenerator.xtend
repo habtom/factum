@@ -39,7 +39,6 @@ import org.tum.factum.pattern.pattern.BtaTerm
 import org.tum.factum.pattern.pattern.Neg
 import org.tum.factum.pattern.pattern.BtaBaseTerm
 import org.tum.factum.pattern.pattern.BtaOperation
-import org.eclipse.emf.common.util.EList
 import org.tum.factum.pattern.pattern.BtaFormula
 import org.tum.factum.pattern.pattern.BtaRef
 import org.tum.factum.pattern.pattern.BtaWUntil
@@ -48,8 +47,14 @@ import org.tum.factum.pattern.pattern.QuantifierOperator
 import org.tum.factum.pattern.pattern.DataTypeVariable
 import org.tum.factum.pattern.pattern.PortRef
 import org.tum.factum.pattern.pattern.Parameter
+import org.tum.factum.pattern.pattern.BtaOpParam
+import org.tum.factum.pattern.pattern.BehaviorTraceAssertion
+import java.util.LinkedList
+import java.util.HashSet
 
 class IsabelleTextGenerator {
+	
+	static var HashSet<String> dtVars = new HashSet<String>()
 
 	def static toIsabelle(Pattern root) '''
 	theory «root.name»«"\n"»
@@ -118,12 +123,18 @@ class IsabelleTextGenerator {
 ««« assumption begins	
 	«FOR cta : root.ctaFormulaIds»«"\t"»«cta.name»: "\<And>t. \<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «val ctaElement = root.ctaFormulaIds.filter[v|v.name == cta.name]»«FOR uf : ctaElement»«mapFormula(uf.ctaFormula)» t 0"«ENDFOR»«IF root.ctaFormulaIds.last() !== cta» and «"\n"»«ENDIF»«ENDFOR»
 «««	begin «"\n"»
+	«val ltlFormulas = new LinkedList<String>»
 	«FOR cType : root.componentTypes»
 		«FOR ltlFormula : cType.behaviorTraceAssertion»
 			«val sname = cType.ctsname»
-			«"\t"»b«sname»«ltlFormula.name»: "\<And>t t' «sname»id.\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «sname».eval «sname»id t t' 0 («generateLtlFormula(ltlFormula.btaFormula, sname)»)"
-			«IF cType.behaviorTraceAssertion.last() !== ltlFormula»«"\t"» and «"\n"»«ENDIF»
+			«ltlFormulas.addLast(generateLtlFormula(ltlFormula, sname))»
 		«ENDFOR»
+	«ENDFOR»
+	«IF !root.ctaFormulaIds.isEmpty»
+	 «"\t"»and 
+	«ENDIF»
+	«FOR ltlFormula : ltlFormulas»
+		«"\t"»«ltlFormula»«IF ltlFormulas.last() !== ltlFormula» and«ENDIF»
 	«ENDFOR»
 	«FOR ag : root.agFormulaIds»
 		theorem «ag.name»:
@@ -295,7 +306,8 @@ class IsabelleTextGenerator {
 				}
 				OutputPort: {
 					val valCmpVarOutputPort = agpval.valCmpVariableRef.portRef as OutputPort
-					'''«IF agpval.agVal == 'val' && agpval.agValTerms !== null»«val valOps = agpval.agValTerms.termOperatorFunction.trmOperator.name»«val valOpsDtVar = agpval.agValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name»«val valCmpParm = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name»ca (\<lambda>c. («valOps» («valCmpTypShortName»«valCmpParm» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)) «valOpsDtVar» = «valCmpTypShortName»«valCmpVarOutputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)))«ENDIF»'''
+					'''«IF agpval.agVal == 'val' && agpval.agValTerms.termOperatorFunction !== null && valCmpVarOutputPort !== null && agpval.agValTerms.termOperatorFunction.trmOperator !== null»«val valOps = agpval.agValTerms.termOperatorFunction.trmOperator.name»«val valOpsDtVar = agpval.agValTerms.termOperatorFunction.trmOperands.get(1).dtTypeVars.name»«val valCmpParm = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.parameters.get(0).name»«val valTermCmpTypShortNameSecondInpt = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.cmptypAssigned.ctsname»«val valTermCmpVarSecondInpt = agpval.agValTerms.termOperatorFunction.trmOperands.get(0).cmpVariableRef.cmpRef.name»ca (\<lambda>c. («valOps» («valTermCmpTypShortNameSecondInpt»«valCmpParm» («valTermCmpTypShortNameSecondInpt»cmp «valTermCmpVarSecondInpt» c)) «valCmpTypShortName» = «valOpsDtVar»«valCmpVarOutputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c)))
+					«ELSEIF agpval.agVal == 'val' && valCmpVarOutputPort !== null && agpval.agValTerms.cmpVariableRef !== null && agpval.agValTerms.cmpVariableRef.cmpRef !== null»«val valCmpPortSecondInpt = agpval.agValTerms.cmpVariableRef.portRef.name»«val valCmpTypShortNameSecondInpt = agpval.agValTerms.cmpVariableRef.cmpRef.cmptypAssigned.ctsname»«val valCmpVarSecondInpt = agpval.agValTerms.cmpVariableRef.cmpRef.name»ca (\<lambda>c. «valCmpTypShortNameSecondInpt»«valCmpPortSecondInpt» («valCmpTypShortNameSecondInpt»cmp «valCmpVarSecondInpt» c) \<in> «valCmpTypShortName»«valCmpVarOutputPort.name» («valCmpTypShortName»cmp «valCmpVarFirstInpt» c))«ENDIF»'''				
 				}
 			}
 		}
@@ -304,34 +316,48 @@ class IsabelleTextGenerator {
 	def dispatch static generateFormula(AgPredicateEq agpeq) {
 		'''ca (\<lambda>c. «agpeq.agComponentVariable1.name» = «agpeq.agComponentVariable2.name» )'''
 	}
+	
+	def static String generateLtlFormula(BehaviorTraceAssertion formula, String sname) {
+		dtVars.clear
+		var btaFormula = generateBtaFormula(formula.btaFormula, sname)
+		return '''b«sname»«formula.name»: "\<And>t t' «sname»id«FOR dtVar : dtVars» «dtVar»«ENDFOR».\<lbrakk>t\<in>arch\<rbrakk> \<Longrightarrow> «sname».eval «sname»id t t' 0 («btaFormula»)"'''
+	}
 
-	def static String generateLtlFormula(BtaFormula formula, String shortName) {
+	def static String generateBtaFormula(BtaFormula formula, String shortName) {
 		switch formula {
 			BtaLImp:
-				return "(" + generateLtlFormula(formula.left, shortName) + ") \\<longrightarrow>\\<^sup>b (" +
-					generateLtlFormula(formula.right, shortName) + ")"
+				return "(" + generateBtaFormula(formula.left, shortName) + ") \\<longrightarrow>\\<^sup>b (" +
+					generateBtaFormula(formula.right, shortName) + ")"
 			BtaLOr:
-				return generateLtlFormula(formula.left, shortName) + " \\<or>\\<^sup>b " + generateLtlFormula(formula.right, shortName)
+				return generateBtaFormula(formula.left, shortName) + " \\<or>\\<^sup>b " + generateBtaFormula(formula.right, shortName)
 			BtaLAnd:
-				return generateLtlFormula(formula.left, shortName) + " \\<and>\\<^sup>b " + generateLtlFormula(formula.right, shortName)
+				return generateBtaFormula(formula.left, shortName) + " \\<and>\\<^sup>b " + generateBtaFormula(formula.right, shortName)
 			LTLOperators: 
-				return  ltlOperator(formula) + "(" + generateLtlFormula(formula.btaFormula, shortName) + ")"
+				return  ltlOperator(formula) + "(" + generateBtaFormula(formula.btaFormula, shortName) + ")"
 			BtaWUntil:
-				return generateLtlFormula(formula.left, shortName) + " \\<WW>\\<^sub>b " + generateLtlFormula(formula.right, shortName)
+				return generateBtaFormula(formula.left, shortName) + " \\<WW>\\<^sub>b " + generateBtaFormula(formula.right, shortName)
 			BtaSUntil:
-				return generateLtlFormula(formula.left, shortName) + " \\<UU>\\<^sub>b " + generateLtlFormula(formula.right, shortName)
+				return generateBtaFormula(formula.left, shortName) + " \\<UU>\\<^sub>b " + generateBtaFormula(formula.right, shortName)
 			BtaTerm:
 				return btaTerm(formula, shortName)
 			Neg:
-				return "\\<not>\\<^sup>b(" + generateLtlFormula(formula.btaFormula, shortName) + ")"
+				return "\\<not>\\<^sup>b(" + generateBtaFormula(formula.btaFormula, shortName) + ")"
 			QuantifierOperator: 
-				return '''«IF formula.exists === null»\<forall>\<^sub>b«formula.quantifiedAllVar.name»«ELSE»\<exists>\<^sub>b«formula.quantifiedExistsVar.name»«ENDIF». «generateLtlFormula(formula.btaFormula, shortName)»'''
+				return '''«IF formula.exists === null»\<forall>\<^sub>b«formula.quantifiedAllVar.name»«ELSE»\<exists>\<^sub>b«formula.quantifiedExistsVar.name»«ENDIF». «generateBtaFormula(formula.btaFormula, shortName)»'''
 			BtaTermEq: {
 				val lhs = convertToBtaRef(formula.left)
 				val rhs = convertToBtaRef(formula.right)
-				
+				if (lhs instanceof DataTypeVariable) {
+					dtVars.add(lhs.name)
+				}
+				if (rhs instanceof DataTypeVariable) {
+					dtVars.add(rhs.name)
+				}
 				if (lhs instanceof InputPort && rhs instanceof DataTypeVariable) {
 					return '''[\<lambda>«shortName». «rhs.name» \<in> «shortName»«lhs.name»(«shortName»)]\<^sub>b'''
+				}
+				if (lhs instanceof DataTypeVariable && rhs instanceof InputPort) {
+					return '''[\<lambda>«shortName». «lhs.name» \<in> «shortName»«rhs.name»(«shortName»)]\<^sub>b'''
 				}
 			    return '''[\<lambda>«shortName». «btaTerm(formula.left, shortName)» = «btaTerm(formula.right, shortName)»]\<^sub>b'''
 			}
@@ -352,16 +378,17 @@ class IsabelleTextGenerator {
 				if (ref instanceof InputPort || ref instanceof OutputPort) {
 					return '''«shortName»«term.btaRef.name»(«shortName»)'''
 				} else {
+					dtVars.add(ref.name)
 					return ref.name
 				}
 			} 
-			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params.btaOperands, shortName)
+			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params, shortName)
 		}
 	}
 
-	def static String btaFunction(String name, EList<BtaTerm> input, String shortName) {
-//		return name + input.stream.map[n | btaTerm(n, shortName)].collect(Collectors.joining(",", "(" , ")"))
-		return '''«name»«FOR in : input» «btaTerm(in, shortName)»«ENDFOR»'''
+	def static String btaFunction(String name, BtaOpParam input, String shortName) {
+		if (input === null) return '''«name»'''
+		return '''(«name»«FOR in : input.btaOperands» «btaTerm(in, shortName)»«ENDFOR»)'''
 	}
 	
 	def static String ltlOperator(LTLOperators op) {

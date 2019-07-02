@@ -33,6 +33,7 @@ import org.tum.factum.pattern.pattern.InputPort
 import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Parameter
 import org.tum.factum.pattern.pattern.BtaRef
+import org.tum.factum.pattern.pattern.BtaOpParam
 
 class NuXmvTextGenerator {
 
@@ -127,7 +128,10 @@ class NuXmvTextGenerator {
 				
 			«ENDFOR»
 		«FOR ltlFormula : cType.behaviorTraceAssertion»
-			LTLSPEC «convertLTLFormula(ltlFormula.btaFormula)»
+			«val formula = convertLTLFormula(ltlFormula.btaFormula)»
+			«IF !formula.isEmpty»
+				LTLSPEC «formula»
+			«ENDIF»
 		«ENDFOR»
 	'''
 
@@ -225,7 +229,7 @@ class NuXmvTextGenerator {
 				return "-" + convertLeftFormula(formula.fsmPrimary)
 			FsmEquality: {
 				val symbol = if(formula.eq === null) "!" else "="
-				return "(" + convertLeftFormula(formula.left) + symbol + convertLeftFormula(formula.right) + ")"
+				return convertLeftFormula(formula.left) + symbol + convertLeftFormula(formula.right)
 			}
 			default:
 				return ""
@@ -241,27 +245,32 @@ class NuXmvTextGenerator {
 			BtaTermEq: return "(" + btaTerm(formula.left) + "=" + btaTerm(formula.right) + ")"
 			BtaTerm: return btaTerm(formula)
 			Neg: return "!(" + convertLTLFormula(formula.btaFormula) + ")"
+			default: return ""
 		}
 	}
 
 	def static String btaTerm(BtaTerm term) {
 		switch term {
 			BtaBaseTerm: return term.btaRef.name
-			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params.btaOperands)
+			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params)
 		}
 	}
 
-	def static String btaFunction(String name, EList<BtaTerm> input) {
+	def static String btaFunction(String name, BtaOpParam input) {
+		
 		var func = functions.get(name)
+		if (input === null) {
+			return func
+		}	
 		val iteratorParams = functionParams.get(name).iterator
-		val iteratorInput = input.iterator
+		val iteratorInput = input.btaOperands.iterator
 
 		while (iteratorInput.hasNext && iteratorParams.hasNext) {
 			val param = iteratorParams.next
 			val term = iteratorInput.next
 			func = func.replaceAll(param, btaTerm(term))
 		}
-		return func
+		return "(" + func + ")"
 	}
 
 	def static String convertRightFormula(FsmFormula formula, String variable) {
