@@ -15,8 +15,6 @@ Pattern returns Pattern:
 		//Language Part 2 - Specification of Component Types (CTypes)
 		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}'
 		)?
-		('Contracts' '{' contracts+=Contract ( "," contracts+=Contract)* '}'
-	    )?
  		//Language Part 3 - Specification of Architectural Constraints
 	    ('ArchSpec' '{'
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 		//Declaration of Component Variables
@@ -28,12 +26,10 @@ Pattern returns Pattern:
 	    	'}'
 	    )?
 	    //Part 4 - Specification of Architectural Guarantees
-	    ('ArchGuarantee' '{'
-			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
-			(agDtVars=DTVariables)?
-			
-			(agFormulaIds+=AgFormulasID)*
-	    '}')?
+	    ('Contracts' '{'
+	    	proofContracts += ProofContract (',' proofContracts += ProofContract)*
+	    '}'	
+	    )?
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
@@ -66,14 +62,58 @@ ComponentType returns ComponentType:
 	    )?
 	'}'
 ;
+Proof returns Proof:
+	{Proof}
+	'proof' '{' 
+		proofSteps+=ProofStep (',' proofSteps+=ProofStep)* 
+	'}'
+;
+ProofStep returns ProofStep:
+	{ProofStep}
+	name = ID ':' 
+	'at' timepoint = Timepoint 'have' state = BasicFormula 
+	('from' '[' proofStepRefs += ProofStepRef (',' proofStepRefs += ProofStepRef)*']')?
+	'using' contract = [ContractRef|QualifiedName]
+;
+ProofStepRef:
+	trigger = [ContractTrigger] | ProofStepRefWithConnections
+;
+ProofStepRefWithConnections returns ProofStepRefWithConnections:
+	{ProofStepRefWithConnections}
+	proofstep = [ProofStep] 'with' '[' proofConnections += ProofConnection ( ',' proofConnections += ProofConnection)* ']'
+;
+ProofConnection returns ProofConnection:
+	{ProofConnection}
+	'('input = [PortRef|QualifiedName] ',' output = [PortRef|QualifiedName]')'
+;
 Contract returns Contract:
 	{Contract}
-	'Contract' cname = ID '{'
+	'Contract' name = ID '{'
     	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
-		'trigger' trigger+=ContractFormula (',' trigger+=ContractFormula 'at' timestep+=Timestep)*
-		'guarantee' guarantee+=ContractFormula //(',' guarantee+=ContractFormula)*
-		'duration' duration+=Timestep
+		('triggers' '{' triggers+=ContractTrigger (',' triggers+=ContractTrigger)* '}')?
+		'guarantees' '{'  guarantees+=BasicFormula (',' guarantees+=BasicFormula)* '}'
+		'duration' duration=Timepoint
 	'}'
+;
+ProofContract returns ProofContract:
+	{ProofContract}
+	'Contract' name = ID '{'
+    	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
+		('triggers' '{' triggers+=ContractTrigger (',' triggers+=ContractTrigger)* '}')?
+		'guarantees' '{'  guarantees+=BasicFormula (',' guarantees+=BasicFormula)* '}'
+		'duration' duration=Timepoint
+		(proof=Proof)?
+	'}'
+;
+ContractRef:
+	Contract
+;
+ContractTrigger returns ContractTrigger:
+	{ContractTrigger}
+	name = ID ':' formula = BasicFormula ('at' timepoint = Timepoint)?
+;
+ContractTriggerRef:
+	ContractTrigger
 ;
 Parameter returns Parameter:
 	{Parameter}
@@ -366,39 +406,39 @@ BtaOpParam:
 	btaOperands+=BtaTerm ("," btaOperands+=BtaTerm)*
 ;
 // Contract formula
-ContractFormula:
-	ContractQuantification |
-	ContractLImp
+BasicFormula:
+	BasicQuantification |
+	BasicLImp
 ;
-ContractQuantification returns ContractFormula:
-	QuantifierOperator contractFormula=ContractLImp
+BasicQuantification returns BasicFormula:
+	QuantifierOperator basicFormula=BasicLImp
 ;
-ContractLImp returns ContractFormula:
-	ContractLOr ({ContractLImp.left=current} ('⇒'|'==>') right=ContractLOr)*
+BasicLImp returns BasicFormula:
+	BasicLOr ({BasicLImp.left=current} ('⇒'|'==>') right=BasicLOr)*
 ;
-ContractLOr returns ContractFormula:
-	ContractLAnd ({ContractLOr.left=current} ('∨'|'\\/') right=ContractLAnd)*
+BasicLOr returns BasicFormula:
+	BasicLAnd ({BasicLOr.left=current} ('∨'|'\\/') right=BasicLAnd)*
 ;
-ContractLAnd returns ContractFormula:
-	ContractPrimary ({ContractLAnd.left=current} ('∧'|'/\\') right=ContractPrimary)*
+BasicLAnd returns BasicFormula:
+	BasicPrimary ({BasicLAnd.left=current} ('∧'|'/\\') right=BasicPrimary)*
 ;
-ContractPrimary returns ContractFormula:
-	{Neg} ('¬'|'~') contractFormula=ContractPrimary |
-	'(' ContractFormula ')' |
-	ContractBase
+BasicPrimary returns BasicFormula:
+	{Neg} ('¬'|'~') basicFormula=BasicPrimary |
+	'(' BasicFormula ')' |
+	BasicBase
 ;
-ContractBase returns ContractFormula:
-	{ContractPredicate} contractPredicate=[DTPredicate|QualifiedName] '[' params=ContractOpParam? ']' |
-	{ContractTermEq} '[' left=ContractTerm '=' right=ContractTerm ']'
+BasicBase returns BasicFormula:
+	{BasicPredicate} basicPredicate=[DTPredicate|QualifiedName] '[' params=BasicOpParam? ']' |
+	{BasicTermEq} '[' left=BasicTerm '=' right=BasicTerm ']'
 ;
-ContractTerm:
-	{ContractBaseTerm} portRef=[PortRef|QualifiedName] |
-	{ContractOperation} contractTrmOperator=[Operation|QualifiedName] '[' params=ContractOpParam? ']'
+BasicTerm:
+	{BasicBaseTerm} portRef=[PortRef|QualifiedName] |
+	{BasicOperation} contractTrmOperator=[Operation|QualifiedName] '[' params=BasicOpParam? ']'
 ;
-ContractOpParam:
-	contractOperands+=ContractTerm ("," contractOperands+=ContractTerm)*
+BasicOpParam:
+	basicOperands+=BasicTerm ("," basicOperands+=BasicTerm)*
 ;
-Timestep:
+Timepoint:
  	INT
 ;
 // Behavior Trace Assertions: END 

@@ -1,0 +1,1323 @@
+Pattern TrainguardMT ShortName tgmt {
+	DTSpec {
+		DT Status (
+			Sort INT 
+		),
+		DT Int (
+			Sort INT
+			Operation add: INT, INT => INT,
+					sub: INT, INT => INT	
+		),
+		DT DoorStatus (
+			Sort DoorStatus
+			Predicate DT_DoorStatus_DoorsOpen: DoorStatus,
+					DT_DoorStatus_DoorsVitalClosed: DoorStatus
+		),
+		DT Bool (
+			Sort BOOLEAN
+			Predicate true: BOOLEAN,
+					false: BOOLEAN
+		),
+		DT Comparison (
+			Operation ls: Int.INT, Int.INT => Bool.BOOLEAN,
+					gt: Int.INT, Int.INT => Bool.BOOLEAN
+		),
+		DT Command (
+			Sort STRING
+		),
+		DT DoorReleaseCommand (
+			Sort DoorReleaseCommand
+			Predicate DT_DoorReleaseCommand_Right: DoorReleaseCommand,
+					DT_DoorReleaseCommand_Left: DoorReleaseCommand,
+					DT_DoorReleaseCommand_Both: DoorReleaseCommand,
+					DT_DoorReleaseCommand_Deactivate: DoorReleaseCommand
+		),
+		DT DoorOpenStrategy (
+			Sort DoorOpenStrategy
+			Predicate DT_DoorOpenStrategy_Right: DoorOpenStrategy,
+					DT_DoorOpenStrategy_Left: DoorOpenStrategy
+		),
+		DT DoorReleaseStatus (
+			Sort DoorReleaseStatus
+			Predicate DT_DoorReleaseStatus_Released: DoorReleaseStatus,
+					DT_DoorReleaseStatus_Locked: DoorReleaseStatus
+		),
+		DT DoorStatus (
+			Sort DoorStatus
+			Predicate DT_DoorStatus_Opened: DoorStatus,
+					DT_DoorStatus_Closed: DoorStatus
+		),
+		DT MovingStatus (
+			Sort MovingStatus
+			Predicate DT_TrainMovingStatus_Moving: MovingStatus,
+					DT_TrainMovingStatus_StandStill: MovingStatus
+		),
+		DT DoorCommand (
+			Sort DoorCommand
+			Predicate DT_DoorCommand_Open: DoorCommand,
+					DT_DoorCommand_Close: DoorCommand
+		),
+		DT TrainControlLevel (
+			Sort TrainControlLevel
+			Predicate DT_TrainControlLevel_CTC: TrainControlLevel,
+					DT_TrainControlLevel_ITC: TrainControlLevel
+		),
+		DT PSD_Authorization (
+			Sort PSD_Authorization
+			Predicate DT_PSD_Authorization_Authorize: PSD_Authorization,
+		          DT_PSD_Authorization_Not_Authorize: PSD_Authorization
+		),
+		DT PlatformPSDStatus (
+			Sort PlatformPSDStatus
+			Predicate DT_PlatformPSDStatus_Has_PSD: PlatformPSDStatus,
+				  DT_PlatformPSDStatus_Has_Not_PSD: PlatformPSDStatus
+		),
+		DT StoppingWindow (
+			Sort StoppingWindow
+			Predicate DT_StoppingWindow_WithinStoppingWindow: StoppingWindow,
+				  DT_StoppingWindow_OutsideStoppingWindow: StoppingWindow
+		),
+		DT Time (
+			Sort INT
+		),
+		DT Authority (
+			Sort STRING
+		)
+	}
+	CTypes {
+		
+		/* 
+		 * OBCU ATO Components
+		 */
+		CType OBCU_ATO_In_Converter {
+			InputPorts {
+				InputPort AB_I_Door_Operating_Mode (Type: DoorStatus.DoorStatus),
+				InputPort AB_I_Premissive_Door_Button (Type: Bool.BOOLEAN),
+				InputPort CAB_I_Door_Command (Type: Command.STRING),
+				InputPort CL_I_Door_Closed_Indication (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort doorStatus (Type: Status.INT),
+				OutputPort cabDoorCommand (Type: Command.STRING),
+				OutputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
+				OutputPort cabPremissiveDoorMode (Type: Status.INT)
+			}
+		},
+		CType OBCU_ATO_Door_Mode_Controller {
+			InputPorts {
+				InputPort trainOperationMode (Type: Status.INT),
+				InputPort platformPSDStatus (Type: Status.INT),
+				InputPort trainControlLevel(Type: Status.INT),
+				InputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
+				InputPort cabPremissiveDoorMode (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort doorMode (Type: Status.INT)
+			}
+		},
+		CType OBCU_ATO_Door_Open_Controller {
+			InputPorts {
+				InputPort doorMode (Type: Status.INT),
+				InputPort dwellTimeElapsed (Type: Bool.BOOLEAN),
+				InputPort releaseForcedByPermissiveDoorButton (Type: Bool.BOOLEAN),
+				InputPort doorReleaseStatus (Type: DoorReleaseStatus.DoorReleaseStatus),
+				InputPort trainControlLevel (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort doorOpenCommand (Type: Command.STRING)
+			}
+			Contracts {
+				Contract doorsOpened {
+					triggers {
+						doorReleased: DoorReleaseStatus.DT_DoorReleaseStatus_Released[doorReleaseStatus],
+						timeNotElapsed: Bool.false[dwellTimeElapsed] at 1
+					}
+					guarantees {
+						DoorCommand.DT_DoorCommand_Open[doorOpenCommand]
+					}
+					duration 2
+				},
+				Contract doorsClosed {
+					triggers {
+						doorReleased: DoorReleaseStatus.DT_DoorReleaseStatus_Locked[doorReleaseStatus]
+					}
+					guarantees {
+						DoorCommand.DT_DoorCommand_Close[doorOpenCommand]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATO_Train_Door_Supervision_Mode_Controller {
+			InputPorts {
+				InputPort movingStatus (Type: Status.INT),
+				InputPort doorReleaseStatus (Type: Time.INT),
+				InputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
+				InputPort trainControlLevel (Type: Status.INT),
+				InputPort doorStatus (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort trainSupervision (Type: Bool.BOOLEAN)
+			}
+		},
+		CType OBCU_ATO_Train_Door_Supervision_Controller {
+			InputPorts {
+				InputPort trainSupervision (Type: Bool.BOOLEAN),
+				InputPort trainControlLevel (Type: Status.INT),
+				InputPort doorStatus (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort trainMovement (Type: Bool.BOOLEAN)
+			}
+		},
+		CType OBCU_ATO_PSD_Door_Controller {
+			InputPorts {
+				InputPort openDoorCommand (Type: Command.STRING),
+				InputPort cabDoorCommand (Type: DoorCommand.DoorCommand),
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel)
+			}
+			OutputPorts {
+				OutputPort psdDoorCommand (Type: DoorCommand.DoorCommand)
+			}
+			Contracts {
+				Contract forwardDoorCommand {
+					triggers {
+						controlLevelCTC: TrainControlLevel.DT_TrainControlLevel_CTC[trainControlLevel]
+					}
+					guarantees {
+						[psdDoorCommand = openDoorCommand]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATO_PSD_Door_Command_State {
+			InputPorts {
+				InputPort openDoorCommand (Type: DoorCommand.DoorCommand)
+			}
+			OutputPorts {
+				OutputPort psdDoorCommandState (Type: DoorCommand.DoorCommand)
+			}
+			Contracts {
+				Contract forwardingCommand {
+					guarantees {
+						[psdDoorCommandState = openDoorCommand]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATO_Telegram_Builder {
+			InputPorts {
+				InputPort psdDoorCommandState (Type: DoorCommand.DoorCommand)
+			}
+			OutputPorts {
+				OutputPort OBCU_WCU_PlatformDoor (Type: DoorCommand.DoorCommand)
+			}
+			Contracts {
+				Contract forwardingCommand {
+					guarantees {
+						[OBCU_WCU_PlatformDoor = psdDoorCommandState]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATO_Out_Converter {
+			InputPorts {
+				InputPort openDoorCommand (Type: Command.STRING)
+			}
+			OutputPorts {
+				OutputPort TCL_O_Door_Opening_Closing (Type: Status.INT)
+			}
+		},
+		
+		
+		/* 
+		 * OBCU ITF Components
+		 */
+		
+		CType OBCU_ITF_WWA_Telegram_Extractor {
+			InputPorts {
+				InputPort WCU_OBCU_MovementAuthority (Type: Authority.STRING)
+			}
+			OutputPorts {
+				OutputPort rauz (Type: Status.INT)
+			}
+		},
+		CType OBCU_ITF_Out_Convertor {
+			InputPorts {
+				InputPort doorStatusHMI (Type: Status.INT),
+				InputPort psdStatusHMI (Type: Status.INT),
+				InputPort currentDoorModeHMI (Type: Status.INT),
+				InputPort doorReleaseStatusHMI (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort HMI_O_Train_Door_Release (Type: Status.INT),
+				OutputPort HMI_O_Train_Door_Mode (Type: Status.INT),
+				OutputPort HMI_O_PSD (Type: Status.INT),
+				OutputPort HMI_O_Train_Door_Status (Type: Status.INT)
+			}
+		},
+		CType OBCU_ITF_HMI_Status_Function {
+			InputPorts {
+				InputPort rauz (Type: Status.INT),
+				InputPort doorReleaseStatus (Type: Status.INT),
+				InputPort trainControlLevel (Type: Status.INT),
+				InputPort doorMode (Type: Status.INT),
+				InputPort doorStatus (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort doorStatusHMI (Type: Status.INT),
+				OutputPort psdStatusHMI (Type: Status.INT),
+				OutputPort currentDoorModeHMI (Type: Status.INT),
+				OutputPort doorReleaseStatusHMI (Type: Status.INT)
+			}
+		},
+		CType OBCU_ITF_FWD_Movement_Authority {
+			InputPorts {
+				InputPort WCU_OBCU_MovementAuthority (Type: Authority.STRING)
+			}
+			OutputPorts {
+				OutputPort WCU_OBCU_MovementAuthority (Type: Authority.STRING)
+			}
+		},
+		CType OBCU_ITF_FWD_Position_Report {
+			InputPorts {
+				InputPort WCU_OBCU_PositionReport (Type: PSD_Authorization.PSD_Authorization)
+			}
+			OutputPorts {
+				OutputPort WCU_OBCU_PositionReport_Out (Type: PSD_Authorization.PSD_Authorization)
+			}
+			Contracts {
+				Contract forwardAuthorization {
+					guarantees {
+						[WCU_OBCU_PositionReport_Out = WCU_OBCU_PositionReport]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ITF_FWD_Platform_Door {
+			InputPorts {
+				InputPort WCU_OBCU_PlatformDoor (Type: DoorCommand.DoorCommand)
+			}
+			OutputPorts {
+				OutputPort WCU_OBCU_PlatformDoor_Out (Type: DoorCommand.DoorCommand)
+			}
+			Contracts {
+				Contract forwardingCommand {
+					guarantees {
+						[WCU_OBCU_PlatformDoor_Out = WCU_OBCU_PlatformDoor]
+					}
+					duration 1
+				}
+			}
+		},
+		
+		/* 
+		 * OBCU ATP Components
+		 */
+		
+		CType OBCU_ATP_In_Converter {
+			InputPorts {
+				InputPort TCL_I_Door_Closed_Indication (Type: DoorStatus.DoorStatus),
+				InputPort TCL_I_Door_Closed_Button (Type: Bool.BOOLEAN)
+			}
+			OutputPorts {
+				OutputPort trainControlLevel (Type: Status.INT),
+				OutputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
+				OutputPort doorStatus (Type: DoorStatus.DoorStatus)
+			}
+			Contracts {
+				Contract forwardDoorStatus {
+					guarantees {
+						[doorStatus = TCL_I_Door_Closed_Indication]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATP_Out_Converter {
+			InputPorts {
+				InputPort propulsion (Type: Bool.BOOLEAN),
+				InputPort doorReleaseCommand (Type: DoorReleaseCommand.DoorReleaseCommand)
+			}
+			OutputPorts {
+				OutputPort TCL_O_Propulsion_Release (Type: Bool.BOOLEAN),
+				OutputPort TCL_O_Door_Release (Type: Bool.BOOLEAN)
+			}
+			Contracts {
+				Contract doorsReleased {
+					triggers {
+						doorsReleased: DoorReleaseCommand.DT_DoorReleaseCommand_Left[doorReleaseCommand] 
+										\/ DoorReleaseCommand.DT_DoorReleaseCommand_Right[doorReleaseCommand]
+										\/ DoorReleaseCommand.DT_DoorReleaseCommand_Both[doorReleaseCommand]
+					}
+					guarantees {
+						Bool.true[TCL_O_Door_Release]
+					}
+					duration 1
+				},
+				Contract doorsNotReleased {
+					triggers {
+						doorsReleased: DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[doorReleaseCommand]
+					}
+					guarantees {
+						Bool.true[TCL_O_Door_Release]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATP_WMA_Telegram_Extractor{
+			InputPorts {
+				InputPort WCU_OBCU_MovementAuthority_out (Type: Authority.STRING)
+			}
+			OutputPorts {
+				OutputPort rauz (Type: Status.INT)
+			}
+		},
+		CType OBCU_ATP_PSD_Authorization_State_Tracker {
+			InputPorts {
+				InputPort authorizePSDOpening (Type: PSD_Authorization.PSD_Authorization)
+			}
+			OutputPorts {
+				OutputPort psdAuthorizationState (Type: PSD_Authorization.PSD_Authorization)
+			}
+			Contracts {
+				Contract forwardAuthorization {
+					guarantees {
+						[psdAuthorizationState = authorizePSDOpening]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATP_PSD_Authorization_Controller {
+			InputPorts {
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
+				InputPort doorReleaseStatus (Type: DoorReleaseStatus.DoorReleaseStatus)
+			}
+			OutputPorts {
+				OutputPort authorizePSDOpening (Type: PSD_Authorization.PSD_Authorization)
+			}
+			Contracts {
+				Contract notAuthorized {
+					triggers {
+						trainControlLevelCTC: TrainControlLevel.DT_TrainControlLevel_CTC[trainControlLevel],
+						doorReleaseStatusLocked: DoorReleaseStatus.DT_DoorReleaseStatus_Locked[doorReleaseStatus] at 1
+					}
+					guarantees {
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[authorizePSDOpening]
+					}
+					duration 2
+				},
+				Contract authorized {
+					triggers {
+						trainControlLevelCTC: TrainControlLevel.DT_TrainControlLevel_ITC[trainControlLevel],
+						doorReleaseStatusLocked: DoorReleaseStatus.DT_DoorReleaseStatus_Released[doorReleaseStatus] at 1
+					}
+					guarantees {
+						PSD_Authorization.DT_PSD_Authorization_Authorize[authorizePSDOpening]
+					}
+					duration 2
+				}
+			}
+		},
+		CType OBCU_ATP_Telegram_Builder {
+			InputPorts {
+				InputPort psdAuthorizationState (Type: PSD_Authorization.PSD_Authorization)
+			}
+			OutputPorts {
+				OutputPort OBCU_WCU_PositionReport (Type: PSD_Authorization.PSD_Authorization)
+			}
+			Contracts {
+				Contract forwardAuthorization {
+					guarantees {
+						[OBCU_WCU_PositionReport = psdAuthorizationState]
+					}
+					duration 1
+				}
+			}
+		},
+		CType OBCU_ATP_Propulson_Function {
+			InputPorts {
+				InputPort doorStatus (Type: Status.INT),
+				InputPort trainControlLevel (Type: Status.INT),
+				InputPort rauz (Type: Status.INT),
+				InputPort authorizePSDOpening (Type: Bool.BOOLEAN)
+			}
+			OutputPorts {
+				OutputPort propulsion (Type: Bool.BOOLEAN)
+			}
+		},
+		CType OBCU_ATP_Door_Release_Controller {
+			InputPorts {
+				InputPort doorStatus (Type: DoorStatus.DoorStatus),
+				InputPort trainControlLevel (Type: Status.INT),
+				InputPort trainOperationMode (Type: Status.INT),
+				InputPort platformPSDStatus (Type: Status.INT),
+				InputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
+				InputPort berthed (Type: Status.INT),
+				InputPort stoppingWindowMinus (Type: Bool.BOOLEAN),
+				InputPort stoppingPoint (Type: Bool.BOOLEAN),
+				InputPort stopingWindowPlus (Type: Bool.BOOLEAN),
+				InputPort trainPosition (Type: Int.INT),
+				InputPort movingStatus (Type: MovingStatus.MovingStatus),
+				InputPort platformSide (Type: DoorOpenStrategy.DoorOpenStrategy)
+			}
+			OutputPorts {
+				OutputPort doorReleaseCommand (Type: DoorReleaseCommand.DoorReleaseCommand),
+				OutputPort doorReleaseStatus (Type: DoorReleaseStatus.DoorReleaseStatus),
+				OutputPort releaseForcedByPermissiveDoorButton (Type: Bool.BOOLEAN)
+			}
+			Contracts {
+				Contract openingLeftDoorSide {
+					triggers {
+						trigger1: DoorOpenStrategy.DT_DoorOpenStrategy_Left[platformSide]
+					}
+					guarantees {
+						DoorReleaseCommand.DT_DoorReleaseCommand_Left[doorReleaseCommand]
+					}
+					duration 1
+				},
+				Contract openingRightDoorSide {
+					triggers {
+						trigger1: DoorOpenStrategy.DT_DoorOpenStrategy_Right[platformSide]
+					}
+					guarantees {
+						DoorReleaseCommand.DT_DoorReleaseCommand_Right[doorReleaseCommand]
+					}
+					duration 1
+				},
+				Contract doorsReleased {
+					var trainInStoppingWindow: Bool.BOOLEAN,
+					var premissiveRelease: Bool.BOOLEAN
+					
+					triggers {
+						standStill: MovingStatus.DT_TrainMovingStatus_StandStill[movingStatus],
+						trainInStoppingPosition: Bool.true[trainInStoppingWindow] at 1,
+						premissiveRelease: Bool.false[premissiveRelease] at 2
+					}
+					guarantees {
+						DoorReleaseStatus.DT_DoorReleaseStatus_Released[doorReleaseStatus]
+					}
+					duration 2
+				},
+				Contract doorsNotReleasedWhileMoving {
+					triggers {
+						moving: MovingStatus.DT_TrainMovingStatus_Moving[movingStatus]
+					}
+					guarantees {
+						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[doorReleaseStatus] /\
+						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[doorReleaseCommand]
+					}
+					duration 1
+				},
+				Contract doorsClosedWhenClosedIndication {
+					triggers {
+						closedIndication: DoorStatus.DT_DoorStatus_Closed[doorStatus]
+					}
+					guarantees {
+						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[doorReleaseStatus] /\
+						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[doorReleaseCommand]
+					}
+					duration 1
+				},
+				Contract doorsReleasedIfStandstillAndInStoppingWindow {
+					triggers {
+						standstill: MovingStatus.DT_TrainMovingStatus_StandStill[movingStatus],
+						hasPSD: PlatformPSDStatus.DT_PlatformPSDStatus_Has_PSD[platformPSDStatus] at 1,
+						inStopingPosition: Bool.true[Comparison.ls[Int.sub[stoppingPoint, stoppingWindowMinus], trainPosition]] /\
+								Bool.true[Comparison.gt[Int.sub[stoppingPoint, stopingWindowPlus], trainPosition]] at 2
+					}
+					guarantees {
+						DoorReleaseStatus.DT_DoorReleaseStatus_Released[doorReleaseStatus]
+					}
+					duration 3
+				}
+			}
+		},
+		
+		/* 
+		 * Wayside Components
+		 */
+		CType Wayside_In_Converter {
+			InputPorts {
+				InputPort PSD_I_PSD_Overwrite (Type: Bool.BOOLEAN),
+				InputPort PSD_I_PSD_Closed (Type: Bool.BOOLEAN),
+				InputPort ATS_I_Select_Door_Open_Strategy (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort selectedDoorStrategy (Type: Status.INT),
+				OutputPort psdClosed (Type: Status.INT),
+				OutputPort psdOverwrite (Type: Status.INT)
+			}
+			Contracts {
+				Contract selectedDoorStrategy {
+					guarantees {
+						[selectedDoorStrategy = ATS_I_Select_Door_Open_Strategy]
+					}
+					duration 1
+				},
+				Contract psdClosed {
+					triggers {
+						trigger1: Bool.true[PSD_I_PSD_Closed]
+					}
+					guarantees {
+						DoorStatus.DT_DoorStatus_DoorsVitalClosed[psdClosed]
+					}
+					duration 1
+				}
+			}
+		},
+		CType Wayside_OPD_Telegram_Extractor {
+			InputPorts {
+				InputPort OBCU_WCU_PlatformDoor (Type: DoorCommand.DoorCommand)
+			}
+			OutputPorts {
+				OutputPort psdOpenCommand (Type: DoorCommand.DoorCommand)
+			}
+			Contracts {
+				Contract forwardCommand {
+					guarantees {
+						[psdOpenCommand = OBCU_WCU_PlatformDoor]
+					}
+					duration 1
+				}
+			}
+		},
+		CType Wayside_OPR_Telegram_Extractor {
+			InputPorts {
+				InputPort OBCU_WCU_PositionReport (Type: PSD_Authorization.PSD_Authorization)
+			}
+			OutputPorts {
+				OutputPort doorOpenAuthorization (Type: PSD_Authorization.PSD_Authorization)
+			}
+			Contracts {
+				Contract forwardAuthorization {
+					guarantees {
+						[doorOpenAuthorization = OBCU_WCU_PositionReport]
+					}
+					duration 1
+				}
+			}
+		},
+		CType Wayside_PSD_Control_Function {
+			InputPorts {
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
+				InputPort doorOpenAuthorization (Type: PSD_Authorization.PSD_Authorization),
+				InputPort psdOpenCommand (Type: DoorCommand.DoorCommand)
+			}
+			OutputPorts {
+				OutputPort psdOpen (Type: Bool.BOOLEAN)
+			}
+			Contracts {
+				Contract doorOpen {
+					triggers {
+						trainControlLevelITC: TrainControlLevel.DT_TrainControlLevel_ITC[trainControlLevel],
+						authorized: PSD_Authorization.DT_PSD_Authorization_Authorize[doorOpenAuthorization] at 1,
+						psdOpenCommand: DoorCommand.DT_DoorCommand_Open[psdOpenCommand] at 2
+					}
+					guarantees {
+						Bool.true[psdOpen]
+					}
+					duration 3
+				},
+				Contract doorClosedCTC {
+					triggers {
+						trainControlLevelITC: TrainControlLevel.DT_TrainControlLevel_CTC[trainControlLevel]
+					}
+					guarantees {
+						Bool.false[psdOpen]
+					}
+					duration 1
+				},
+				Contract doorClosedNotAuthorized {
+					triggers {
+						notAuthorized: PSD_Authorization.DT_PSD_Authorization_Not_Authorize[doorOpenAuthorization]
+					}
+					guarantees {
+						Bool.false[psdOpen]
+					}
+					duration 1
+				},
+				Contract doorClosed {
+					triggers {
+						notAuthorized: PSD_Authorization.DT_PSD_Authorization_Not_Authorize[doorOpenAuthorization],
+						psdCloseCommand: DoorCommand.DT_DoorCommand_Close[psdOpenCommand] at 1
+					}
+					guarantees {
+						Bool.false[psdOpen]
+					}
+					duration 2
+				},
+				Contract doorClosedCommandClose {
+					triggers {
+						psdCloseCommand: DoorCommand.DT_DoorCommand_Close[psdOpenCommand]
+					}
+					guarantees {
+						Bool.false[psdOpen]
+					}
+					duration 1
+				}
+			}
+		},
+		CType Wayside_RAUZ_Control_Function {
+			InputPorts {
+				InputPort psdOverwrite (Type: Status.INT),
+				InputPort trainControlLevel (Type: Status.INT),
+				InputPort psdClosed (Type: Bool.BOOLEAN)
+			}
+			OutputPorts {
+				OutputPort rauz (Type: Status.INT),
+				OutputPort zoneBlockedATS (Type: Bool.BOOLEAN)
+			}
+		},
+		CType Wayside_Door_Strategy_Function {
+			InputPorts {
+				InputPort selectedDoorStrategy (Type: Status.INT),
+				InputPort defaultDoorStrategy (Type: Status.INT),
+				InputPort trainControlLevel (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort currentDoorStrategy (Type: Status.INT)
+			}
+		},
+		CType Wayside_ATS_Status_Function{
+			InputPorts {
+				InputPort currentDoorStrategy (Type: Status.INT),
+				InputPort trainControlLevel (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort psdStatusATS (Type: Status.INT),
+				OutputPort psdAuthorizationATS (Type: Authority.STRING),
+				OutputPort psdRequestATS (Type: Status.INT),
+				OutputPort doorStrategyStatusToATS (Type: Status.INT)
+			}
+		},
+		CType Wayside_PSD_Door_Command_State_Tracker {
+			InputPorts {
+				InputPort rauz (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort rauzState (Type: Status.INT)
+			}
+		},
+		CType Wayside_TelegramBuilder {
+			InputPorts {
+				InputPort rausState (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort WCU_OBCU_MovementAuthority (Type: Authority.STRING)
+			}
+		},
+		CType Wayside_Out_Converter {
+			InputPorts {
+				InputPort psdOpen (Type: Bool.BOOLEAN),
+				InputPort psdStatusATS (Type: Status.INT),
+				InputPort psdAuthorizationATS (Type: Authority.STRING),
+				InputPort psdRequestATS (Type: Status.INT),
+				InputPort doorStrategyStatusToATS (Type: Status.INT)
+			}
+			OutputPorts {
+				OutputPort PSD_O_PSD_Close (Type: Bool.BOOLEAN),
+				OutputPort PSD_O_PSD_Open (Type: Bool.BOOLEAN),
+				OutputPort ATS_O_PSD_Authorization (Type: Authority.STRING),
+				OutputPort ATS_O_PSD_Status (Type: Status.INT),
+				OutputPort ATS_O_PSD_Request (Type: Status.INT),
+				OutputPort ATS_O_Door_Strategy (Type: Status.INT)
+			}
+			Contracts {
+				Contract psdOpen {
+					triggers {
+						open: Bool.true[psdOpen]
+					}
+					guarantees {
+						Bool.true[PSD_O_PSD_Open] /\ Bool.false[PSD_O_PSD_Close]
+					}
+					
+					duration 1
+				},
+				Contract psdClose {
+					triggers {
+						open: Bool.false[psdOpen]
+					}
+					guarantees {
+						Bool.false[PSD_O_PSD_Open] /\ Bool.true[PSD_O_PSD_Close]
+					}
+					
+					duration 1
+				}
+			}
+		}
+	}
+	Contracts {
+		// 1) If the train is moving, the PSDs are closed.
+		Contract PSDAreClosedWhenTrainIsMoving {
+			triggers {
+				trigger1: MovingStatus.DT_TrainMovingStatus_Moving[OBCU_ATP_Door_Release_Controller.movingStatus]
+			}
+			guarantees {
+				Bool.true[Wayside_Out_Converter.PSD_O_PSD_Close] /\ Bool.false[Wayside_Out_Converter.PSD_O_PSD_Open]
+			}
+			duration 13
+			proof {
+				step1: 
+					at 3
+					have 
+						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
+						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[OBCU_ATP_Door_Release_Controller.doorReleaseStatus]
+					from [
+						trigger1
+					]
+					using
+						OBCU_ATP_Door_Release_Controller.doorsNotReleasedWhileMoving,
+				step2:
+					at 4
+					have 
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening]
+					from [
+						step1 with [
+							(OBCU_ATP_PSD_Authorization_Controller.doorReleaseStatus, OBCU_ATP_Door_Release_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATP_PSD_Authorization_Controller.notAuthorized,
+				step3:
+					at 5
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_PSD_Authorization_State_Tracker.psdAuthorizationState]
+					from [
+						step2 with [
+							(OBCU_ATP_PSD_Authorization_State_Tracker.authorizePSDOpening, OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening)
+						]
+					]
+					using
+						OBCU_ATP_PSD_Authorization_State_Tracker.forwardAuthorization,
+				step4:
+					at 6
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_Telegram_Builder.OBCU_WCU_PositionReport]
+					from [
+						step3 with [
+							(OBCU_ATP_Telegram_Builder.psdAuthorizationState, OBCU_ATP_PSD_Authorization_State_Tracker.psdAuthorizationState)
+						]
+					]
+					using
+						OBCU_ATP_Telegram_Builder.forwardAuthorization,
+				step5:
+					at 4
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_Door_Open_Controller.doorOpenCommand]
+					from [
+						step1 with [
+							(OBCU_ATO_Door_Open_Controller.doorReleaseStatus, OBCU_ATP_Door_Release_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATO_Door_Open_Controller.doorsClosed,
+				step6:
+					at 5
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_PSD_Door_Controller.psdDoorCommand]
+					from [
+						step5 with [
+							(OBCU_ATO_PSD_Door_Controller.psdDoorCommand, OBCU_ATO_Door_Open_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATO_PSD_Door_Controller.forwardDoorCommand,
+				step7:
+					at 6
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_PSD_Door_Command_State.psdDoorCommandState]
+					from [
+						step6 with [
+							(OBCU_ATO_PSD_Door_Command_State.openDoorCommand, OBCU_ATO_PSD_Door_Controller.psdDoorCommand)
+						]
+					]
+					using
+						OBCU_ATO_PSD_Door_Command_State.forwardingCommand,
+				step8:
+					at 7
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_Telegram_Builder.OBCU_WCU_PlatformDoor]
+					from [
+						step7 with [
+							(OBCU_ATO_Telegram_Builder.psdDoorCommandState, OBCU_ATO_PSD_Door_Command_State.psdDoorCommandState)
+						]
+					]
+					using
+						OBCU_ATO_Telegram_Builder.forwardingCommand,
+				step9:
+					at 8
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor_Out]
+					from [
+						step8 with [
+							(OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor, OBCU_ATO_Telegram_Builder.OBCU_WCU_PlatformDoor)
+						]
+					]
+					using
+						OBCU_ITF_FWD_Platform_Door.forwardingCommand,
+				step10:
+					at 7
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out]
+					from [
+						step4 with [
+							(OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport, OBCU_ATP_Telegram_Builder.OBCU_WCU_PositionReport)
+						]
+					]
+					using
+						OBCU_ITF_FWD_Position_Report.forwardAuthorization,
+				step11:
+					at 8
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[Wayside_OPR_Telegram_Extractor.doorOpenAuthorization]
+					from [
+						step10 with [
+							(Wayside_OPR_Telegram_Extractor.OBCU_WCU_PositionReport, OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out)
+						]
+					]
+					using
+						Wayside_OPR_Telegram_Extractor.forwardAuthorization,
+				step12:
+					at 9
+					have
+						DoorCommand.DT_DoorCommand_Close[Wayside_OPD_Telegram_Extractor.psdOpenCommand]
+					from [
+						step9 with [
+							(Wayside_OPD_Telegram_Extractor.OBCU_WCU_PlatformDoor, OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor_Out)
+						]
+					]
+					using
+						Wayside_OPD_Telegram_Extractor.forwardCommand,
+				step13:
+					at 11
+					have
+						Bool.false[Wayside_PSD_Control_Function.psdOpen]
+					from [
+						step12 with [
+							(Wayside_PSD_Control_Function.psdOpenCommand, Wayside_OPD_Telegram_Extractor.psdOpenCommand)
+						],
+						step11 with [
+							(Wayside_PSD_Control_Function.doorOpenAuthorization, Wayside_OPR_Telegram_Extractor.doorOpenAuthorization)
+						]
+					]
+					using
+						Wayside_PSD_Control_Function.doorClosed,
+				step14:
+					at 13
+					have
+						Bool.true[Wayside_Out_Converter.PSD_O_PSD_Close] /\ Bool.false[Wayside_Out_Converter.PSD_O_PSD_Open]
+					from [
+						step13 with [
+							(Wayside_Out_Converter.psdOpen, Wayside_PSD_Control_Function.psdOpen)
+						]
+					]
+					using
+						Wayside_Out_Converter.psdClose
+			}
+		},
+		// 2) If the train is at standstill and the position of the train doors match the position of the PSDs, then, the PSDs are opened.
+		Contract PSDAreOpenIfNotMovingAndMatchingPosition {
+			triggers {
+				standstill: MovingStatus.DT_TrainMovingStatus_StandStill[OBCU_ATP_Door_Release_Controller.movingStatus],
+				hasPSD: PlatformPSDStatus.DT_PlatformPSDStatus_Has_PSD[OBCU_ATP_Door_Release_Controller.platformPSDStatus] at 1,
+				inStopingPosition: Bool.true[Comparison.ls[Int.sub[OBCU_ATP_Door_Release_Controller.stoppingPoint, OBCU_ATP_Door_Release_Controller.stoppingWindowMinus], OBCU_ATP_Door_Release_Controller.trainPosition]] /\
+						Bool.true[Comparison.gt[Int.sub[OBCU_ATP_Door_Release_Controller.stoppingPoint, OBCU_ATP_Door_Release_Controller.stopingWindowPlus], OBCU_ATP_Door_Release_Controller.trainPosition]] at 2
+			}
+			guarantees {
+				Bool.true[Wayside_Out_Converter.PSD_O_PSD_Open] /\ Bool.false[Wayside_Out_Converter.PSD_O_PSD_Close]
+			}
+			duration 13
+			proof {
+				step1:
+					at 3
+					have 
+						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
+						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[OBCU_ATP_Door_Release_Controller.doorReleaseStatus]
+					from [
+						standstill, hasPSD, inStopingPosition
+					]
+					using
+						OBCU_ATP_Door_Release_Controller.doorsReleasedIfStandstillAndInStoppingWindow,
+				step2:
+					at 4
+					have 
+						PSD_Authorization.DT_PSD_Authorization_Authorize[OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening]
+					from [
+						step1 with [
+							(OBCU_ATP_PSD_Authorization_Controller.doorReleaseStatus, OBCU_ATP_Door_Release_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATP_PSD_Authorization_Controller.notAuthorized,
+				step3:
+					at 5
+					have
+						PSD_Authorization.DT_PSD_Authorization_Authorize[OBCU_ATP_PSD_Authorization_State_Tracker.psdAuthorizationState]
+					from [
+						step2 with [
+							(OBCU_ATP_PSD_Authorization_State_Tracker.authorizePSDOpening, OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening)
+						]
+					]
+					using
+						OBCU_ATP_PSD_Authorization_State_Tracker.forwardAuthorization,
+				step4:
+					at 6
+					have
+						PSD_Authorization.DT_PSD_Authorization_Authorize[OBCU_ATP_Telegram_Builder.OBCU_WCU_PositionReport]
+					from [
+						step3 with [
+							(OBCU_ATP_Telegram_Builder.psdAuthorizationState, OBCU_ATP_PSD_Authorization_State_Tracker.psdAuthorizationState)
+						]
+					]
+					using
+						OBCU_ATP_Telegram_Builder.forwardAuthorization,
+				step5:
+					at 4
+					have
+						DoorCommand.DT_DoorCommand_Open[OBCU_ATO_Door_Open_Controller.doorOpenCommand]
+					from [
+						step1 with [
+							(OBCU_ATO_Door_Open_Controller.doorReleaseStatus, OBCU_ATP_Door_Release_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATO_Door_Open_Controller.doorsClosed,
+				step6:
+					at 5
+					have
+						DoorCommand.DT_DoorCommand_Open[OBCU_ATO_PSD_Door_Controller.psdDoorCommand]
+					from [
+						step5 with [
+							(OBCU_ATO_PSD_Door_Controller.psdDoorCommand, OBCU_ATO_Door_Open_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATO_PSD_Door_Controller.forwardDoorCommand,
+				step7:
+					at 6
+					have
+						DoorCommand.DT_DoorCommand_Open[OBCU_ATO_PSD_Door_Command_State.psdDoorCommandState]
+					from [
+						step6 with [
+							(OBCU_ATO_PSD_Door_Command_State.openDoorCommand, OBCU_ATO_PSD_Door_Controller.psdDoorCommand)
+						]
+					]
+					using
+						OBCU_ATO_PSD_Door_Command_State.forwardingCommand,
+				step8:
+					at 7
+					have
+						DoorCommand.DT_DoorCommand_Open[OBCU_ATO_Telegram_Builder.OBCU_WCU_PlatformDoor]
+					from [
+						step7 with [
+							(OBCU_ATO_Telegram_Builder.psdDoorCommandState, OBCU_ATO_PSD_Door_Command_State.psdDoorCommandState)
+						]
+					]
+					using
+						OBCU_ATO_Telegram_Builder.forwardingCommand,
+				step9:
+					at 8
+					have
+						DoorCommand.DT_DoorCommand_Open[OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor_Out]
+					from [
+						step8 with [
+							(OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor, OBCU_ATO_Telegram_Builder.OBCU_WCU_PlatformDoor)
+						]
+					]
+					using
+						OBCU_ITF_FWD_Platform_Door.forwardingCommand,
+				step10:
+					at 7
+					have
+						PSD_Authorization.DT_PSD_Authorization_Authorize[OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out]
+					from [
+						step4 with [
+							(OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport, OBCU_ATP_Telegram_Builder.OBCU_WCU_PositionReport)
+						]
+					]
+					using
+						OBCU_ITF_FWD_Position_Report.forwardAuthorization,
+				step11:
+					at 8
+					have
+						PSD_Authorization.DT_PSD_Authorization_Authorize[Wayside_OPR_Telegram_Extractor.doorOpenAuthorization]
+					from [
+						step10 with [
+							(Wayside_OPR_Telegram_Extractor.OBCU_WCU_PositionReport, OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out)
+						]
+					]
+					using
+						Wayside_OPR_Telegram_Extractor.forwardAuthorization,
+				step12:
+					at 9
+					have
+						DoorCommand.DT_DoorCommand_Open[Wayside_OPD_Telegram_Extractor.psdOpenCommand]
+					from [
+						step9 with [
+							(Wayside_OPD_Telegram_Extractor.OBCU_WCU_PlatformDoor, OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor_Out)
+						]
+					]
+					using
+						Wayside_OPD_Telegram_Extractor.forwardCommand,
+				step13:
+					at 11
+					have
+						Bool.true[Wayside_PSD_Control_Function.psdOpen]
+					from [
+						step12 with [
+							(Wayside_PSD_Control_Function.psdOpenCommand, Wayside_OPD_Telegram_Extractor.psdOpenCommand)
+						],
+						step11 with [
+							(Wayside_PSD_Control_Function.doorOpenAuthorization, Wayside_OPR_Telegram_Extractor.doorOpenAuthorization)
+						]
+					]
+					using
+						Wayside_PSD_Control_Function.doorClosed,
+				step14:
+					at 13
+					have
+						Bool.true[Wayside_Out_Converter.PSD_O_PSD_Close] /\ Bool.false[Wayside_Out_Converter.PSD_O_PSD_Open]
+					from [
+						step13 with [
+							(Wayside_Out_Converter.psdOpen, Wayside_PSD_Control_Function.psdOpen)
+						]
+					]
+					using
+						Wayside_Out_Converter.psdClose
+					
+			}
+		},
+		// 3) If the train doors open on the right hand side, the platform must be on the right hand
+		Contract trainOpensTheDoorOnTheRightSide {
+			triggers {
+				openRightDoorStrategy: DoorOpenStrategy.DT_DoorOpenStrategy_Right[OBCU_ATP_Door_Release_Controller.platformSide]
+			}
+			guarantees {
+				DoorReleaseCommand.DT_DoorReleaseCommand_Right[OBCU_ATP_Door_Release_Controller.doorReleaseCommand]
+			}
+			duration 1
+			proof {
+				step1:
+					at 1
+					have
+						DoorReleaseCommand.DT_DoorReleaseCommand_Right[OBCU_ATP_Door_Release_Controller.doorReleaseCommand]
+					from [
+						openRightDoorStrategy
+					]
+					using
+						OBCU_ATP_Door_Release_Controller.openingRightDoorSide
+			}
+		},
+		// 4) If permissive release and the train is at standstill then both doors are open
+		Contract trainOpensTheDoorOnTheRightSide {
+			triggers {
+				standstill: MovingStatus.DT_TrainMovingStatus_StandStill[OBCU_ATP_Door_Release_Controller.movingStatus],
+				permissiveButtonPresset: Bool.true[OBCU_ATP_Door_Release_Controller.cabPremissiveDoorButton]
+			}
+			guarantees {
+				Bool.true[Wayside_Out_Converter.PSD_O_PSD_Open] /\ Bool.false[Wayside_Out_Converter.PSD_O_PSD_Close] /\
+				DoorReleaseCommand.DT_DoorReleaseCommand_Right[OBCU_ATP_Door_Release_Controller.doorReleaseCommand]
+			}
+			duration 1
+			proof {
+				step1:
+					at 3
+					have 
+						DoorReleaseCommand.DT_DoorReleaseCommand_Both[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
+						DoorReleaseStatus.DT_DoorReleaseStatus_Released[OBCU_ATP_Door_Release_Controller.doorStatus] /\
+						Bool.true[OBCU_ATP_Door_Release_Controller.releaseForcedByPermissiveDoorButton]
+					from [
+						standstill, permissiveButtonPresset
+					]
+					using
+						OBCU_ATP_Door_Release_Controller.doorsReleasedIfStandstillAndInStoppingWindow
+			}
+		},
+		// 5) When the train indicates that the doors are closed, PSDs are closed
+		Contract PSDAreClosedWhenTrainGivesClosedIndication {
+			triggers {
+				trigger1: DoorStatus.DT_DoorStatus_DoorsVitalClosed[OBCU_ATP_In_Converter.TCL_I_Door_Closed_Indication]
+			}
+			guarantees {
+				Bool.true[Wayside_Out_Converter.PSD_O_PSD_Close] /\ Bool.false[Wayside_Out_Converter.PSD_O_PSD_Open]
+			}
+			duration 14
+			proof {
+				step1:
+					at 1
+					have 
+						DoorStatus.DT_DoorStatus_DoorsVitalClosed[OBCU_ATP_In_Converter.doorStatus]
+					from [
+						trigger1
+					]
+					using
+						OBCU_ATP_In_Converter.forwardDoorStatus,
+				step2:
+					at 4
+					have 
+						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
+						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[OBCU_ATP_Door_Release_Controller.doorReleaseStatus]
+					from [
+						step1 with [
+							(OBCU_ATP_Door_Release_Controller.doorStatus, OBCU_ATP_In_Converter.doorStatus)
+						]
+					]
+					using
+						OBCU_ATP_Door_Release_Controller.doorsClosedWhenClosedIndication,
+				step3:
+					at 5
+					have 
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening]
+					from [
+						step2 with [
+							(OBCU_ATP_PSD_Authorization_Controller.doorReleaseStatus, OBCU_ATP_Door_Release_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATP_PSD_Authorization_Controller.notAuthorized,
+				step4:
+					at 6
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_PSD_Authorization_State_Tracker.psdAuthorizationState]
+					from [
+						step3 with [
+							(OBCU_ATP_PSD_Authorization_State_Tracker.authorizePSDOpening, OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening)
+						]
+					]
+					using
+						OBCU_ATP_PSD_Authorization_State_Tracker.forwardAuthorization,
+				step5:
+					at 7
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_Telegram_Builder.OBCU_WCU_PositionReport]
+					from [
+						step4 with [
+							(OBCU_ATP_Telegram_Builder.psdAuthorizationState, OBCU_ATP_PSD_Authorization_State_Tracker.psdAuthorizationState)
+						]
+					]
+					using
+						OBCU_ATP_Telegram_Builder.forwardAuthorization,
+				step6:
+					at 5
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_Door_Open_Controller.doorOpenCommand]
+					from [
+						step2 with [
+							(OBCU_ATO_Door_Open_Controller.doorReleaseStatus, OBCU_ATP_Door_Release_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATO_Door_Open_Controller.doorsClosed,
+				step7:
+					at 6
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_PSD_Door_Controller.psdDoorCommand]
+					from [
+						step6 with [
+							(OBCU_ATO_PSD_Door_Controller.psdDoorCommand, OBCU_ATO_Door_Open_Controller.doorReleaseStatus)
+						]
+					]
+					using
+						OBCU_ATO_PSD_Door_Controller.forwardDoorCommand,
+				step8:
+					at 7
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_PSD_Door_Command_State.psdDoorCommandState]
+					from [
+						step7 with [
+							(OBCU_ATO_PSD_Door_Command_State.openDoorCommand, OBCU_ATO_PSD_Door_Controller.psdDoorCommand)
+						]
+					]
+					using
+						OBCU_ATO_PSD_Door_Command_State.forwardingCommand,
+				step9:
+					at 8
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ATO_Telegram_Builder.OBCU_WCU_PlatformDoor]
+					from [
+						step8 with [
+							(OBCU_ATO_Telegram_Builder.psdDoorCommandState, OBCU_ATO_PSD_Door_Command_State.psdDoorCommandState)
+						]
+					]
+					using
+						OBCU_ATO_Telegram_Builder.forwardingCommand,
+				step10:
+					at 9
+					have
+						DoorCommand.DT_DoorCommand_Close[OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor_Out]
+					from [
+						step9 with [
+							(OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor, OBCU_ATO_Telegram_Builder.OBCU_WCU_PlatformDoor)
+						]
+					]
+					using
+						OBCU_ITF_FWD_Platform_Door.forwardingCommand,
+				step11:
+					at 8
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out]
+					from [
+						step5 with [
+							(OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport, OBCU_ATP_Telegram_Builder.OBCU_WCU_PositionReport)
+						]
+					]
+					using
+						OBCU_ITF_FWD_Position_Report.forwardAuthorization,
+				step12:
+					at 9
+					have
+						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[Wayside_OPR_Telegram_Extractor.doorOpenAuthorization]
+					from [
+						step11 with [
+							(Wayside_OPR_Telegram_Extractor.OBCU_WCU_PositionReport, OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out)
+						]
+					]
+					using
+						Wayside_OPR_Telegram_Extractor.forwardAuthorization,
+				step13:
+					at 10
+					have
+						DoorCommand.DT_DoorCommand_Close[Wayside_OPD_Telegram_Extractor.psdOpenCommand]
+					from [
+						step10 with [
+							(Wayside_OPD_Telegram_Extractor.OBCU_WCU_PlatformDoor, OBCU_ITF_FWD_Platform_Door.WCU_OBCU_PlatformDoor_Out)
+						]
+					]
+					using
+						Wayside_OPD_Telegram_Extractor.forwardCommand,
+				step14:
+					at 12
+					have
+						Bool.false[Wayside_PSD_Control_Function.psdOpen]
+					from [
+						step12 with [
+							(Wayside_PSD_Control_Function.doorOpenAuthorization, Wayside_OPR_Telegram_Extractor.doorOpenAuthorization)
+						],
+						step13 with [
+							(Wayside_PSD_Control_Function.psdOpenCommand, Wayside_OPD_Telegram_Extractor.psdOpenCommand)
+						]
+					]
+					using
+						Wayside_PSD_Control_Function.doorClosed,
+				step15:
+					at 14
+					have
+						Bool.true[Wayside_Out_Converter.PSD_O_PSD_Close] /\ Bool.false[Wayside_Out_Converter.PSD_O_PSD_Open]
+					from [
+						step14 with [
+							(Wayside_Out_Converter.psdOpen, Wayside_PSD_Control_Function.psdOpen)
+						]
+					]
+					using
+						Wayside_Out_Converter.psdClose
+			}
+		}
+	}
+}
