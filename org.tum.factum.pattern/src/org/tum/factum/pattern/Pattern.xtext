@@ -15,8 +15,6 @@ Pattern returns Pattern:
 		//Language Part 2 - Specification of Component Types (CTypes)
 		('CTypes' '{' componentTypes+=ComponentType	( "," componentTypes+=ComponentType)* '}'
 		)?
-		('Contracts' '{' contracts+=Contract ( "," contracts+=Contract)* '}'
-	    )?
  		//Language Part 3 - Specification of Architectural Constraints
 	    ('ArchSpec' '{'
 	    	(ctaCmpVar+=ComponentVariable ("," ctaCmpVar+=ComponentVariable)*) 		//Declaration of Component Variables
@@ -28,15 +26,10 @@ Pattern returns Pattern:
 	    	'}'
 	    )?
 	    //Part 4 - Specification of Architectural Guarantees
-	    ('ArchGuarantee' '{'
-			(agCmpVar+=ComponentVariable ("," agCmpVar+=ComponentVariable)*)
-			(agDtVars=DTVariables)?
-			
-			(agFormulaIds+=AgFormulasID)*
-			
-			(proof=Proof)?
-			
-	    '}')?
+	    ('Contracts' '{'
+	    	proofContracts += ProofContract (',' proofContracts += ProofContract)*
+	    '}'	
+	    )?
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
 	'}'
@@ -71,22 +64,23 @@ ComponentType returns ComponentType:
 ;
 Proof returns Proof:
 	{Proof}
-	'Proof' '{' 
-		proofStatements+=ProofStatement (',' proofStatements+=ProofStatement)* 
+	'proof' '{' 
+		proofSteps+=ProofStep (',' proofSteps+=ProofStep)* 
 	'}'
-;
-ProofStatement returns ProofStatement:
-	{ProofStatement}
-	name = ID ':' proofStep = ProofStep
 ;
 ProofStep returns ProofStep:
 	{ProofStep}
+	name = ID ':' 
 	'at' timepoint = Timepoint 'have' state = BasicFormula 
-	'using' contract = [ContractRef|QualifiedName] //'of' proofStepRef = [ProofStepRef] // should we really add this reference?
-	('with' '[' proofConnections += ProofConnection ( ',' proofConnections += ProofConnection)* ']')?
+	('from' '[' proofStepRefs += ProofStepRef (',' proofStepRefs += ProofStepRef)*']')?
+	'using' contract = [ContractRef|QualifiedName]
 ;
 ProofStepRef:
-	ProofStep
+	trigger = [ContractTrigger] | ProofStepRefWithConnections
+;
+ProofStepRefWithConnections returns ProofStepRefWithConnections:
+	{ProofStepRefWithConnections}
+	proofstep = [ProofStep] 'with' '[' proofConnections += ProofConnection ( ',' proofConnections += ProofConnection)* ']'
 ;
 ProofConnection returns ProofConnection:
 	{ProofConnection}
@@ -96,13 +90,30 @@ Contract returns Contract:
 	{Contract}
 	'Contract' name = ID '{'
     	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
-		'trigger' triggers+=BasicFormula (',' triggers+=BasicFormula 'at' triggerTimepoints+=Timepoint)*
-		'guarantee' guarantees+=BasicFormula
+		('triggers' '{' triggers+=ContractTrigger (',' triggers+=ContractTrigger)* '}')?
+		'guarantees' '{'  guarantees+=BasicFormula (',' guarantees+=BasicFormula)* '}'
 		'duration' duration=Timepoint
+	'}'
+;
+ProofContract returns ProofContract:
+	{ProofContract}
+	'Contract' name = ID '{'
+    	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
+		('triggers' '{' triggers+=ContractTrigger (',' triggers+=ContractTrigger)* '}')?
+		'guarantees' '{'  guarantees+=BasicFormula (',' guarantees+=BasicFormula)* '}'
+		'duration' duration=Timepoint
+		(proof=Proof)?
 	'}'
 ;
 ContractRef:
 	Contract
+;
+ContractTrigger returns ContractTrigger:
+	{ContractTrigger}
+	name = ID ':' formula = BasicFormula ('at' timepoint = Timepoint)?
+;
+ContractTriggerRef:
+	ContractTrigger
 ;
 Parameter returns Parameter:
 	{Parameter}
