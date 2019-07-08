@@ -1,12 +1,12 @@
 Pattern TrainguardMT ShortName tgmt {
 	DTSpec {
 		DT Status (
-			Sort INT 
+			Sort INT
 		),
 		DT Int (
 			Sort INT
 			Operation add: INT, INT => INT,
-					sub: INT, INT => INT	
+					sub: INT, INT => INT
 		),
 		DT DoorStatus (
 			Sort DoorStatus
@@ -85,20 +85,20 @@ Pattern TrainguardMT ShortName tgmt {
 		)
 	}
 	CTypes {
-		
-		/* 
+
+		/*
 		 * OBCU ATO Components
 		 */
 		CType OBCU_ATO_In_Converter {
 			InputPorts {
 				InputPort AB_I_Door_Operating_Mode (Type: DoorStatus.DoorStatus),
 				InputPort AB_I_Premissive_Door_Button (Type: Bool.BOOLEAN),
-				InputPort CAB_I_Door_Command (Type: Command.STRING),
-				InputPort CL_I_Door_Closed_Indication (Type: Status.INT)
+				InputPort CAB_I_Door_Command (Type: DoorCommand.DoorCommand),
+				InputPort CL_I_Door_Closed_Indication (Type: DoorStatus.DoorStatus)
 			}
 			OutputPorts {
 				OutputPort doorStatus (Type: Status.INT),
-				OutputPort cabDoorCommand (Type: Command.STRING),
+				OutputPort cabDoorCommand (Type: DoorCommand.DoorCommand),
 				OutputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
 				OutputPort cabPremissiveDoorMode (Type: Status.INT)
 			}
@@ -124,7 +124,7 @@ Pattern TrainguardMT ShortName tgmt {
 				InputPort trainControlLevel (Type: Status.INT)
 			}
 			OutputPorts {
-				OutputPort doorOpenCommand (Type: Command.STRING)
+				OutputPort doorOpenCommand (Type: DoorCommand.DoorCommand)
 			}
 			Contracts {
 				Contract doorsOpened {
@@ -150,7 +150,7 @@ Pattern TrainguardMT ShortName tgmt {
 		},
 		CType OBCU_ATO_Train_Door_Supervision_Mode_Controller {
 			InputPorts {
-				InputPort movingStatus (Type: Status.INT),
+				InputPort movingStatus (Type: MovingStatus.MovingStatus),
 				InputPort doorReleaseStatus (Type: Time.INT),
 				InputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
 				InputPort trainControlLevel (Type: Status.INT),
@@ -172,7 +172,7 @@ Pattern TrainguardMT ShortName tgmt {
 		},
 		CType OBCU_ATO_PSD_Door_Controller {
 			InputPorts {
-				InputPort openDoorCommand (Type: Command.STRING),
+				InputPort openDoorCommand (Type: DoorCommand.DoorCommand),
 				InputPort cabDoorCommand (Type: DoorCommand.DoorCommand),
 				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel)
 			}
@@ -225,18 +225,18 @@ Pattern TrainguardMT ShortName tgmt {
 		},
 		CType OBCU_ATO_Out_Converter {
 			InputPorts {
-				InputPort openDoorCommand (Type: Command.STRING)
+				InputPort openDoorCommand (Type: DoorCommand.DoorCommand)
 			}
 			OutputPorts {
 				OutputPort TCL_O_Door_Opening_Closing (Type: Status.INT)
 			}
 		},
-		
-		
-		/* 
+
+
+		/*
 		 * OBCU ITF Components
 		 */
-		
+
 		CType OBCU_ITF_WWA_Telegram_Extractor {
 			InputPorts {
 				InputPort WCU_OBCU_MovementAuthority (Type: Authority.STRING)
@@ -314,11 +314,11 @@ Pattern TrainguardMT ShortName tgmt {
 				}
 			}
 		},
-		
-		/* 
+
+		/*
 		 * OBCU ATP Components
 		 */
-		
+
 		CType OBCU_ATP_In_Converter {
 			InputPorts {
 				InputPort TCL_I_Door_Closed_Indication (Type: DoorStatus.DoorStatus),
@@ -350,7 +350,7 @@ Pattern TrainguardMT ShortName tgmt {
 			Contracts {
 				Contract doorsReleased {
 					triggers {
-						doorsReleased: DoorReleaseCommand.DT_DoorReleaseCommand_Left[doorReleaseCommand] 
+						doorsReleased: DoorReleaseCommand.DT_DoorReleaseCommand_Left[doorReleaseCommand]
 										\/ DoorReleaseCommand.DT_DoorReleaseCommand_Right[doorReleaseCommand]
 										\/ DoorReleaseCommand.DT_DoorReleaseCommand_Both[doorReleaseCommand]
 					}
@@ -494,7 +494,7 @@ Pattern TrainguardMT ShortName tgmt {
 				Contract doorsReleased {
 					var trainInStoppingWindow: Bool.BOOLEAN,
 					var premissiveRelease: Bool.BOOLEAN
-					
+
 					triggers {
 						standStill: MovingStatus.DT_TrainMovingStatus_StandStill[movingStatus],
 						trainInStoppingPosition: Bool.true[trainInStoppingWindow] at 1,
@@ -539,8 +539,8 @@ Pattern TrainguardMT ShortName tgmt {
 				}
 			}
 		},
-		
-		/* 
+
+		/*
 		 * Wayside Components
 		 */
 		CType Wayside_In_Converter {
@@ -737,7 +737,7 @@ Pattern TrainguardMT ShortName tgmt {
 					guarantees {
 						Bool.true[PSD_O_PSD_Open] /\ Bool.false[PSD_O_PSD_Close]
 					}
-					
+
 					duration 1
 				},
 				Contract psdClose {
@@ -747,7 +747,7 @@ Pattern TrainguardMT ShortName tgmt {
 					guarantees {
 						Bool.false[PSD_O_PSD_Open] /\ Bool.true[PSD_O_PSD_Close]
 					}
-					
+
 					duration 1
 				}
 			}
@@ -764,9 +764,9 @@ Pattern TrainguardMT ShortName tgmt {
 			}
 			duration 13
 			proof {
-				step1: 
+				step1:
 					at 3
-					have 
+					have
 						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
 						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[OBCU_ATP_Door_Release_Controller.doorReleaseStatus]
 					from [
@@ -776,7 +776,7 @@ Pattern TrainguardMT ShortName tgmt {
 						OBCU_ATP_Door_Release_Controller.doorsNotReleasedWhileMoving,
 				step2:
 					at 4
-					have 
+					have
 						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening]
 					from [
 						step1 with [
@@ -937,7 +937,7 @@ Pattern TrainguardMT ShortName tgmt {
 			proof {
 				step1:
 					at 3
-					have 
+					have
 						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
 						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[OBCU_ATP_Door_Release_Controller.doorReleaseStatus]
 					from [
@@ -947,7 +947,7 @@ Pattern TrainguardMT ShortName tgmt {
 						OBCU_ATP_Door_Release_Controller.doorsReleasedIfStandstillAndInStoppingWindow,
 				step2:
 					at 4
-					have 
+					have
 						PSD_Authorization.DT_PSD_Authorization_Authorize[OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening]
 					from [
 						step1 with [
@@ -1091,7 +1091,7 @@ Pattern TrainguardMT ShortName tgmt {
 					]
 					using
 						Wayside_Out_Converter.psdClose
-					
+
 			}
 		},
 		// 3) If the train doors open on the right hand side, the platform must be on the right hand
@@ -1129,7 +1129,7 @@ Pattern TrainguardMT ShortName tgmt {
 			proof {
 				step1:
 					at 3
-					have 
+					have
 						DoorReleaseCommand.DT_DoorReleaseCommand_Both[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
 						DoorReleaseStatus.DT_DoorReleaseStatus_Released[OBCU_ATP_Door_Release_Controller.doorStatus] /\
 						Bool.true[OBCU_ATP_Door_Release_Controller.releaseForcedByPermissiveDoorButton]
@@ -1152,7 +1152,7 @@ Pattern TrainguardMT ShortName tgmt {
 			proof {
 				step1:
 					at 1
-					have 
+					have
 						DoorStatus.DT_DoorStatus_DoorsVitalClosed[OBCU_ATP_In_Converter.doorStatus]
 					from [
 						trigger1
@@ -1161,7 +1161,7 @@ Pattern TrainguardMT ShortName tgmt {
 						OBCU_ATP_In_Converter.forwardDoorStatus,
 				step2:
 					at 4
-					have 
+					have
 						DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[OBCU_ATP_Door_Release_Controller.doorReleaseCommand] /\
 						DoorReleaseStatus.DT_DoorReleaseStatus_Locked[OBCU_ATP_Door_Release_Controller.doorReleaseStatus]
 					from [
@@ -1173,7 +1173,7 @@ Pattern TrainguardMT ShortName tgmt {
 						OBCU_ATP_Door_Release_Controller.doorsClosedWhenClosedIndication,
 				step3:
 					at 5
-					have 
+					have
 						PSD_Authorization.DT_PSD_Authorization_Not_Authorize[OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening]
 					from [
 						step2 with [
