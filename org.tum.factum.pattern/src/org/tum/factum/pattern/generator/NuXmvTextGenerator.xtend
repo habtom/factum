@@ -34,23 +34,48 @@ import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Parameter
 import org.tum.factum.pattern.pattern.BtaRef
 import org.tum.factum.pattern.pattern.BtaOpParam
+import org.tum.factum.pattern.pattern.Parenthesis
+import org.tum.factum.pattern.pattern.Bracket
+import org.tum.factum.pattern.pattern.FsmRef
+import org.tum.factum.pattern.pattern.FsmVariable
+import org.tum.factum.pattern.pattern.NuXmvDataType
+import org.tum.factum.pattern.pattern.BoundedNuXmv
+import org.tum.factum.pattern.pattern.BoolNuXmv
+import org.tum.factum.pattern.pattern.BtaSUntil
+import org.tum.factum.pattern.pattern.BtaWUntil
+import java.util.ArrayList
+import org.tum.factum.pattern.pattern.BehaviorTraceAssertion
+import org.tum.factum.pattern.pattern.FsmVariableType
 
 class NuXmvTextGenerator {
 
-	static var dataTypes = new HashMap<String, String>;
-
-	static var functions = new HashMap<String, String>;
-
-	static var functionParams = new HashMap<String, EList<String>>
-
-	static var guardsLeft = new HashMap<Integer, String>
+	static var HashMap<String, String> dataTypes
+	static var HashMap<String, String> functions
+	static var HashMap<String, EList<String>> functionParams
+	static var HashMap<Integer, String> guardsLeft
+	static var HashMap<String, Integer> dtTypes
+	static var ArrayList<String> ltlFormulasVars
+	static var ArrayList<String> ltlFormulasBools
 
 	def static toNuXmv(Pattern root, ComponentType cType) {
+		dataTypes = new HashMap<String, String>
+		functions = new HashMap<String, String>
+		functionParams = new HashMap<String, EList<String>>
+		guardsLeft = new HashMap<Integer, String>
+		dtTypes = new HashMap<String, Integer>
+		ltlFormulasVars = new ArrayList<String>
+		ltlFormulasBools = new ArrayList<String>
+
 		for (dType : root.dtSpec) {
-			// Store every mapped datatype in a dictionary
+			// Dictionary of DataTypes
 			for (sort : dType.mapSorts) {
-				dataTypes.put(sort.sortName.name, sort.dataType)
+				dataTypes.put(sort.sortName.name, sort.dataType.convertToString)
+				val bd = sort.dataType
+				if (bd instanceof BoundedNuXmv) {
+					dtTypes.put(sort.sortName.name, bd.upperBound)
+				}
 			}
+			// Dictionary of functions
 			for (func : dType.mapOp) {
 				val name = func.op.name
 				functions.put(name, func.opFunction)
@@ -58,6 +83,7 @@ class NuXmvTextGenerator {
 			}
 		}
 		val transitions = cType.transitions
+		// Convert every guard
 		for (var i = 0; i < transitions.size; i++) {
 			val guardLeft = convertLeftFormula(transitions.get(i).guardLeft)
 			if(guardLeft !== null) guardsLeft.put(i, guardLeft)
@@ -77,23 +103,28 @@ class NuXmvTextGenerator {
 			
 		VAR 
 			state : «states»
-			«val variables = cType.btaDtVar»
+			-- Variables
+			«val variables = cType.fsmVars»
 			«FOR variable : variables»
 				«var name = variable.name»
 				«var type = variable.varSortType.name»
 				«name» : «dataTypes.get(type)»;
 			«ENDFOR»
+			-- InputPorts
 			«val inputPorts = cType.inputPorts»
 			«FOR inputPort : inputPorts»
 				«var name = inputPort.name»
 				«var type = inputPort.inputPrtSrtTyp.name»
 				«name» : «dataTypes.get(type)»;
+				«name»_noVal : boolean;
 			«ENDFOR»
+			-- OutputPorts
 			«val outputPorts = cType.outputPorts»
 			«FOR outputPort : outputPorts»
 				«var name = outputPort.name»
 				«var type = outputPort.outputPrtSrtTyp.name»
 				«name» : «dataTypes.get(type)»;
+				«name»_noVal : boolean;
 			«ENDFOR»
 			
 		ASSIGN
@@ -112,26 +143,26 @@ class NuXmvTextGenerator {
 			«FOR transition : transitions»
 				«"\t"»«transitionState(transition, transitionNr++)»
 			«ENDFOR»
-			TRUE: state;
+			«"\t"»TRUE: state;
 			esac;
 			
 			«FOR variable : variables»
 				«transitionVariable(variable.name, transitions)»
 				
 			«ENDFOR»
-			«FOR inputPort : inputPorts»
-				«transitionVariable(inputPort.name, transitions)»
-				
-			«ENDFOR»
 			«FOR outputPort : outputPorts»
-				«transitionVariable(outputPort.name, transitions)»
+				«transitionOutputPort(outputPort.name, transitions)»
 				
 			«ENDFOR»
+		«var dtSorts = new HashMap<String, Integer>»
+		«FOR dtType : cType.btaDtVar»
+			«dtSorts.put(dtType.name, dtTypes.get(dtType.varSortType.name))»
+		«ENDFOR»
 		«FOR ltlFormula : cType.behaviorTraceAssertion»
-			«val formula = convertLTLFormula(ltlFormula.btaFormula)»
-			«IF !formula.isEmpty»
-				LTLSPEC «formula»
-			«ENDIF»
+			«convertLTLFormula(ltlFormula, dtSorts)»
+		«ENDFOR»
+		«FOR ltlFormula : ltlFormulasVars»
+			«ltlFormula»
 		«ENDFOR»
 	'''
 
@@ -148,24 +179,15 @@ class NuXmvTextGenerator {
 		return func
 	}
 
-	def static String initVarToNuXmv(DataTypeVariable dtv, InitDataTypes idt) {
+	def static String initVarToNuXmv(FsmVariableType type, InitDataTypes idt) {
 		if (idt.variable !== null) {
-			return '''init(«dtv.name») := «idt.variable.name»;'''
+			return '''init(«type.name») := «idt.variable.name»;'''
 		}
 		if (idt.op !== null) {
 			val op = idt.op
-			return '''init(«dtv.name») := «getFunction(op.op.name, op.params)»;'''
+			return '''init(«type.name») := «getFunction(op.op.name, op.params)»;'''
 		}
 		return ""
-	}
-
-	def static String getName(BtaRef variable) {
-		switch variable {
-			InputPort: return variable.name
-			OutputPort: return variable.name
-			Parameter: return variable.name
-			DataTypeVariable: return variable.name
-		}
 	}
 
 	def static String transitionState(Transition transition, int transitionNr) {
@@ -173,7 +195,7 @@ class NuXmvTextGenerator {
 		val transitionEnd = transition.transitionEnd.name
 		val guard = guardsLeft.get(transitionNr)
 
-		return '''(state = «transitionStart»)«IF (guard != "")» & «guard»«ENDIF» : «transitionEnd»;'''
+		return '''state = «transitionStart»«IF (guard != "")» & («guard»)«ENDIF» : «transitionEnd»;'''
 	}
 
 	def static String transitionVariable(String variable, EList<Transition> transitions) {
@@ -200,9 +222,47 @@ class NuXmvTextGenerator {
 		'''
 	}
 
+	def static String transitionOutputPort(String outputPort, EList<Transition> transitions) {
+		var right = new HashMap<Integer, String>
+		for (var transitionNr = 0; transitionNr < transitions.size; transitionNr++) {
+			val guardRight = convertRightFormula(transitions.get(transitionNr).guardRight, outputPort)
+			if(!guardRight.isEmpty) right.put(transitionNr, guardRight)
+		}
+		if (right.isEmpty) {
+			return '''
+				next(«outputPort») := «outputPort»;
+				next(«outputPort»_noVal) := TRUE;
+			'''
+		}
+
+		return '''
+			«var transitionNr = 0»
+			next(«outputPort») := case
+			«FOR transition : transitions»
+				«val guardRight = right.get(transitionNr++)»
+				«IF guardRight !== null»
+					«"\t"»«build(transition.transitionStart.name, guardRight, transitionNr)»
+				«ENDIF»
+			«ENDFOR»	
+				TRUE: «outputPort»;
+			esac;
+			«var transNr = 0»
+			«"\n"»
+			next(«outputPort»_noVal) := case
+			«FOR transition : transitions»
+				«val guardRight = right.get(transNr++)»
+				«IF guardRight !== null»
+					«"\t"»«build(transition.transitionStart.name, "FALSE", transNr)»
+				«ENDIF»
+			«ENDFOR»	
+				TRUE: TRUE;
+			esac;
+		'''
+	}
+
 	def static String build(String state, String guardRight, int transitionNr) {
 		val guardLeft = guardsLeft.get(transitionNr - 1)
-		return '''(state = «state»)«IF (!guardLeft.isEmpty)» & «guardLeft»«ENDIF» : «guardRight»;'''
+		return '''state = «state»«IF (!guardLeft.isEmpty)» & «guardLeft»«ENDIF» : «guardRight»;'''
 	}
 
 	def static String convertLeftFormula(FsmFormula formula) {
@@ -215,53 +275,87 @@ class NuXmvTextGenerator {
 				return formula.primitive
 			case formula.variable !== null:
 				return formula.variable.name
+			case formula.noVal !== null:
+				return "_"
 			FsmLAndImpl:
 				return convertLeftFormula(formula.left) + " & " + convertLeftFormula(formula.right)
 			ComparisonImpl:
-				return "(" + convertLeftFormula(formula.left) + formula.comp + convertLeftFormula(formula.right) + ")"
+				return convertLeftFormula(formula.left) + formula.comp + convertLeftFormula(formula.right)
 			FsmLOr:
 				return convertLeftFormula(formula.left) + " | " + convertLeftFormula(formula.right)
 			FsmLImp:
-				return "(" + convertLeftFormula(formula.left) + ") -> (" + convertLeftFormula(formula.right) + ")"
+				return convertLeftFormula(formula.left) + " -> " + convertLeftFormula(formula.right)
 			LogicNeg:
-				return "!(" + convertLeftFormula(formula.fsmPrimary) + ")"
+				return "!" + convertLeftFormula(formula.fsmPrimary)
 			MathNeg:
 				return "-" + convertLeftFormula(formula.fsmPrimary)
+			Bracket:
+				return "(" + convertLeftFormula(formula.fsmFormula) + ")"
 			FsmEquality: {
 				val symbol = if(formula.eq === null) "!" else "="
-				return convertLeftFormula(formula.left) + symbol + convertLeftFormula(formula.right)
+				val lhs = convertLeftFormula(formula.left)
+				val rhs = convertLeftFormula(formula.right)
+				if(rhs == "_") return lhs + "_noVal"
+				if(lhs == "_") return rhs + "_noVal"
+				return lhs + symbol + rhs
 			}
 			default:
 				return ""
 		}
 	}
 
-	def static String convertLTLFormula(BtaFormula formula) {
+	// Converts to btaFormula and stores variables in an array
+	def static String convertToBtaFormula(BtaFormula formula, ArrayList<String> dtTypes) {
 		switch formula {
-			BtaLImp: return "(" + convertLTLFormula(formula.left) + ") -> (" + convertLTLFormula(formula.right) + ")"
-			BtaLOr: return convertLTLFormula(formula.left) + " | " + convertLTLFormula(formula.right)
-			BtaLAnd: return convertLTLFormula(formula.left) + " & " + convertLTLFormula(formula.right)
-			LTLOperators: return (formula.ltlG ?: formula.ltlF ?: formula.ltlX) + convertLTLFormula(formula.btaFormula)
-			BtaTermEq: return "(" + btaTerm(formula.left) + "=" + btaTerm(formula.right) + ")"
-			BtaTerm: return btaTerm(formula)
-			Neg: return "!(" + convertLTLFormula(formula.btaFormula) + ")"
-			default: return ""
-		}
-	}
-
-	def static String btaTerm(BtaTerm term) {
-		switch term {
-			BtaBaseTerm: return term.btaRef.name
-			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params)
+			BtaLImp:
+				return convertToBtaFormula(formula.left, dtTypes) + " -> " + convertToBtaFormula(formula.right, dtTypes)
+			BtaLOr:
+				return convertToBtaFormula(formula.left, dtTypes) + " | " + convertToBtaFormula(formula.right, dtTypes)
+			BtaLAnd:
+				return convertToBtaFormula(formula.left, dtTypes) + " & " + convertToBtaFormula(formula.right, dtTypes)
+			LTLOperators:
+				return (formula.ltlG ?: formula.ltlF ?: formula.ltlX) + convertToBtaFormula(formula.btaFormula, dtTypes)
+			BtaTerm:
+				return btaTerm(formula)
+			Neg:
+				return "!" + convertToBtaFormula(formula.btaFormula, dtTypes)
+			Parenthesis:
+				return "(" + convertToBtaFormula(formula.btaFormula, dtTypes) + ")"
+			BtaSUntil:
+				return convertToBtaFormula(formula.left, dtTypes) + " U " + convertToBtaFormula(formula.right, dtTypes)
+			BtaWUntil: {
+				val lhs = convertToBtaFormula(formula.left, dtTypes)
+				val rhs = convertToBtaFormula(formula.right, dtTypes)
+				return '''«rhs» V («rhs» | «lhs»)'''
+			}
+			BtaTermEq: {
+				val noValPorts = new StringBuilder
+				val lhs = btaTerm(formula.left)
+				val rhs = btaTerm(formula.right)
+				if (formula.left.isPort) {
+					noValPorts.append(" & !" + lhs + "_noVal")
+				}
+				if (formula.right.isPort) {
+					noValPorts.append(" & !" + rhs + "_noVal")
+				}
+				if (formula.left.isDtVar) {
+					dtTypes.add(lhs)
+				}
+				if (formula.right.isDtVar) {
+					dtTypes.add(rhs)
+				}
+				return lhs + "=" + rhs + noValPorts
+			}
+			default:
+				return ""
 		}
 	}
 
 	def static String btaFunction(String name, BtaOpParam input) {
-		
 		var func = functions.get(name)
 		if (input === null) {
 			return func
-		}	
+		}
 		val iteratorParams = functionParams.get(name).iterator
 		val iteratorInput = input.btaOperands.iterator
 
@@ -316,7 +410,7 @@ class NuXmvTextGenerator {
 				if (right.isEmpty) {
 					return convertRightFormula(formula.left, variable)
 				}
-				return "(" + convertRightFormula(formula.left, variable) + ") || (" +
+				return "(" + convertRightFormula(formula.left, variable) + ") | (" +
 					convertRightFormula(formula.right, variable) + ")"
 			}
 			FsmLImp: {
@@ -330,7 +424,123 @@ class NuXmvTextGenerator {
 				return "!(" + convertRightFormula(formula.fsmPrimary, variable) + ")"
 			MathNeg:
 				return "-" + convertRightFormula(formula.fsmPrimary, variable)
+			Bracket:
+				return "(" + convertRightFormula(formula.fsmFormula, variable) + ")"
 		}
 		return ""
+	}
+
+	def static void convertLTLFormula(BehaviorTraceAssertion ltlFormula, HashMap<String, Integer> dtVars) {
+		var fsmVariables = new ArrayList<String>
+		val formula = convertToBtaFormula(ltlFormula.btaFormula, fsmVariables)
+		val boolVars = new ArrayList<String>()
+		val variables = new ArrayList<String>()
+		val bools = new ArrayList<Integer>()
+		val boundsVariables = new ArrayList<Integer>()
+		for (variable : fsmVariables) {
+			val mapping = dtVars.get(variable)
+			if (mapping === null) {
+				boolVars.add(variable)
+				bools.add(1)
+			} else {
+				boundsVariables.add(mapping)
+				variables.add(variable)
+			}
+		}
+		if (boolVars.length > 0) {
+			val int[] counters1 = newIntArrayOfSize(boolVars.length)
+			nestedLoopOperation(counters1, bools, 0, boolVars, formula, false)
+			val int[] counters2 = newIntArrayOfSize(variables.length)
+			for (btaFormula : ltlFormulasBools) {
+				nestedLoopOperation(counters2, boundsVariables, 0, variables, btaFormula, true)
+			}
+		} else {
+			val int[] counters = newIntArrayOfSize(fsmVariables.length)
+			nestedLoopOperation(counters, boundsVariables, 0, fsmVariables, formula, true)
+		}
+	}
+
+	def static void nestedLoopOperation(int[] counters, int[] length, int level, ArrayList<String> arr, String formula,
+		boolean isVar) {
+		if (level == counters.length) {
+			if(isVar) changeVarToInts(counters, arr, formula) else changeVarToBools(counters, arr, formula)
+		} else {
+			for (counters.set(level, 0); counters.get(level) <= length.get(level); counters.set(level,
+				counters.get(level) + 1)) {
+				nestedLoopOperation(counters, length, level + 1, arr, formula, isVar)
+			}
+		}
+	}
+
+	def static void changeVarToInts(int[] counters, ArrayList<String> arr, String btaFormula) {
+		var formula = "LTLSPEC " + btaFormula
+		for (var level = 0; level < counters.length; level++) {
+			formula = formula.replaceAll(arr.get(level), counters.get(level).toString)
+		}
+		ltlFormulasVars.add(formula)
+	}
+
+	def static void changeVarToBools(int[] counters, ArrayList<String> arr, String btaFormula) {
+		var counterAsString = btaFormula
+		for (var level = 0; level < counters.length; level++) {
+			counterAsString = counterAsString.replaceAll(arr.get(level),
+				if(counters.get(level) == 0) "FALSE" else "TRUE")
+		}
+		ltlFormulasBools.add(counterAsString)
+	}
+
+	def static String btaTerm(BtaTerm term) {
+		switch term {
+			BtaBaseTerm: return term.btaRef.name
+			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params)
+		}
+	}
+
+	def static String getName(FsmVariableType variable) {
+		switch variable {
+			DataTypeVariable: return variable.name
+			OutputPort: return variable.name
+		}
+	}
+
+	def static String getName(BtaRef variable) {
+		switch variable {
+			InputPort: return variable.name
+			OutputPort: return variable.name
+			Parameter: return variable.name
+			DataTypeVariable: return variable.name
+		}
+	}
+
+	def static String getName(FsmRef variable) {
+		switch variable {
+			InputPort: return variable.name
+			OutputPort: return variable.name
+			Parameter: return variable.name
+			FsmVariable: return variable.name
+		}
+	}
+
+	def static String convertToString(NuXmvDataType dt) {
+		switch dt {
+			BoundedNuXmv: return '''«dt.lowerBound» .. «dt.upperBound»'''
+			BoolNuXmv: return "boolean"
+		}
+	}
+
+	def static Boolean isPort(BtaTerm term) {
+		if (term instanceof BtaBaseTerm) {
+			if (term.btaRef instanceof InputPort || term.btaRef instanceof OutputPort)
+				return true
+		}
+		return false;
+	}
+
+	def static Boolean isDtVar(BtaTerm term) {
+		if (term instanceof BtaBaseTerm) {
+			if (term.btaRef instanceof DataTypeVariable)
+				return true
+		}
+		return false;
 	}
 }

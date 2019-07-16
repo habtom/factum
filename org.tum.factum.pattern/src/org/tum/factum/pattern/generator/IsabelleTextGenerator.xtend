@@ -51,6 +51,7 @@ import org.tum.factum.pattern.pattern.BtaOpParam
 import org.tum.factum.pattern.pattern.BehaviorTraceAssertion
 import java.util.LinkedList
 import java.util.HashSet
+import org.tum.factum.pattern.pattern.Parenthesis
 
 class IsabelleTextGenerator {
 	
@@ -326,22 +327,23 @@ class IsabelleTextGenerator {
 	def static String generateBtaFormula(BtaFormula formula, String shortName) {
 		switch formula {
 			BtaLImp:
-				return "(" + generateBtaFormula(formula.left, shortName) + ") \\<longrightarrow>\\<^sup>b (" +
-					generateBtaFormula(formula.right, shortName) + ")"
+				return generateBtaFormula(formula.left, shortName) + " \\<longrightarrow>\\<^sup>b " +
+					generateBtaFormula(formula.right, shortName)
 			BtaLOr:
 				return generateBtaFormula(formula.left, shortName) + " \\<or>\\<^sup>b " + generateBtaFormula(formula.right, shortName)
 			BtaLAnd:
 				return generateBtaFormula(formula.left, shortName) + " \\<and>\\<^sup>b " + generateBtaFormula(formula.right, shortName)
 			LTLOperators: 
-				return  ltlOperator(formula) + "(" + generateBtaFormula(formula.btaFormula, shortName) + ")"
+				return  ltlOperator(formula) + generateBtaFormula(formula.btaFormula, shortName)
 			BtaWUntil:
 				return generateBtaFormula(formula.left, shortName) + " \\<WW>\\<^sub>b " + generateBtaFormula(formula.right, shortName)
 			BtaSUntil:
 				return generateBtaFormula(formula.left, shortName) + " \\<UU>\\<^sub>b " + generateBtaFormula(formula.right, shortName)
 			BtaTerm:
-				return btaTerm(formula, shortName)
+				return btaTerm(formula)
 			Neg:
 				return "\\<not>\\<^sup>b(" + generateBtaFormula(formula.btaFormula, shortName) + ")"
+			Parenthesis: return "(" + generateBtaFormula(formula.btaFormula, shortName) + ")"
 			QuantifierOperator: 
 				return '''«IF formula.exists === null»\<forall>\<^sub>b«formula.quantifiedAllVar.name»«ELSE»\<exists>\<^sub>b«formula.quantifiedExistsVar.name»«ENDIF». «generateBtaFormula(formula.btaFormula, shortName)»'''
 			BtaTermEq: {
@@ -359,7 +361,7 @@ class IsabelleTextGenerator {
 				if (lhs instanceof DataTypeVariable && rhs instanceof InputPort) {
 					return '''[\<lambda>«shortName». «lhs.name» \<in> «shortName»«rhs.name»(«shortName»)]\<^sub>b'''
 				}
-			    return '''[\<lambda>«shortName». «btaTerm(formula.left, shortName)» = «btaTerm(formula.right, shortName)»]\<^sub>b'''
+			    return '''[\<lambda>«shortName». «btaTermEq(formula.left, shortName)» = «btaTermEq(formula.right, shortName)»]\<^sub>b'''
 			}
 		}
 	}
@@ -371,7 +373,7 @@ class IsabelleTextGenerator {
 		}
 	}
 
-	def static String btaTerm(BtaTerm term, String shortName) {
+	def static String btaTermEq(BtaTerm term, String shortName) {
 		switch term {
 			BtaBaseTerm: {
 				val ref = term.btaRef
@@ -382,13 +384,20 @@ class IsabelleTextGenerator {
 					return ref.name
 				}
 			} 
-			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params, shortName)
+			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params)
+		}
+	}
+	
+	def static String btaTerm(BtaTerm term) {
+		switch term {
+			BtaBaseTerm: return term.btaRef.name
+			BtaOperation: return btaFunction(term.btaTrmOperator.name, term.params)
 		}
 	}
 
-	def static String btaFunction(String name, BtaOpParam input, String shortName) {
+	def static String btaFunction(String name, BtaOpParam input) {
 		if (input === null) return '''«name»'''
-		return '''(«name»«FOR in : input.btaOperands» «btaTerm(in, shortName)»«ENDFOR»)'''
+		return '''(«name»«FOR in : input.btaOperands» «btaTerm(in)»«ENDFOR»)'''
 	}
 	
 	def static String ltlOperator(LTLOperators op) {

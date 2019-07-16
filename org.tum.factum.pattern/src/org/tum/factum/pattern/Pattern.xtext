@@ -63,6 +63,7 @@ ComponentType returns ComponentType:
 	    )?
 	    //Part 2.5 of Spec
 	   	('Behavior' '{'
+	   			'Variables' fsmVars+=FsmVariable ( ',' fsmVars+=FsmVariable)*
 	   			'States' states+=State ( ',' states+=State)*	
 	   			'Initial' initial=Initialization
 	   			('Transitions' '{'
@@ -100,17 +101,25 @@ State returns State:
 	name=ID
 ;
 
+FsmVariable:
+	name=ID ':' varSortType=[Sort|QualifiedName]
+;
+
 Initialization:
 	initialState=[State|QualifiedName] | 
 	'{' 
 		'State' initialState=[State|QualifiedName]
-		'Var' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes
-		(',' vars+=[DataTypeVariable|QualifiedName] '=' dataTypes+=InitDataTypes)* 
+		'Var' vars+=[FsmVariableType] '=' dataTypes+=InitDataTypes
+		(',' vars+=[FsmVariableType] '=' dataTypes+=InitDataTypes)* 
 	'}'
 ;
 
+FsmVariableType:
+	FsmVariable | OutputPort
+;
+
 InitDataTypes:
-	variable=[BtaRef] | op=OperationFunc
+	variable=[FsmVariable] | op=OperationFunc
 ;
 
 Transition returns Transition:
@@ -125,7 +134,7 @@ OperationFunc:
 ;
 
 OperationDataType:
-	variable=[BtaRef] | primitive=FsmPrimitive
+	variable=[FsmRef] | primitive=FsmPrimitive
 ;
 // FSM Implementation: END  
 
@@ -163,11 +172,11 @@ Sort:
 ;
 
 NuXmvDataType:
-	INT '..' INT | 'integer' | 'real' | 'bool'
+	{BoundedNuXmv} lowerBound=INT '..' upperBound=INT | {BoolNuXmv} 'boolean'
 ;
 
 Equation:
-	(INT | ID | '+' | '-' | '/' | '*')+
+	(INT | ID | '+' | '-' | '/' | '*' | '.' | Bool )+
 ;
 
 MapOperation:
@@ -384,11 +393,11 @@ BehaviorTraceAssertion:
 ;
 BtaFormula:
 	BtaQuantification |
-	BtaLImp
+	BtaWUntil
 ;
 BtaQuantification returns BtaFormula:
 	QuantifierOperator btaFormula=BtaWUntil |
-	LTLOperators btaFormula=BtaLImp
+	LTLOperators btaFormula=BtaWUntil
 ;
 BtaWUntil returns BtaFormula:
 	BtaSUntil ({BtaWUntil.left=current} 'W' right=BtaSUntil)*
@@ -407,7 +416,7 @@ BtaLAnd returns BtaFormula:
 ;
 BtaPrimary returns BtaFormula:
 	{Neg} ('¬'|'~') btaFormula=BtaPrimary |
-	'(' BtaFormula ')' |
+	{Parenthesis} '(' btaFormula=BtaFormula ')' |
 	BtaBase
 ;
 BtaBase returns BtaFormula:
@@ -424,6 +433,14 @@ BtaOpParam:
 // Behavior Trace Assertions: END 
 
 // FSM Assertions: BEGIN
+FsmRef:
+	InputPort | OutputPort | Parameter | FsmVariable
+;
+
+NoVal:
+	'_'
+;
+
 FsmFormula:
 	FsmLImp
 ;
@@ -448,13 +465,14 @@ FsmEquals returns FsmFormula:
 FsmPrimary returns FsmFormula:
 	{LogicNeg} ('¬'|'~') fsmPrimary=FsmPrimary |
 	{MathNeg} ('-') fsmPrimary=FsmPrimary |
-	'(' FsmFormula ')' |
+	{Bracket}'(' fsmFormula=FsmFormula ')' |
 	FsmBase
 ;
 FsmBase returns FsmFormula:
 	primitive=FsmPrimitive |
-	variable=[BtaRef] |
-	func=OperationFunc
+	variable=[FsmRef] |
+	func=OperationFunc |
+	noVal=NoVal
 ;
 FsmPrimitive:
 	INT | 

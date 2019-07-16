@@ -25,7 +25,8 @@ import org.tum.factum.pattern.pattern.DataTypeVariable
 import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Parameter
 import org.tum.factum.pattern.pattern.OperationDataType
-import org.tum.factum.pattern.pattern.BtaRef
+import org.tum.factum.pattern.pattern.FsmRef
+import org.tum.factum.pattern.pattern.FsmVariable
 
 /**
  * This class contains custom validation rules. 
@@ -188,15 +189,11 @@ class PatternValidator extends AbstractPatternValidator {
 	// FSM
 	@Check
 	def checkInitialParameter(ComponentType ct) {
-		val btaVars = ct.btaDtVar
 		val init = ct.initial
 		val initVars = init.vars
 		if (hasDuplicate(initVars)) {
 			error("Invalid redeclaration of variable", init, PatternPackage.Literals.INITIALIZATION__VARS)
 		}
-		if (btaVars.size > init.vars.size) {
-			warning("Not all variables have been initialized", init, PatternPackage.Literals.INITIALIZATION__VARS)
-		} 
 		var i = 0
 		for (variable : initVars) {
 			var dataTypes = init.dataTypes
@@ -251,10 +248,10 @@ class PatternValidator extends AbstractPatternValidator {
     	return false;
 	}
 	
-	def Sort getSort(BtaRef ref) {
+	def Sort getSort(FsmRef ref) {
 		switch ref {
 			InputPort: return ref.inputPrtSrtTyp
-			DataTypeVariable: return ref.varSortType
+			FsmVariable: return ref.varSortType
 			Parameter: return ref.paramSrtTyp
 			OutputPort: return ref.outputPrtSrtTyp
 		}
