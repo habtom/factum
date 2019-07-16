@@ -21,6 +21,13 @@ import org.tum.factum.pattern.pattern.InputPort
 import org.tum.factum.pattern.pattern.OutputPort
 import org.tum.factum.pattern.pattern.Parameter
 import org.tum.factum.pattern.pattern.ComponentType
+import org.tum.factum.pattern.pattern.Contract
+import org.tum.factum.pattern.pattern.ProofStep
+import org.tum.factum.pattern.pattern.ProofStepRefWithConnections
+import org.tum.factum.pattern.pattern.ContractTrigger
+import org.tum.factum.pattern.pattern.ProofContract
+import java.util.HashMap
+import java.util.ArrayList
 
 /**
  * This class contains custom validation rules. 
@@ -177,6 +184,213 @@ class PatternValidator extends AbstractPatternValidator {
 			error("Invalid number of operands: expected " + signature.size + ", not " + calcSize(parameters), PatternPackage.Literals.BTA_PREDICATE__BTA_PREDICATE)
 		} else {
 			checkSorts(signature,parameters)
+		}
+	}
+	
+	@Check
+	def checkContractTriggerTimepoints(Contract contract) {
+		val triggers = contract.getTriggers();
+		var lastTimepointValue = 0;
+		var	currentTimepointValue = 0;
+		
+		for(var i = 0; i < triggers.size(); i++) {
+			if (i === 0 && triggers.get(i).timepoint === null){}
+			else {
+				if (i === 0 && triggers.get(i).timepoint !== null) {
+					if(Integer.parseInt(triggers.get(i).timepoint) !== 0) {
+						error("First time point must be 0.", PatternPackage.eINSTANCE.contract_Triggers, i)
+						return
+					}
+				}
+				
+				if (i !== 0 && triggers.get(i).timepoint === null) {
+					error("Trigger must have a time point", PatternPackage.eINSTANCE.contract_Triggers, i)
+					return
+				}
+				
+				currentTimepointValue = Integer.parseInt(triggers.get(i).timepoint)	
+				
+				if (currentTimepointValue <= 0) {
+					error("Time points have to be larger than 0. Time point 0 is reserved for the first trigger.", PatternPackage.eINSTANCE.contractTrigger_Timepoint, i)
+					return
+				}
+				
+				if (lastTimepointValue > currentTimepointValue) {
+					error("Time points of the triggers have to be in an ascending order.", PatternPackage.eINSTANCE.contract_Triggers, i)
+					return
+				}
+				
+				lastTimepointValue = currentTimepointValue
+			}
+		}
+	}
+	
+	@Check
+	def checkContractDuration(Contract contract) {
+		val triggers = contract.getTriggers();
+		if (Integer.parseInt(contract.duration) <= 0) {
+			error("Duration must be greater than 0.", PatternPackage.eINSTANCE.contract_Duration)
+			return	
+		}
+		
+		if (triggers.size() !== 0) {
+			val lastTimepointValue = triggers.get(triggers.size() - 1).timepoint;
+		
+			if (lastTimepointValue !== null && Integer.parseInt(lastTimepointValue) >= Integer.parseInt(contract.duration)) {
+				error("Duration of the contract must be greater than the time point of last trigger.", PatternPackage.eINSTANCE.contract_Duration)
+				return
+			}
+		}
+	}
+	
+	@Check
+	def uniqueContractName(ComponentType cType) {
+		var i=0;
+		
+		var errors = new HashMap<Integer, Integer>();
+		
+		while (i<cType.contracts.size) {
+			val contract = cType.contracts.get(i)
+			
+			for (var j=0; j<cType.contracts.size; j++) {
+				if (cType.contracts.get(j).name.equals(contract.name) && i != j && !(errors.get(i) !== null || errors.get(j) !== null)) {
+					if (i > j) {
+						errors.put(i, i);	
+					} else {
+						errors.put(j, j);
+					}
+					j = cType.contracts.size;
+				}
+			} 
+			
+			i++
+		}
+		
+		errors.forEach[index, value| {
+			error("Contract with this name already exists.", PatternPackage.eINSTANCE.componentType_Contracts, index);
+		}];
+	}
+	
+	@Check
+	def checkProofStepTimesteps(ProofStep proofStep) {
+		var proofStepRefs = proofStep.proofStepRefs;
+		val contract = proofStep.contract as Contract;
+		var triggers = contract.triggers;
+		var triggersTimepoints = new ArrayList<Integer>();
+		var refsTimepoints = new ArrayList<Integer>();
+		var minimumRefTimepoint = 0;
+		
+		if (triggers.size() === 0) {
+			return;
+		}
+		
+		if (proofStepRefs.size() !== triggers.size()) {
+			error("The number of triggers of your contract reference is not equal to the number of the references in your proof step.", 
+					PatternPackage.eINSTANCE.proofStep_ProofStepRefs
+				)
+			return;
+		}
+		
+		for (trigger: triggers) {
+			if (trigger.timepoint !== null) {
+				triggersTimepoints.add(Integer.parseInt(trigger.timepoint));	
+			} else {
+				triggersTimepoints.add(0);
+			}
+		}
+		
+		for (reference: proofStepRefs) {
+			var timepoint = "";
+			
+			if (reference instanceof ProofStepRefWithConnections) {
+				val r = reference as ProofStepRefWithConnections;
+				timepoint = r.proofstep.timepoint;
+				
+			} else {
+				val r = reference.trigger as ContractTrigger;
+				timepoint = r.timepoint;
+			}
+			
+			if (timepoint === null) {
+				refsTimepoints.add(0);	
+			} else {
+				refsTimepoints.add(Integer.parseInt(timepoint));
+			}
+		}
+		
+		minimumRefTimepoint = refsTimepoints.min();
+		
+		for (var i = 0; i < refsTimepoints.size(); i++) {
+			refsTimepoints.set(i, refsTimepoints.get(i) - minimumRefTimepoint);
+			
+			if (refsTimepoints.get(i) !== triggersTimepoints.get(i)) {
+				error("Mismatch between time points in contract triggers and proof step references.", 
+					PatternPackage.eINSTANCE.proofStep_ProofStepRefs, i
+				)
+				return;
+			}
+		}
+	}
+		
+	@Check
+	def checkDurationOfProofStepsAndContract(ProofContract contract) {
+		if (contract.proof.proofSteps.size() === 0) {
+			return;
+		}
+		
+		var lastProofStep = contract.proof.proofSteps.last();
+		
+		if (Integer.parseInt(lastProofStep.timepoint) !== Integer.parseInt(contract.duration)) {
+			error("Duration of the architectural contract does not match with the time point of the last proof step.", 
+					PatternPackage.eINSTANCE.proofContract_Duration
+				)
+		}
+	}
+	
+	@Check
+	def checkIfReferencesAreFromEarlierProofSteps(ProofStep proofStep) {
+		var references = proofStep.getProofStepRefs;
+		var timepoint = Integer.parseInt(proofStep.timepoint);
+		
+		for (var i = 0; i< references.size(); i++) {
+			if (references.get(i) instanceof ProofStepRefWithConnections) {
+				var a = (proofStep.proofStepRefs.get(i) as ProofStepRefWithConnections);
+				if (Integer.parseInt(a.proofstep.timepoint) > timepoint) {
+					error("You can only reference proof steps from the past.", 
+						PatternPackage.eINSTANCE.proofStep_ProofStepRefs, i
+					)
+				}
+			}
+		}
+	}
+	
+	@Check
+	def checkRationaleDurationAgainsProofStepDuration(ProofStep proofStep) {
+		var triggers = (proofStep.contract as Contract).triggers
+		
+		if (triggers.size() === 0) {
+			return;
+		}
+		
+		var minimumTriggerTimepoint = 0;
+		var proofStepTimespoint = Integer.parseInt(proofStep.timepoint);
+		var contractDuration = Integer.parseInt((proofStep.contract as Contract).duration);
+		var proofStepFirstReferenceTimepoint = 0;
+		
+		if (proofStep.proofStepRefs.get(0) instanceof ProofStepRefWithConnections) {
+			var a = (proofStep.proofStepRefs.get(0) as ProofStepRefWithConnections);
+			proofStepFirstReferenceTimepoint = Integer.parseInt(a.proofstep.timepoint)
+			
+		} else {
+			if (proofStep.proofStepRefs.get(0).trigger.timepoint !== null) {
+				proofStepFirstReferenceTimepoint = Integer.parseInt((proofStep.proofStepRefs.get(0) as ContractTrigger).timepoint)	
+			}
+		}
+		
+		if ((contractDuration - minimumTriggerTimepoint) !== (proofStepTimespoint - proofStepFirstReferenceTimepoint)) {
+			error("Time point of the proof step does not match with the duration of it's rationale.", 
+					PatternPackage.eINSTANCE.proofStep_Timepoint
+				)
 		}
 	}
 }
