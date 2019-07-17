@@ -94,13 +94,13 @@ class IsabelleTextGenerator {
 	«ENDFOR»
 	«FOR ctyp : root.componentTypes.drop(1)»
 		«FOR ip : ctyp.inputPorts»
-			«"\t"»and «ctyp.ctsname»«ip.name» :: "'«ctyp.ctsname» \<Rightarrow> «ip.inputPrtSrtTyp.name» set"«"\n"»
+			«IF ip.inputPrtSrtTyp !== null»«"\t"»and «ctyp.ctsname»«ip.name» :: "'«ctyp.ctsname» \<Rightarrow> «ip.inputPrtSrtTyp.name» set"«"\n"»«ENDIF»
 		«ENDFOR»
 		«FOR op : ctyp.outputPorts»
-			«"\t"»and «ctyp.ctsname»«op.name» :: "'«ctyp.ctsname» \<Rightarrow> «op.outputPrtSrtTyp.name»"
+			«IF op.outputPrtSrtTyp !== null»«"\t"»and «ctyp.ctsname»«op.name» :: "'«ctyp.ctsname» \<Rightarrow> «op.outputPrtSrtTyp.name»"«ENDIF»
 		«ENDFOR»
 		«FOR p : ctyp.parameters»
-			«"\t"»and «ctyp.ctsname»«p.name» :: "'«ctyp.ctsname» \<Rightarrow> «p.paramSrtTyp.name»"
+			«IF p.paramSrtTyp !== null»«"\t"»and «ctyp.ctsname»«p.name» :: "'«ctyp.ctsname» \<Rightarrow> «p.paramSrtTyp.name»"«ENDIF»
 		«ENDFOR»
 	«ENDFOR»
 						
