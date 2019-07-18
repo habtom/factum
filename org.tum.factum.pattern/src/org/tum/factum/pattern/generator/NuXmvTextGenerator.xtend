@@ -53,7 +53,10 @@ class NuXmvTextGenerator {
 	static var HashMap<String, String> functions
 	static var HashMap<String, EList<String>> functionParams
 	static var HashMap<Integer, String> guardsLeft
-	static var HashMap<String, Integer> dtTypes
+	static var HashMap<String, Integer> sortsUpperBound
+	static var HashMap<String, Integer> sortsLowerBound
+	static var HashMap<String, Integer> varsUpperBound
+	static var HashMap<String, Integer> varsLowerBound
 	static var ArrayList<String> ltlFormulasVars
 	static var ArrayList<String> ltlFormulasBools
 
@@ -62,7 +65,10 @@ class NuXmvTextGenerator {
 		functions = new HashMap<String, String>
 		functionParams = new HashMap<String, EList<String>>
 		guardsLeft = new HashMap<Integer, String>
-		dtTypes = new HashMap<String, Integer>
+		sortsUpperBound = new HashMap<String, Integer>
+		sortsLowerBound = new HashMap<String, Integer>
+		varsUpperBound = new HashMap<String, Integer>
+		varsLowerBound = new HashMap<String, Integer>
 		ltlFormulasVars = new ArrayList<String>
 		ltlFormulasBools = new ArrayList<String>
 
@@ -72,7 +78,8 @@ class NuXmvTextGenerator {
 				dataTypes.put(sort.sortName.name, sort.dataType.convertToString)
 				val bd = sort.dataType
 				if (bd instanceof BoundedNuXmv) {
-					dtTypes.put(sort.sortName.name, bd.upperBound)
+					sortsUpperBound.put(sort.sortName.name, Integer.parseInt(bd.upperBound))
+					sortsLowerBound.put(sort.sortName.name, Integer.parseInt(bd.lowerBound))
 				}
 			}
 			// Dictionary of functions
@@ -87,6 +94,12 @@ class NuXmvTextGenerator {
 		for (var i = 0; i < transitions.size; i++) {
 			val guardLeft = convertLeftFormula(transitions.get(i).guardLeft)
 			if(guardLeft !== null) guardsLeft.put(i, guardLeft)
+		}
+		for (variable : cType.btaDtVar) {
+			if (sortsUpperBound.get(variable.varSortType.name) !== null) {
+				varsUpperBound.put(variable.name, sortsUpperBound.get(variable.varSortType.name))
+				varsLowerBound.put(variable.name, sortsLowerBound.get(variable.varSortType.name))
+			}
 		}
 		convertToNuXmv(cType)
 	}
@@ -154,12 +167,8 @@ class NuXmvTextGenerator {
 				«transitionOutputPort(outputPort.name, transitions)»
 				
 			«ENDFOR»
-		«var dtSorts = new HashMap<String, Integer>»
-		«FOR dtType : cType.btaDtVar»
-			«dtSorts.put(dtType.name, dtTypes.get(dtType.varSortType.name))»
-		«ENDFOR»
 		«FOR ltlFormula : cType.behaviorTraceAssertion»
-			«convertLTLFormula(ltlFormula, dtSorts)»
+			«convertLTLFormula(ltlFormula)»
 		«ENDFOR»
 		«FOR ltlFormula : ltlFormulasVars»
 			«ltlFormula»
@@ -430,44 +439,49 @@ class NuXmvTextGenerator {
 		return ""
 	}
 
-	def static void convertLTLFormula(BehaviorTraceAssertion ltlFormula, HashMap<String, Integer> dtVars) {
+	def static void convertLTLFormula(BehaviorTraceAssertion ltlFormula) {
 		var fsmVariables = new ArrayList<String>
 		val formula = convertToBtaFormula(ltlFormula.btaFormula, fsmVariables)
 		val boolVars = new ArrayList<String>()
 		val variables = new ArrayList<String>()
 		val bools = new ArrayList<Integer>()
-		val boundsVariables = new ArrayList<Integer>()
+		val upperBounds = new ArrayList<Integer>()
+		val lowerBounds = new ArrayList<Integer>()
 		for (variable : fsmVariables) {
-			val mapping = dtVars.get(variable)
-			if (mapping === null) {
+			val upperBound = varsUpperBound.get(variable)
+			val lowerBound = varsLowerBound.get(variable)
+			// Boolean
+			if (upperBound === null) {
 				boolVars.add(variable)
 				bools.add(1)
 			} else {
-				boundsVariables.add(mapping)
+				upperBounds.add(upperBound)
+				lowerBounds.add(lowerBound)
 				variables.add(variable)
 			}
 		}
 		if (boolVars.length > 0) {
-			val int[] counters1 = newIntArrayOfSize(boolVars.length)
-			nestedLoopOperation(counters1, bools, 0, boolVars, formula, false)
-			val int[] counters2 = newIntArrayOfSize(variables.length)
+			val int[] countersBool = newIntArrayOfSize(boolVars.length)
+			val int[] countersVar = newIntArrayOfSize(variables.length)
+			val int[] lowerBools = newIntArrayOfSize(boolVars.length)
+			nestedLoopOperation(lowerBools, countersBool, bools, 0, boolVars, formula, false)
 			for (btaFormula : ltlFormulasBools) {
-				nestedLoopOperation(counters2, boundsVariables, 0, variables, btaFormula, true)
+				nestedLoopOperation(lowerBounds, countersVar, upperBounds, 0, variables, btaFormula, true)
 			}
 		} else {
-			val int[] counters = newIntArrayOfSize(fsmVariables.length)
-			nestedLoopOperation(counters, boundsVariables, 0, fsmVariables, formula, true)
+			val int[] counters = newIntArrayOfSize(variables.length)
+			nestedLoopOperation(lowerBounds, counters, upperBounds, 0, fsmVariables, formula, true)
 		}
 	}
 
-	def static void nestedLoopOperation(int[] counters, int[] length, int level, ArrayList<String> arr, String formula,
+	def static void nestedLoopOperation(int[] lowerBound, int[] counters, int[] length, int level, ArrayList<String> arr, String formula,
 		boolean isVar) {
 		if (level == counters.length) {
 			if(isVar) changeVarToInts(counters, arr, formula) else changeVarToBools(counters, arr, formula)
 		} else {
-			for (counters.set(level, 0); counters.get(level) <= length.get(level); counters.set(level,
+			for (counters.set(level, lowerBound.get(level)); counters.get(level) <= length.get(level); counters.set(level,
 				counters.get(level) + 1)) {
-				nestedLoopOperation(counters, length, level + 1, arr, formula, isVar)
+				nestedLoopOperation(lowerBound, counters, length, level + 1, arr, formula, isVar)
 			}
 		}
 	}

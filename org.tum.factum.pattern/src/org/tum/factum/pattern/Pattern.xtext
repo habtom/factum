@@ -172,7 +172,7 @@ Sort:
 ;
 
 NuXmvDataType:
-	{BoundedNuXmv} lowerBound=INT '..' upperBound=INT | {BoolNuXmv} 'boolean'
+	{BoundedNuXmv} lowerBound=Number '..' upperBound=Number | {BoolNuXmv} 'boolean'
 ;
 
 Equation:
@@ -539,4 +539,8 @@ QualifiedName:
 ;
 EString returns ecore::EString:
 	STRING | ID
+;
+
+Number:
+	('-')?INT
 ;
