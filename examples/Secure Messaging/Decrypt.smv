@@ -1,0 +1,87 @@
+-- Instructions:
+-- ~$ nuXmv -int Decrypt.smv
+-- > go
+-- > check_ltlspec
+
+MODULE main
+	
+VAR 
+	state : {wait,decrypt};
+	-- Variables
+	msg1 : 5 .. 35;
+	msg2 : 5 .. 35;
+	-- InputPorts
+	rcvEnc : 5 .. 35;
+	rcvEnc_noVal : boolean;
+	-- OutputPorts
+	sndDec : 0 .. 30;
+	sndDec_noVal : boolean;
+	
+ASSIGN
+	init(state) := wait;
+	
+	next(state) := case
+		state = wait & (rcvEnc_noVal) : wait;
+		state = wait : decrypt;
+		state = decrypt : wait;
+		TRUE: state;
+	esac;
+	
+	next(msg1) := case
+		state = wait : rcvEnc;
+		TRUE: msg1;
+	esac;
+	
+	next(msg2) := case
+		state = decrypt : rcvEnc;
+		TRUE: msg2;
+	esac;
+	
+	next(sndDec) := case
+		state = wait : (msg2 - 5);
+		state = decrypt : (msg1 - 5);
+		TRUE: sndDec;
+	esac;
+	
+	next(sndDec_noVal) := case
+		state = wait : FALSE;
+		state = decrypt : FALSE;
+		TRUE: TRUE;
+	esac;
+	
+LTLSPEC G((0=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(0 - 5) & !sndDec_noVal)))
+LTLSPEC G((1=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(1 - 5) & !sndDec_noVal)))
+LTLSPEC G((2=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(2 - 5) & !sndDec_noVal)))
+LTLSPEC G((3=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(3 - 5) & !sndDec_noVal)))
+LTLSPEC G((4=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(4 - 5) & !sndDec_noVal)))
+LTLSPEC G((5=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(5 - 5) & !sndDec_noVal)))
+LTLSPEC G((6=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(6 - 5) & !sndDec_noVal)))
+LTLSPEC G((7=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(7 - 5) & !sndDec_noVal)))
+LTLSPEC G((8=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(8 - 5) & !sndDec_noVal)))
+LTLSPEC G((9=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(9 - 5) & !sndDec_noVal)))
+LTLSPEC G((10=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(10 - 5) & !sndDec_noVal)))
+LTLSPEC G((11=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(11 - 5) & !sndDec_noVal)))
+LTLSPEC G((12=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(12 - 5) & !sndDec_noVal)))
+LTLSPEC G((13=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(13 - 5) & !sndDec_noVal)))
+LTLSPEC G((14=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(14 - 5) & !sndDec_noVal)))
+LTLSPEC G((15=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(15 - 5) & !sndDec_noVal)))
+LTLSPEC G((16=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(16 - 5) & !sndDec_noVal)))
+LTLSPEC G((17=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(17 - 5) & !sndDec_noVal)))
+LTLSPEC G((18=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(18 - 5) & !sndDec_noVal)))
+LTLSPEC G((19=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(19 - 5) & !sndDec_noVal)))
+LTLSPEC G((20=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(20 - 5) & !sndDec_noVal)))
+LTLSPEC G((21=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(21 - 5) & !sndDec_noVal)))
+LTLSPEC G((22=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(22 - 5) & !sndDec_noVal)))
+LTLSPEC G((23=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(23 - 5) & !sndDec_noVal)))
+LTLSPEC G((24=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(24 - 5) & !sndDec_noVal)))
+LTLSPEC G((25=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(25 - 5) & !sndDec_noVal)))
+LTLSPEC G((26=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(26 - 5) & !sndDec_noVal)))
+LTLSPEC G((27=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(27 - 5) & !sndDec_noVal)))
+LTLSPEC G((28=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(28 - 5) & !sndDec_noVal)))
+LTLSPEC G((29=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(29 - 5) & !sndDec_noVal)))
+LTLSPEC G((30=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(30 - 5) & !sndDec_noVal)))
+LTLSPEC G((31=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(31 - 5) & !sndDec_noVal)))
+LTLSPEC G((32=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(32 - 5) & !sndDec_noVal)))
+LTLSPEC G((33=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(33 - 5) & !sndDec_noVal)))
+LTLSPEC G((34=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(34 - 5) & !sndDec_noVal)))
+LTLSPEC G((35=rcvEnc & !rcvEnc_noVal) -> (F(sndDec=(35 - 5) & !sndDec_noVal)))
