@@ -7,7 +7,7 @@
 **[Installation Instructions](#installation-instructions)**<br>
 **[Publish-subscribe Pattern Tutorial](#publish-subscribe-pattern-tutorial)**<br>
 
-## Overview 
+## Overview
 
 FACTum Studio is a tool that supports Architectural Design Patterns (ADPs) specification and verification with the support of interactive verification in Isabelle/HOL.
 
@@ -24,6 +24,10 @@ The development of the tool utilizes frameworks and languages in the Eclipse/EMF
 Xtext is a language engineering framework that enables the textual feature of DSL using the base grammar within the EMF.
 The Xtend language is an expressive dialect of Java for productivity.
 It is used as a programing lanaguage for the additional language features such as type checking, validation, referencing and scoping.
+
+docs/factumArch.png
+![FACTum Studio Architecture](/docs/factumArch.png)
+Format: ![Alt Text](url)
 
 ## Installation Instructions
 
