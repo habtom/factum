@@ -17,7 +17,8 @@ At this stage of development, the tool has the following key features mainly for
 * Specification of architectural guarantees and
 * Generation of Isabelle/HOL theory from ADP specification.
 
-The tool is developed using the Eclipse Modeling Framework (EMF), particularly, with [Obeo](https://www.obeo.fr/en/)'s free and ready-to-use Eclipse package Obeo Designer Community. It includes the technologies required for the development, such as Sirius, Xtext, and Xtend.
+## FACTum Studio Architecture
+FACTum Studio is developed using the Eclipse Modeling Framework (EMF), particularly, with [Obeo](https://www.obeo.fr/en/)'s free and ready-to-use Eclipse package Obeo Designer Community edition. 
 
 ## Installation Instructions
 
