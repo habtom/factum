@@ -25,7 +25,11 @@ Xtext is a language engineering framework that enables the textual feature of DS
 The Xtend language is an expressive dialect of Java for productivity.
 It is used as a programing language for additional language features such as type checking, validation, referencing, and scoping.
 
-![FACTum Studio Architecture](/docs/factumArch.png =400x)
+![FACTum Studio Architecture](/docs/factumArch.png) {
+  width: 70%;
+  border: none;
+  background: none;
+}
 
 ## Installation Instructions
 
