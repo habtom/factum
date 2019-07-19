@@ -19,6 +19,10 @@ At this stage of development, the tool has the following key features mainly for
 
 ## FACTum Studio Architecture
 FACTum Studio is developed using the Eclipse Modeling Framework (EMF), particularly, with [Obeo](https://www.obeo.fr/en/)'s free and ready-to-use Eclipse package Obeo Designer Community edition. 
+The development of the tool utilizes frameworks and languages in the Eclipse/EMF ecosystem, which include Xtext, Ecore, Xtend and Sirius. 
+Xtext is a language engineering framework that enables the textual feature of DSL using the base grammar within the EMF. 
+The Xtend language is an expressive dialect of Java for productivity.
+It is used as a programing lanaguage for the additional language features such as type checking, validation, referencing and scoping.
 
 ## Installation Instructions
 
