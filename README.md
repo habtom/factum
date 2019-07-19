@@ -26,7 +26,7 @@ The Xtend language is an expressive dialect of Java for productivity.
 It is used as a programing language for additional language features such as type checking, validation, referencing, and scoping.
 
 <!--- ![FACTum Studio Architecture](/docs/factumArch.png) --->
-<img src="/docs/factumArch.png" alt="FACTum Studio Architecture" width="600"/>
+<img src="/docs/factumArch02.png" alt="FACTum Studio Architecture" width="600"/>
 
 The diagram above illustrates the architecture of FACTum Studio.
 The tool has two workspaces. The first part is where the domain language is modeled, which is the FACTum pattern metamodel.
