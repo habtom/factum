@@ -1,0 +1,189 @@
+Pattern ReliableAdder ShortName ps {
+		
+	DTSpec {
+		DT Integer (
+			Sort INT 
+			Operation add: INT, INT => INT
+		)
+	}
+	CTypes {
+		CType Dispatcher ShortName dp {
+			InputPorts {
+				InputPort i1(Type: Integer.INT),
+				InputPort i2(Type: Integer.INT)
+			}
+			OutputPorts {
+				OutputPort o1(Type: Integer.INT),
+				OutputPort o2(Type: Integer.INT),
+				OutputPort o3(Type: Integer.INT),
+				OutputPort o4(Type: Integer.INT) 
+			}   
+			Contracts {
+				Contract dispatch {
+					var x: Integer.INT,
+					var y: Integer.INT
+					
+					triggers {
+						trigger1: [i1 = x] /\ [i2 = y]
+					}
+					guarantee
+						[o1 = x] /\ [o2 = y] /\ [o3 = x] /\ [o4 = y]
+					duration 1	
+				}
+			}
+		},
+		CType Adder1 ShortName ad1 {
+			InputPorts { 
+				InputPort i1(Type: Integer.INT),
+				 InputPort i2(Type: Integer.INT)
+			}
+			OutputPorts { 
+				OutputPort oo(Type: Integer.INT) 
+			}
+			Contracts {
+				Contract add1 {
+					var x: Integer.INT,
+					var y: Integer.INT
+					
+					triggers {
+						trigger1: [i1 = x] /\ [i2 = y]
+					}
+					guarantee
+						[oo = Integer.add[x, y]]
+					duration 4
+				}
+			}
+			
+		},
+		CType Adder2 ShortName ad2 {
+			InputPorts { 
+				InputPort i1(Type: Integer.INT),
+				InputPort i2(Type: Integer.INT)
+			}
+			OutputPorts { 
+				OutputPort oo(Type: Integer.INT) 
+			}
+			Contracts {
+				Contract add2 {
+					var x: Integer.INT,
+					var y: Integer.INT
+					
+					triggers {
+						trigger1: [i1 = x] /\ [i2 = y]
+					}
+					guarantee
+						[oo = Integer.add[x, y]]
+					duration 3
+				}
+			}
+		},
+		CType Merger ShortName mg {
+			InputPorts { 
+				InputPort i1(Type: Integer.INT),
+				 InputPort i2(Type: Integer.INT)
+			}
+			OutputPorts { 
+				OutputPort oo(Type: Integer.INT) 
+			}
+			Contracts {
+				Contract merge1 {
+					var x: Integer.INT
+					
+					triggers {
+						trigger1: [i1 = x] /\ [i2 = x]
+					}
+					guarantee
+						[oo = x]
+					duration 2
+				},
+				Contract merge2 {
+					var x: Integer.INT
+					
+					triggers {
+						trigger1: [i1 = x],
+						trigger2: [i2 = x] at 1
+					}
+					guarantee
+						[oo = x]
+					duration 3
+				},
+				Contract merge3 {
+					var x: Integer.INT
+					
+					triggers {
+						trigger1: [i2 = x],
+						trigger2: [i1 = x] at 1
+					}
+					guarantee
+						[oo = x]
+					duration 3
+				}
+			}
+		}
+	}
+	Connections {
+		DispatcherAdder11: (Adder1.i1, Dispatcher.o1),
+		DispatcherAdder12: (Adder1.i2, Dispatcher.o2),
+		DispatcherAdder21: (Adder2.i1, Dispatcher.o3),
+		DispatcherAdder22: (Adder2.i2, Dispatcher.o4),
+		Adder1Merger	 : (Merger.i1, Adder1.oo),
+		Adder2Merger	 : (Merger.i2, Adder2.oo)
+	}
+	Contracts {
+		
+		Contract Sum {
+			var x: Integer.INT,
+			var	y: Integer.INT
+			
+			triggers {
+				trigger1: [Dispatcher.i1 = x] ∧ [Dispatcher.i2 = y]
+			}
+			guarantee 
+				[Merger.oo = Integer.add[x, y]]
+			duration 7
+			proof { 
+				step1:
+					at 1
+					have [Dispatcher.o1 = x] /\ [Dispatcher.o2 = y] /\
+						 [Dispatcher.o3 = x] /\ [Dispatcher.o4 = y]
+					from [
+						trigger1
+					]
+					using Dispatcher.dispatch,
+				step2:
+					at 5 
+					have [Adder1.oo = Integer.add[x, y]]
+					from [
+						step1 with [DispatcherAdder11, DispatcherAdder12]
+					]
+					using Adder1.add1,
+					
+					
+					
+				step3:
+					at 4
+					have [Adder2.oo = Integer.add[x, y]]
+					by "(metis One_nat_def Suc_numeral add_Suc_shift semiring_norm(2) semiring_norm(8))"
+					from [
+						step1 with [DispatcherAdder21, DispatcherAdder22]
+					]
+					using Adder2.add2,
+				step5: 
+					at 7
+					have [Merger.oo = Integer.add[x, y]]
+					by "(simp add: numeral_Bit0 numeral_Bit1)"
+					from [
+						step3 with [Adder2Merger],
+						step2 with [Adder1Merger]
+					] 
+					using Merger.merge3
+					map x = Integer.add[x, y]
+			}
+		}
+	}
+}
+
+
+
+
+

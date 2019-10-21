@@ -28,6 +28,8 @@ import org.tum.factum.pattern.pattern.ContractTrigger
 import org.tum.factum.pattern.pattern.ProofContract
 import java.util.HashMap
 import java.util.ArrayList
+import org.tum.factum.pattern.pattern.Pattern
+import org.tum.factum.pattern.pattern.Connection
 
 /**
  * This class contains custom validation rules. 
@@ -244,7 +246,7 @@ class PatternValidator extends AbstractPatternValidator {
 	}
 	
 	@Check
-	def uniqueContractName(ComponentType cType) {
+	def checkUniqueContractName(ComponentType cType) {
 		var i=0;
 		
 		var errors = new HashMap<Integer, Integer>();
@@ -269,6 +271,45 @@ class PatternValidator extends AbstractPatternValidator {
 		errors.forEach[index, value| {
 			error("Contract with this name already exists.", PatternPackage.eINSTANCE.componentType_Contracts, index);
 		}];
+	}
+	
+	@Check
+	def checkUniqueConnectionName(Pattern pattern) {
+		var i=0;
+		
+		var errors = new HashMap<Integer, Integer>();
+		
+		while (i < pattern.connections.size) {
+			val contract = pattern.connections.get(i)
+			
+			for (var j = 0; j < pattern.connections.size; j++) {
+				if (pattern.connections.get(j).name.equals(contract.name) && i != j && !(errors.get(i) !== null || errors.get(j) !== null)) {
+					if (i > j) {
+						errors.put(i, i);	
+					} else {
+						errors.put(j, j);
+					}
+					j = pattern.connections.size;
+				}
+			} 
+			
+			i++
+		}
+		
+		errors.forEach[index, value| {
+			error("Connection with this name already exists.", PatternPackage.eINSTANCE.pattern_Connections, index);
+		}];
+	}
+	
+	@Check
+	def checkInputAndOutputPortsInConnection(Connection connection) {
+		if (!(connection.inputPort instanceof InputPort)) {
+			error("Connection must be a pair of an InputPort and an OutputPort", PatternPackage.eINSTANCE.connection_InputPort);
+		}
+		
+		if (!(connection.outputPort instanceof OutputPort)) {
+			error("Connection must be a pair of an InputPort and an OutputPort", PatternPackage.eINSTANCE.connection_OutputPort);
+		}
 	}
 	
 	@Check

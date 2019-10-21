@@ -25,10 +25,16 @@ Pattern returns Pattern:
 			(ctaFormulaIds+=CtaFormulasID)*
 	    	'}'
 	    )?
+	    
+	    ('Connections' '{'
+	    	connections += Connection (',' connections += Connection)*	
+	    '}'
+	    )?
+	    
 	    //Part 4 - Specification of Architectural Guarantees
 	    ('Contracts' '{'
 	    	proofContracts += ProofContract (',' proofContracts += ProofContract)*
-	    '}'	
+	    '}'
 	    )?
 	    
 		('SubPattern' '{' SubPattern+=Pattern ( "," SubPattern+=Pattern)* '}' )?
@@ -71,27 +77,30 @@ Proof returns Proof:
 ProofStep returns ProofStep:
 	{ProofStep}
 	name = ID ':' 
-	'at' timepoint = Timepoint 'have' state = BasicFormula 
+	'at' timepoint = Timepoint
+	'have' state = BasicFormula
+	('by' proofBy = EString)? 
 	('from' '[' proofStepRefs += ProofStepRef (',' proofStepRefs += ProofStepRef)*']')?
 	'using' contract = [ContractRef|QualifiedName]
+	('map' proofTermMappings+=ProofTermMapping (',' proofTermMappings+=ProofTermMapping)*)?
 ;
 ProofStepRef:
-	trigger = [ContractTrigger] | ProofStepRefWithConnections
+	trigger = [ContractTrigger] ('by' proofBy = EString)? | ProofStepRefWithConnections ('by' proofBy = EString)?
 ;
 ProofStepRefWithConnections returns ProofStepRefWithConnections:
 	{ProofStepRefWithConnections}
-	proofstep = [ProofStep] 'with' '[' proofConnections += ProofConnection ( ',' proofConnections += ProofConnection)* ']'
+	proofstep = [ProofStep] 'with' '[' proofConnections += [ConnectionRef|QualifiedName] ( ',' proofConnections += [ConnectionRef|QualifiedName])* ']'
 ;
-ProofConnection returns ProofConnection:
-	{ProofConnection}
-	'('input = [PortRef|QualifiedName] ',' output = [PortRef|QualifiedName]')'
+ProofTermMapping returns ProofTermMapping:
+	{ProofTermMapping}
+	variable = ID '=' term = BasicTerm
 ;
 Contract returns Contract:
 	{Contract}
 	'Contract' name = ID '{'
     	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
 		('triggers' '{' triggers+=ContractTrigger (',' triggers+=ContractTrigger)* '}')?
-		'guarantees' '{'  guarantees+=BasicFormula (',' guarantees+=BasicFormula)* '}'
+		'guarantee' guarantee = BasicFormula
 		'duration' duration=Timepoint
 	'}'
 ;
@@ -100,7 +109,7 @@ ProofContract returns ProofContract:
 	'Contract' name = ID '{'
     	(contractDtVar+=DataTypeVariable (',' contractDtVar+=DataTypeVariable)*)?
 		('triggers' '{' triggers+=ContractTrigger (',' triggers+=ContractTrigger)* '}')?
-		'guarantees' '{'  guarantees+=BasicFormula (',' guarantees+=BasicFormula)* '}'
+		'guarantee' guarantees = BasicFormula
 		'duration' duration=Timepoint
 		(proof=Proof)?
 	'}'
@@ -114,6 +123,13 @@ ContractTrigger returns ContractTrigger:
 ;
 ContractTriggerRef:
 	ContractTrigger
+;
+Connection returns Connection:
+	{Connection}
+	name = ID ':' '(' inputPort = [PortRef|QualifiedName] ',' outputPort = [PortRef|QualifiedName] ')'
+;
+ConnectionRef:
+	Connection
 ;
 Parameter returns Parameter:
 	{Parameter}
@@ -179,6 +195,7 @@ DTVariables:
 PortRef:
 	InputPort | OutputPort | Parameter | DataTypeVariable
 ;
+
 CmpVariableRef:
 	cmpRef=[ComponentVariable|ID] '.' portRef=[PortRef|ID]
 ;
@@ -407,14 +424,7 @@ BtaOpParam:
 ;
 // Contract formula
 BasicFormula:
-	BasicQuantification |
-	BasicLImp
-;
-BasicQuantification returns BasicFormula:
-	QuantifierOperator basicFormula=BasicLImp
-;
-BasicLImp returns BasicFormula:
-	BasicLOr ({BasicLImp.left=current} ('⇒'|'==>') right=BasicLOr)*
+	BasicLOr ({BasicFormula.left=current} ('⇒'|'==>') right=BasicLOr)*
 ;
 BasicLOr returns BasicFormula:
 	BasicLAnd ({BasicLOr.left=current} ('∨'|'\\/') right=BasicLAnd)*
