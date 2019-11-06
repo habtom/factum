@@ -10,8 +10,7 @@ Pattern TrainguardMT ShortName tgmt {
 		),
 		DT DoorStatus (
 			Sort DoorStatus
-			Predicate DT_DoorStatus_DoorsOpen: DoorStatus,
-					DT_DoorStatus_DoorsVitalClosed: DoorStatus,
+			Predicate DT_DoorStatus_DoorsVitalClosed: DoorStatus,
 					DT_DoorStatus_Closed: DoorStatus
 		),
 		DT Bool ( 
@@ -65,16 +64,7 @@ Pattern TrainguardMT ShortName tgmt {
 		),
 		DT PlatformPSDStatus (
 			Sort PlatformPSDStatus
-			Predicate DT_PlatformPSDStatus_Has_PSD: PlatformPSDStatus,
-				  DT_PlatformPSDStatus_Has_Not_PSD: PlatformPSDStatus
-		),
-		DT StoppingWindow (
-			Sort StoppingWindow
-			Predicate DT_StoppingWindow_WithinStoppingWindow: StoppingWindow,
-				  DT_StoppingWindow_OutsideStoppingWindow: StoppingWindow
-		),
-		DT Time (
-			Sort INT
+			Predicate DT_PlatformPSDStatus_Has_PSD: PlatformPSDStatus
 		),
 		DT Authority (
 			Sort STRING
@@ -92,7 +82,7 @@ Pattern TrainguardMT ShortName tgmt {
 				InputPort CL_I_Door_Closed_Indication (Type: DoorStatus.DoorStatus)
 			}
 			OutputPorts {
-				OutputPort doorStatus (Type: Status.INT),
+				OutputPort doorStatus (Type: DoorStatus.DoorStatus),
 				OutputPort cabDoorCommand (Type: DoorCommand.DoorCommand),
 				OutputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
 				OutputPort cabPremissiveDoorMode (Type: Status.INT)
@@ -101,8 +91,8 @@ Pattern TrainguardMT ShortName tgmt {
 		CType OBCU_ATO_Door_Mode_Controller {
 			InputPorts {
 				InputPort trainOperationMode (Type: Status.INT),
-				InputPort platformPSDStatus (Type: Status.INT),
-				InputPort trainControlLevel(Type: Status.INT),
+				InputPort platformPSDStatus (Type: DoorStatus.DoorStatus),
+				InputPort trainControlLevel(Type: TrainControlLevel.TrainControlLevel),
 				InputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
 				InputPort cabPremissiveDoorMode (Type: Status.INT)
 			}
@@ -116,7 +106,7 @@ Pattern TrainguardMT ShortName tgmt {
 				InputPort dwellTimeElapsed (Type: Bool.BOOLEAN),
 				InputPort releaseForcedByPermissiveDoorButton (Type: Bool.BOOLEAN),
 				InputPort doorReleaseStatus (Type: DoorReleaseStatus.DoorReleaseStatus),
-				InputPort trainControlLevel (Type: Status.INT)
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel)
 			}
 			OutputPorts {
 				OutputPort doorOpenCommand (Type: DoorCommand.DoorCommand)
@@ -143,10 +133,10 @@ Pattern TrainguardMT ShortName tgmt {
 		CType OBCU_ATO_Train_Door_Supervision_Mode_Controller {
 			InputPorts {
 				InputPort movingStatus (Type: MovingStatus.MovingStatus),
-				InputPort doorReleaseStatus (Type: Time.INT),
+				InputPort doorReleaseStatus (Type: DoorReleaseStatus.DoorReleaseStatus),
 				InputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
-				InputPort trainControlLevel (Type: Status.INT),
-				InputPort doorStatus (Type: Status.INT)
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
+				InputPort doorStatus (Type: DoorStatus.DoorStatus)
 			}
 			OutputPorts {
 				OutputPort trainSupervision (Type: Bool.BOOLEAN)
@@ -155,8 +145,8 @@ Pattern TrainguardMT ShortName tgmt {
 		CType OBCU_ATO_Train_Door_Supervision_Controller {
 			InputPorts {
 				InputPort trainSupervision (Type: Bool.BOOLEAN),
-				InputPort trainControlLevel (Type: Status.INT),
-				InputPort doorStatus (Type: Status.INT)
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
+				InputPort doorStatus (Type: DoorStatus.DoorStatus)
 			}
 			OutputPorts {
 				OutputPort trainMovement (Type: Bool.BOOLEAN)
@@ -248,7 +238,7 @@ Pattern TrainguardMT ShortName tgmt {
 				InputPort openDoorCommand (Type: DoorCommand.DoorCommand)
 			}
 			OutputPorts {
-				OutputPort TCL_O_Door_Opening_Closing (Type: Status.INT)
+				OutputPort TCL_O_Door_Opening_Closing (Type: DoorCommand.DoorCommand)
 			}
 		},
 
@@ -282,16 +272,16 @@ Pattern TrainguardMT ShortName tgmt {
 		CType OBCU_ITF_HMI_Status_Function {
 			InputPorts {
 				InputPort rauz (Type: Status.INT),
-				InputPort doorReleaseStatus (Type: Status.INT),
-				InputPort trainControlLevel (Type: Status.INT),
+				InputPort doorReleaseStatus (Type: DoorReleaseStatus.DoorReleaseStatus),
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
 				InputPort doorMode (Type: Status.INT),
-				InputPort doorStatus (Type: Status.INT)
+				InputPort doorStatus (Type: DoorStatus.DoorStatus)
 			}
 			OutputPorts {
-				OutputPort doorStatusHMI (Type: Status.INT),
+				OutputPort doorStatusHMI (Type: DoorStatus.DoorStatus),
 				OutputPort psdStatusHMI (Type: Status.INT),
 				OutputPort currentDoorModeHMI (Type: Status.INT),
-				OutputPort doorReleaseStatusHMI (Type: Status.INT)
+				OutputPort doorReleaseStatusHMI (Type: DoorReleaseStatus.DoorReleaseStatus)
 			}
 		},
 		CType OBCU_ITF_FWD_Movement_Authority {
@@ -364,7 +354,7 @@ Pattern TrainguardMT ShortName tgmt {
 				InputPort TCL_I_Door_Closed_Button (Type: Bool.BOOLEAN)
 			}
 			OutputPorts {
-				OutputPort trainControlLevel (Type: Status.INT),
+				OutputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
 				OutputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
 				OutputPort doorStatus (Type: DoorStatus.DoorStatus)
 			}
@@ -394,14 +384,6 @@ Pattern TrainguardMT ShortName tgmt {
 						doorsReleased: DoorReleaseCommand.DT_DoorReleaseCommand_Left[doorReleaseCommand]
 										\/ DoorReleaseCommand.DT_DoorReleaseCommand_Right[doorReleaseCommand]
 										\/ DoorReleaseCommand.DT_DoorReleaseCommand_Both[doorReleaseCommand]
-					}
-					guarantee 
-						Bool.true[TCL_O_Door_Release]
-					duration 1
-				},
-				Contract doorsNotReleased {
-					triggers {
-						doorsReleased: DoorReleaseCommand.DT_DoorReleaseCommand_Deactivate[doorReleaseCommand]
 					}
 					guarantee 
 						Bool.true[TCL_O_Door_Release]
@@ -500,8 +482,8 @@ Pattern TrainguardMT ShortName tgmt {
 		},
 		CType OBCU_ATP_Propulson_Function {
 			InputPorts {
-				InputPort doorStatus (Type: Status.INT),
-				InputPort trainControlLevel (Type: Status.INT),
+				InputPort doorStatus (Type: DoorStatus.DoorStatus),
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
 				InputPort rauz (Type: Status.INT),
 				InputPort authorizePSDOpening (Type: Bool.BOOLEAN)
 			}
@@ -512,9 +494,8 @@ Pattern TrainguardMT ShortName tgmt {
 		CType OBCU_ATP_Door_Release_Controller
 		 {
 			InputPorts {
-				
 				InputPort doorStatus (Type: DoorStatus.DoorStatus),
-				InputPort trainControlLevel (Type: Status.INT),
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
 				InputPort trainOperationMode (Type: Status.INT),
 				InputPort platformPSDStatus (Type: PlatformPSDStatus.PlatformPSDStatus),
 				InputPort cabPremissiveDoorButton (Type: Bool.BOOLEAN),
@@ -532,15 +513,6 @@ Pattern TrainguardMT ShortName tgmt {
 				OutputPort releaseForcedByPermissiveDoorButton (Type: Bool.BOOLEAN)
 			}
 			Contracts {
-				Contract openingLeftDoorSide {
-					triggers {
-						
-						trigger1: DoorOpenStrategy.DT_DoorOpenStrategy_Left[platformSide]
-					}
-					guarantee 
-						DoorReleaseCommand.DT_DoorReleaseCommand_Left[doorReleaseCommand]
-					duration 1
-				},
 				Contract openingRightDoorSide {
 					triggers {
 						trigger1: DoorOpenStrategy.DT_DoorOpenStrategy_Right[platformSide]
@@ -548,18 +520,6 @@ Pattern TrainguardMT ShortName tgmt {
 					guarantee 
 						DoorReleaseCommand.DT_DoorReleaseCommand_Right[doorReleaseCommand]
 					duration 1
-				},
-				Contract doorsReleased {
-//					var trainInStoppingWindow: Bool.BOOLEAN,
-//					var premissiveRelease: Bool.BOOLEAN
-					triggers {
-						standStill: MovingStatus.DT_TrainMovingStatus_StandStill[movingStatus]
-//						trainInStoppingPosition: Bool.true[] at 1,
-//						premissiveRelease: Bool.false[premissiveRelease] at 2
-					}
-					guarantee 
-						DoorReleaseStatus.DT_DoorReleaseStatus_Released[doorReleaseStatus]
-					duration 3
 				},
 				Contract doorsNotReleasedWhileMoving {
 					triggers {
@@ -614,24 +574,9 @@ Pattern TrainguardMT ShortName tgmt {
 				InputPort ATS_I_Select_Door_Open_Strategy (Type: Status.INT)
 			}
 			OutputPorts {
-				OutputPort selectedDoorStrategy (Type: Status.INT),
+				OutputPort selectedDoorStrategy (Type: DoorOpenStrategy.DoorOpenStrategy),
 				OutputPort psdClosed (Type: DoorStatus.DoorStatus),
 				OutputPort psdOverwrite (Type: Status.INT)
-			}
-			Contracts {
-				Contract selectedDoorStrategy {
-					guarantee 
-						[selectedDoorStrategy = ATS_I_Select_Door_Open_Strategy]
-					duration 1
-				},
-				Contract psdClosed {
-					triggers {
-						trigger1: Bool.true[PSD_I_PSD_Closed]
-					}
-					guarantee 
-						DoorStatus.DT_DoorStatus_DoorsVitalClosed[psdClosed]
-					duration 1
-				}
 			}
 		},
 		CType Wayside_OPD_Telegram_Extractor {
@@ -706,22 +651,6 @@ Pattern TrainguardMT ShortName tgmt {
 						Bool.true[psdOpen]
 					duration 3
 				},
-				Contract doorClosedCTC {
-					triggers {
-						trainControlLevelITC: TrainControlLevel.DT_TrainControlLevel_CTC[trainControlLevel]
-					}
-					guarantee 
-						Bool.false[psdOpen]
-					duration 1
-				},
-				Contract doorClosedNotAuthorized {
-					triggers {
-						notAuthorized: PSD_Authorization.DT_PSD_Authorization_Not_Authorize[doorOpenAuthorization]
-					}
-					guarantee 
-						Bool.false[psdOpen]
-					duration 1
-				},
 				Contract doorClosed {
 					triggers {
 						notAuthorized: PSD_Authorization.DT_PSD_Authorization_Not_Authorize[doorOpenAuthorization],
@@ -730,21 +659,13 @@ Pattern TrainguardMT ShortName tgmt {
 					guarantee 
 						Bool.false[psdOpen]
 					duration 3
-				},
-				Contract doorClosedCommandClose {
-					triggers {
-						psdCloseCommand: DoorCommand.DT_DoorCommand_Close[psdOpenCommand]
-					}
-					guarantee 
-						Bool.false[psdOpen]
-					duration 1
 				}
 			}
 		},
 		CType Wayside_RAUZ_Control_Function {
 			InputPorts {
 				InputPort psdOverwrite (Type: Status.INT),
-				InputPort trainControlLevel (Type: Status.INT),
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel),
 				InputPort psdClosed (Type: Bool.BOOLEAN)
 			}
 			OutputPorts {
@@ -754,18 +675,18 @@ Pattern TrainguardMT ShortName tgmt {
 		},
 		CType Wayside_Door_Strategy_Function {
 			InputPorts {
-				InputPort selectedDoorStrategy (Type: Status.INT),
-				InputPort defaultDoorStrategy (Type: Status.INT),
-				InputPort trainControlLevel (Type: Status.INT)
+				InputPort selectedDoorStrategy (Type: DoorOpenStrategy.DoorOpenStrategy),
+				InputPort defaultDoorStrategy (Type: DoorOpenStrategy.DoorOpenStrategy),
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel)
 			}
 			OutputPorts {
-				OutputPort currentDoorStrategy (Type: Status.INT)
+				OutputPort currentDoorStrategy (Type: DoorOpenStrategy.DoorOpenStrategy)
 			}
 		},
 		CType Wayside_ATS_Status_Function{
 			InputPorts {
-				InputPort currentDoorStrategy (Type: Status.INT),
-				InputPort trainControlLevel (Type: Status.INT)
+				InputPort currentDoorStrategy (Type: DoorOpenStrategy.DoorOpenStrategy),
+				InputPort trainControlLevel (Type: TrainControlLevel.TrainControlLevel)
 			}
 			OutputPorts {
 				OutputPort psdStatusATS (Type: Status.INT),
@@ -842,8 +763,7 @@ Pattern TrainguardMT ShortName tgmt {
 		AuthorizeOpening_PAST_PAC: (OBCU_ATP_PSD_Authorization_State_Tracker.authorizePSDOpening, OBCU_ATP_PSD_Authorization_Controller.authorizePSDOpening),
 		AuthorizeOpening_TB_PAST: (OBCU_ATP_Telegram_Builder.psdAuthorizationState, OBCU_ATP_PSD_Authorization_State_Tracker.psdAuthorizationState),
 		PositionReport_FPR_TB: (OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport, OBCU_ATP_Telegram_Builder.OBCU_WCU_PositionReport),
-		PositionReport_TE_FPR: (Wayside_OPR_Telegram_Extractor.OBCU_WCU_PositionReport, OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out),
-		PositionReport_TE_FPRS: (Wayside_OPR_Telegram_Extractor.OBCU_WCU_PositionReport, OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out)
+		PositionReport_TE_FPR: (Wayside_OPR_Telegram_Extractor.OBCU_WCU_PositionReport, OBCU_ITF_FWD_Position_Report.WCU_OBCU_PositionReport_Out)
 	}
 
 	Contracts {
