@@ -1,0 +1,131 @@
+
+
+
+
+Pattern EncryptedConnection ShortName encConnect {
+	
+	DTSpec {
+		DT Numbers (
+			Sort INT16, INT32
+			Operation 
+					  add: INT16, INT16 => INT32,
+					  sub: INT32, INT16 => INT16,
+					  five: => INT16
+		DTMap {
+			Sort INT16 -> 0 .. 1024,
+				 INT32 -> 5 .. 1029
+			Operation add[x, y] -> x + y,
+					  sub[x, y] -> x - y,
+					  five[] -> 5
+					  
+			}
+		)
+		
+	}
+	
+	CTypes {
+		CType Encrypt ShortName enc {
+			InputPorts {
+				InputPort rcvMsg (Type: Numbers.INT16)
+			}
+			OutputPorts {
+				OutputPort sndEnc (Type: Numbers.INT32)
+			}
+			
+			Contracts {
+				flex msg: Numbers.INT16,
+				flex msgEnc: Numbers.INT32
+		
+				c: G ([msg = rcvMsg] ⇒ (F([sndEnc=Numbers.add[msg, Numbers.five[]]])))
+			}
+			Behavior {
+				States wait, encrypt
+				Initial {
+					State wait
+					Var msg = rcvMsg
+				}
+				Transitions {
+					wait -> [msgEnc=Numbers.add[msg, 5]] encrypt
+					encrypt -> [sndEnc=msgEnc] wait
+				}
+			}
+			
+		},
+		CType Decrypt ShortName dec {
+			InputPorts {
+				InputPort rcvEnc (Type: Numbers.INT32)
+			}
+			OutputPorts {
+				OutputPort sndDec (Type: Numbers.INT16
+				)
+			}
+			
+			Contracts {
+				flex msgEnc: Numbers.INT32,
+				flex msgDec: Numbers.INT16
+		
+				c: G ([msgDec = rcvEnc] ⇒ (F([sndDec=Numbers.sub[msgEnc, Numbers.five[]]])))
+			}
+			Behavior {
+				States wait, decrypt
+				Initial {
+					State wait
+					Var msgEnc = rcvEnc
+				}
+				Transitions {
+					wait -> [msgDec=Numbers.sub[msgEnc, 5]] decrypt
+					decrypt -> [sndDec = msgDec] wait
+				}
+			}
+		},
+		CType Node ShortName nd {
+			InputPorts {
+				InputPort rcv (Type: Numbers.INT32)
+			}
+			OutputPorts {
+				OutputPort snd (Type: Numbers.INT32)
+			}
+			Contracts{
+				flex msg: Numbers.INT32
+				
+				c: G ([msg = rcv] ⇒ (F([snd=msg])))
+			}	
+		}
+	}
+	
+	ArchSpec {
+		flex enc1 : Encrypt,
+		flex enc2 : Encrypt,
+		flex dec1 : Decrypt,
+		flex dec2 : Decrypt,
+		flex nd1 : Node,
+		flex nd2 : Node
+		
+		// Only one instance of Encrypt and Decrypt
+		enc: G (cAct(enc1) ∧ (∀enc2.(cAct(enc2) ⇒ eq(enc2, enc1))))
+		dec: G (cAct(dec1) ∧ (∀dec2.(cAct(dec2) ⇒ eq(dec2, dec1))))
+		
+		// Specify connection
+		con: ∃nd1. (∃nd2. (G (cAct(nd1) ∧ cAct(nd2) ∧ conn(enc1.sndEnc, nd1.rcv) 
+			 ∧ conn(nd1.snd, nd2.rcv) ∧ conn(nd2.snd, dec1.rcvEnc))))
+	}
+	
+	ArchGuarantee {
+		flex enc : Encrypt,
+		flex dec : Decrypt
+		
+		flex num16 : Numbers.INT16
+		
+		g: G (val(enc.rcvMsg, num16)  ⇒ (F(val(dec.sndDec, num16))))
+	}
+	
+}
+
+
+
+
+
+
+
+
+
