@@ -63,7 +63,7 @@ ComponentType returns ComponentType:
 	    )?
 	    //Part 2.5 of Spec
 	   	('Behavior' '{'
-	   			'Variables' fsmVars+=FsmVariable ( ',' fsmVars+=FsmVariable)*
+	   			('Variables' fsmVars+=FsmVariable ( ',' fsmVars+=FsmVariable)*)?
 	   			'States' states+=State ( ',' states+=State)*	
 	   			'Initial' initial=Initialization
 	   			('Transitions' '{'
@@ -176,11 +176,11 @@ NuXmvDataType:
 ;
 
 Equation:
-	(INT | ID | '+' | '-' | '/' | '*' | '.' | Bool )+
+	(INT | ID | '+' | '-' | '/' | '*' | '(' | ')' | Bool )+
 ;
 
 MapOperation:
-	op=[Operation|QualifiedName] '['(vars+=ID (',' vars+=ID)*)? ']' '->' opFunction=Equation 
+	op=[Operation|QualifiedName] '['(vars+=ID (',' vars+=ID)*)? ']' '->' opFunction=Equation
 ;
 
 MapSort:
@@ -213,7 +213,7 @@ Term:
 	termOperatorFunction=TermOperatorFunction
 ;
 TermOperatorFunction:
-	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*) ")" 
+	trmOperator=[Operation|QualifiedName] "(" (trmOperands+=Term ("," trmOperands+=Term)*)? ")" 
 ;
 RefComponentVariableInputPort:
 	inptPrtCmpRef=[ComponentVariable|ID] '.' inputPrtrf=[InputPort|ID]
@@ -233,6 +233,9 @@ CtaPredicateConn:
 ; 
 CtaPredicateEq: 
 	ctaEq='eq' ('(' ctaComponentVariable1=[ComponentVariable|ID] ',' ctaComponentVariable2=[ComponentVariable|ID] ')')
+;
+CtaPredicateNeq: 
+	ctaEq='neq' ('(' ctaComponentVariable1=[ComponentVariable|ID] ',' ctaComponentVariable2=[ComponentVariable|ID] ')')
 ;
 CtaPredicateVal:
 	ctaVal='val' ('(' valCmpVariableRef=CmpVariableRef ',' ctaValTerms=Term ')') 
@@ -275,6 +278,7 @@ CtaBaseTerms:
 		ctaPredicateConn=CtaPredicateConn | 
 		ctaPredicateVal=CtaPredicateVal | 
 		ctaPredicateEq=CtaPredicateEq | //This might be duplicate to CtaPredicateTerms?
+		ctaPredicateNeq=CtaPredicateNeq |
 		ctaPredicateCAct=CtaPredicateCAct | 
 		ctaPredicatePAct=CtaPredicatePAct 
 ;
