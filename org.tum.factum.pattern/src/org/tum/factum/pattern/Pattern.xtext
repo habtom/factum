@@ -125,7 +125,7 @@ InitDataTypes:
 Transition returns Transition:
 	{Transition}
 	transitionStart=[State|QualifiedName] 
-	('['guardLeft=FsmFormula']')? '->' ('['guardRight=FsmFormula']')?
+	('['guard=FsmFormula']')? '->' ('['action=FsmFormula']')?
 	transitionEnd=[State|QualifiedName]
 ;
 
