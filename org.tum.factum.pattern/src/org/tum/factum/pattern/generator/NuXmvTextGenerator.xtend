@@ -52,7 +52,7 @@ class NuXmvTextGenerator {
 	static var HashMap<String, String> dataTypes
 	static var HashMap<String, String> functions
 	static var HashMap<String, EList<String>> functionParams
-	static var HashMap<Integer, String> guardsLeft
+	static var HashMap<Integer, String> guards
 	static var HashMap<String, Integer> sortsUpperBound
 	static var HashMap<String, Integer> sortsLowerBound
 	static var HashMap<String, Integer> varsUpperBound
@@ -64,7 +64,7 @@ class NuXmvTextGenerator {
 		dataTypes = new HashMap<String, String>
 		functions = new HashMap<String, String>
 		functionParams = new HashMap<String, EList<String>>
-		guardsLeft = new HashMap<Integer, String>
+		guards = new HashMap<Integer, String>
 		sortsUpperBound = new HashMap<String, Integer>
 		sortsLowerBound = new HashMap<String, Integer>
 		varsUpperBound = new HashMap<String, Integer>
@@ -93,7 +93,7 @@ class NuXmvTextGenerator {
 		// Convert every guard
 		for (var i = 0; i < transitions.size; i++) {
 			val guard = convertLeftFormula(transitions.get(i).guard)
-			if(guard !== null) guardsLeft.put(i, guard)
+			if(guard !== null) guards.put(i, guard)
 		}
 		for (variable : cType.btaDtVar) {
 			if (sortsUpperBound.get(variable.varSortType.name) !== null) {
@@ -202,9 +202,9 @@ class NuXmvTextGenerator {
 	def static String transitionState(Transition transition, int transitionNr) {
 		val transitionStart = transition.transitionStart.name
 		val transitionEnd = transition.transitionEnd.name
-		val guard = guardsLeft.get(transitionNr)
+		val guard = guards.get(transitionNr)
 
-		return '''state = «transitionStart»«IF (guard != "")» & («guard»)«ENDIF» : «transitionEnd»;'''
+		return '''state = «transitionStart»«IF (!guard.isEmpty)» & («guard»)«ENDIF» : «transitionEnd»;'''
 	}
 
 	def static String transitionVariable(String variable, EList<Transition> transitions) {
@@ -222,9 +222,8 @@ class NuXmvTextGenerator {
 			next(«variable») := case
 			«FOR transition : transitions»
 				«val action = right.get(transitionNr++)»
-				«IF action !== null»
-					«"\t"»«build(transition.transitionStart.name, action, transitionNr)»
-				«ENDIF»
+«««				«IF action !== null»
+				«"\t"»«build(transition.transitionStart.name, action ?: variable, transitionNr)»
 			«ENDFOR»	
 				TRUE: «variable»;
 			esac;
@@ -249,9 +248,7 @@ class NuXmvTextGenerator {
 			next(«outputPort») := case
 			«FOR transition : transitions»
 				«val action = right.get(transitionNr++)»
-				«IF action !== null»
-					«"\t"»«build(transition.transitionStart.name, action, transitionNr)»
-				«ENDIF»
+				«"\t"»«build(transition.transitionStart.name, action ?: outputPort, transitionNr)»
 			«ENDFOR»	
 				TRUE: «outputPort»;
 			esac;
@@ -270,8 +267,8 @@ class NuXmvTextGenerator {
 	}
 
 	def static String build(String state, String action, int transitionNr) {
-		val guard = guardsLeft.get(transitionNr - 1)
-		return '''state = «state»«IF (!guard.isEmpty)» & «guard»«ENDIF» : «action»;'''
+		val guard = guards.get(transitionNr - 1)
+		return '''state = «state»«IF (!guard.isEmpty)» & («guard»)«ENDIF» : «action»;'''
 	}
 
 	def static String convertLeftFormula(FsmFormula formula) {
